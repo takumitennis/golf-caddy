@@ -170,7 +170,12 @@
       <a href="#" class="btn-primary">Reserve a Caddy</a>
     </div>
   </header>
-
+<!-- Login / Sign-up ボタン -->
+<button id="loginBtn"
+        style="margin:20px auto;display:block;padding:12px 24px;font-size:1rem;
+               color:#fff;background:#2f8f2f;border:none;border-radius:6px;cursor:pointer;">
+  Login / Sign-up
+</button>
   <!-- Features Section -->
   <section class="features">
     <div class="container">
@@ -208,5 +213,20 @@
     <p>お問い合わせ: <a href="mailto:info@golfcaddyservice.com" style="color:#8bc34a;">info@golfcaddyservice.com</a></p>
     <p>&copy; 2025 Golf-Caddy Matching Service. All rights reserved.</p>
   </footer>
-</body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 👉 あなたの Supabase 情報を貼り付け
+    const SUPABASE_URL = "https://vqjxajzaasuqfgvhvxci.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
+  
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = prompt("Enter your email to receive a magic link:");
+      if (!email) return;
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      alert(error ? error.message : "Magic link sent! Check your inbox.");
+    };
+  </script>
+  </body>
 </html> 
