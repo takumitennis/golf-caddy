@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golf-Caddy Matching Service</title>
+  <style>
+    :root {
+      --primary-color: #2f8f2f;
+      --secondary-color: #ffffff;
+      --text-color: #333333;
+      --bg-light: #f9f9f9;
+      --max-width: 1200px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    header {
+      background: url("https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?auto=format&fit=crop&w=1400&q=80") center / cover no-repeat;
+      color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 60vh;
+      padding: 0 1rem;
+    }
+
+    header .hero-content {
+      max-width: 650px;
+    }
+
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      margin-bottom: 2rem;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: var(--secondary-color);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      background: #237123;
+    }
+
+    /* Features Section */
+    .features {
+      background: var(--bg-light);
+      padding: 4rem 1rem;
+    }
+
+    .features .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .feature {
+      background: var(--secondary-color);
+      padding: 2rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .feature h3 {
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+
+    /* How It Works */
+    .how-it-works {
+      padding: 4rem 1rem;
+    }
+
+    .how-it-works .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .how-it-works h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      color: var(--primary-color);
+    }
+
+    .steps {
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .steps li {
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    .steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Footer */
+    footer {
+      background: #222;
+      color: #aaa;
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        height: 70vh;
+      }
+
+      .feature {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <header>
+    <div class="hero-content">
+      <h1>Golf-Caddy Matching Service</h1>
+      <p>ゴルフ場と信頼できるキャディをスピーディにマッチング</p>
+      <a href="#" class="btn-primary">Reserve a Caddy</a>
+    </div>
+  </header>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <div class="feature">
+        <h3>Fast Booking</h3>
+        <p>数タップでキャディを予約。時間を無駄にしません。</p>
+      </div>
+      <div class="feature">
+        <h3>Reliable Caddies</h3>
+        <p>経験豊富なキャディのみを厳選。安心してプレーに集中できます。</p>
+      </div>
+      <div class="feature">
+        <h3>Real-time Ratings</h3>
+        <p>リアルタイムの評価システムで常にサービス品質を維持。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How it Works</h2>
+      <ol class="steps">
+        <li>ゴルフ場とキャディがプラットフォームに登録</li>
+        <li>ゴルフ場が必要な日程でキャディを予約</li>
+        <li>キャディに LINE 通知が届き、勤務確定</li>
+        <li>プレー当日：キャディが現地でサポート</li>
+        <li>勤務完了後、双方が完了ボタン＆評価</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>お問い合わせ: <a href="mailto:info@golfcaddyservice.com" style="color:#8bc34a;">info@golfcaddyservice.com</a></p>
+    <p>&copy; 2025 Golf-Caddy Matching Service. All rights reserved.</p>
+  </footer>
+</body>
+</html> 
