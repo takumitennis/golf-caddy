@@ -220,13 +220,24 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
   
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
-    document.getElementById("loginBtn").onclick = async () => {
-      const email = prompt("Enter your email to receive a magic link:");
-      if (!email) return;
-      const { error } = await supabase.auth.signInWithOtp({ email });
-      alert(error ? error.message : "Magic link sent! Check your inbox.");
-    };
-  </script>
-  </body>
-</html> 
+
+/* ① すでにログイン済みなら即リダイレクト */
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.href = "dashboard.html";
+});
+
+/* ② Magic Link でログイン直後にリダイレクト */
+supabase.auth.onAuthStateChange((event) => {
+  if (event === "SIGNED_IN") window.location.href = "dashboard.html";
+});
+
+/* ③ ボタンクリックでメール送信 */
+document.getElementById("loginBtn").onclick = async () => {
+  const email = prompt("Enter your email to receive a magic link:");
+  if (!email) return;
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  alert(error ? error.message : "Magic link sent! Check your inbox.");
+};
+</script>
+</body>
+</html>
