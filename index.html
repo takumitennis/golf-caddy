@@ -171,11 +171,21 @@
     </div>
   </header>
 <!-- Login / Sign-up ボタン -->
-<button id="loginBtn"
-        style="margin:20px auto;display:block;padding:12px 24px;font-size:1rem;
-               color:#fff;background:#2f8f2f;border:none;border-radius:6px;cursor:pointer;">
-  Login / Sign-up
-</button>
+<!-- ▼ ここに貼り替え ▼ -->
+<div style="display:flex; gap:20px; justify-content:center; margin:20px 0;">
+    <button onclick="location.href='login.html?role=golf'"
+            style="padding:12px 24px; background:#006aad; color:#fff;
+                   border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
+      ゴルフ場でログイン
+    </button>
+  
+    <button onclick="location.href='login.html?role=caddy'"
+            style="padding:12px 24px; background:#2f8f2f; color:#fff;
+                   border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
+      キャディでログイン
+    </button>
+  </div>
+  <!-- ▲ ここまで ▲ -->
   <!-- Features Section -->
   <section class="features">
     <div class="container">
