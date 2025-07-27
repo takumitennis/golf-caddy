@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>My Page</title>
+  <style>
+    body{font-family:Helvetica,Arial,sans-serif;text-align:center;padding-top:40px}
+    .card{display:inline-block;padding:24px 32px;border:1px solid #ccc;border-radius:8px;min-width:260px}
+    button{margin-top:20px;padding:10px 24px;border:none;border-radius:6px;background:#c74444;color:#fff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="welcome">Loading...</h2>
+    <button id="logout">Logout</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
+
+    // 現在のユーザー取得
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        document.getElementById("welcome").textContent =
+          "Hello, " + (data.user.email ?? "Guest") + " 👋";
+      } else {
+        // 未ログインならトップへ戻す
+        window.location.href = "/";
+      }
+    });
+
+    // ログアウト処理
+    document.getElementById("logout").onclick = async () => {
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    };
+  </script>
+</body>
+</html>
