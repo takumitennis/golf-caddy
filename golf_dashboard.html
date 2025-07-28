@@ -152,9 +152,11 @@
         const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td=document.createElement('td');
         const cnt=countMap[dateStr]||0;
-        if(cnt===0){td.className='cal-red';td.textContent='×';}
-        else if(cnt<3){td.className='cal-yellow';td.textContent=cnt;}
-        else{td.className='cal-green';td.textContent=cnt;}
+        const label = cnt===0 ? '×' : cnt;
+        if(cnt===0){td.className='cal-red';}
+        else if(cnt<3){td.className='cal-yellow';}
+        else{td.className='cal-green';}
+        td.innerHTML = `<small>${day}</small><br>${label}`;
         td.style.cursor='default';
         row.appendChild(td);
         if((startWeekDay+day)%7===0){table.appendChild(row);row=document.createElement('tr');}
