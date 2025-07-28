@@ -173,13 +173,13 @@
 <!-- Login / Sign-up ボタン -->
 <!-- ▼ ここに貼り替え ▼ -->
 <div style="display:flex; gap:20px; justify-content:center; margin:20px 0;">
-    <button onclick="location.href='login.html?role=golf'"
+    <button onclick="location.href='login/?role=golf'"
             style="padding:12px 24px; background:#006aad; color:#fff;
                    border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
       ゴルフ場でログイン
     </button>
   
-    <button onclick="location.href='login.html?role=caddy'"
+    <button onclick="location.href='login/?role=caddy'"
             style="padding:12px 24px; background:#2f8f2f; color:#fff;
                    border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
       キャディでログイン
@@ -241,13 +241,8 @@ supabase.auth.onAuthStateChange((event) => {
   if (event === "SIGNED_IN") window.location.href = "dashboard.html";
 });
 
-/* ③ ボタンクリックでメール送信 */
-document.getElementById("loginBtn").onclick = async () => {
-  const email = prompt("Enter your email to receive a magic link:");
-  if (!email) return;
-  const { error } = await supabase.auth.signInWithOtp({ email });
-  alert(error ? error.message : "Magic link sent! Check your inbox.");
-};
+// ↓ 旧ハンドラ削除済み
+
 </script>
 </body>
 </html>

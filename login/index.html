@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- This file is identical to the root-level login.html but placed under /login/index.html
+     so Cloudflare Pages can serve /login?role=golf などの拡張子なし URL にも対応する -->
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
@@ -28,56 +30,48 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // role=golf / role=caddy を URL クエリ ?role=golf で受け取る
     const role = new URLSearchParams(location.search).get("role") || "guest";
 
-    let mode = "login";                    // login or signup
+    let mode = "login";
     const form   = document.getElementById("authForm");
     const toggle = document.getElementById("toggle");
     const title  = document.getElementById("title");
 
     toggle.onclick = () => {
       mode  = mode === "login" ? "signup" : "login";
-      title.textContent = mode === "login" ? "Login" : "Sign-up";
+      title.textContent  = mode === "login" ? "Login" : "Sign-up";
       toggle.textContent = mode === "login" ? "Create new account" : "I have an account";
     };
 
     form.onsubmit = async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email").value;
+      const email    = document.getElementById("email").value;
       const password = document.getElementById("pass").value;
-
       let res;
 
-if (mode === "signup") {
-  /* ---------------- 新規登録 ---------------- */
-  res = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { role } }   // user_metadata に role を保存
-  });
+      if (mode === "signup") {
+        /* ---------- 新規登録 ---------- */
+        res = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { role } }
+        });
 
-  /* 🔑 メール確認を必須にしていない場合、ここで即セッションが返る */
-  if (!res.error) {
-    // プロフィール入力ページへ（role をクエリで渡す）
-    location.href = `profile.html?role=${role}`;
-    return;                       // ← ここで終了（下の login には進まない）
-  }
+        if (!res.error) {
+          location.href = `../profile.html?role=${role}`;
+          return;
+        }
+      } else {
+        /* ---------- ログイン ---------- */
+        res = await supabase.auth.signInWithPassword({ email, password });
+        if (!res.error) {
+          location.href = "../dashboard.html";
+          return;
+        }
+      }
 
-} else {
-  /* ---------------- ログイン ---------------- */
-  res = await supabase.auth.signInWithPassword({ email, password });
-
-  if (!res.error) {
-    // 既にプロフィールがある想定でダッシュボードへ
-    location.href = "dashboard.html";
-    return;
-  }
-}
-
-/* ----- ここに来るのはエラー時のみ ----- */
-alert(res.error?.message || "Unknown error");
-};
+      alert(res.error?.message || "Unknown error");
+    };
   </script>
 </body>
-</html>
+</html> 
