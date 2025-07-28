@@ -46,6 +46,7 @@
             .join("");
           document.querySelector(".card").insertAdjacentHTML("beforeend", details);
         }
+        if (role === "golf") { window.location.href = "golf_dashboard.html"; return; }
       } else {
         window.location.href = "/";
       }

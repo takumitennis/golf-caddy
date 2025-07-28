@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Golf Dashboard</title>
+  <style>
+    body{font-family:Helvetica,Arial,sans-serif;padding:20px}
+    h1{margin-bottom:20px}
+    form{margin-bottom:30px}
+    input,button{padding:8px;margin-right:10px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #ccc;padding:8px;text-align:center}
+    th{background:#f2f2f2}
+  </style>
+</head>
+<body>
+  <h1>ゴルフ場ダッシュボード</h1>
+  <div id="welcome"></div>
+
+  <!-- Booking creation form -->
+  <form id="createForm">
+    <label>日付: <input type="date" id="bDate" required></label>
+    <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
+    <button type="submit">募集作成</button>
+  </form>
+
+  <!-- Bookings table -->
+  <table>
+    <thead>
+      <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
+    </thead>
+    <tbody id="bookBody"></tbody>
+  </table>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
+
+    let gid;
+    // 1. Check login & role
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) { location.href = "/"; return; }
+      const role = data.user.user_metadata?.role;
+      if (role !== "golf") { location.href = "dashboard.html"; return; }
+      // get golf_courses row to fetch gid & name
+      const { data: rows } = await supabase
+        .from("golf_courses")
+        .select("gid,name")
+        .eq("email", data.user.email)
+        .single();
+      if (!rows) { alert("プロフィール未登録です"); location.href="/profile.html?role=golf"; return; }
+      gid = rows.gid;
+      document.getElementById("welcome").textContent = `ようこそ ${rows.name} 様`;
+      loadBookings();
+    });
+
+    // 2. load bookings
+    async function loadBookings(){
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("booking_id,date,slots,status")
+        .eq("gid", gid)
+        .order("date", { ascending: true });
+      const tbody = document.getElementById("bookBody");
+      tbody.innerHTML = "";
+      if (error){ console.error(error); return; }
+      data.forEach(b => {
+        tbody.insertAdjacentHTML("beforeend",
+          `<tr><td>${b.date}</td><td>${b.slots}</td><td>${b.status}</td></tr>`);
+      });
+    }
+
+    // 3. create booking
+    document.getElementById("createForm").onsubmit = async e => {
+      e.preventDefault();
+      const date = document.getElementById("bDate").value;
+      const slots = parseInt(document.getElementById("bSlots").value,10);
+      if (!date || !slots) return;
+      const { error } = await supabase.from("bookings").insert({ gid, date, slots });
+      if (error){ alert(error.message); return; }
+      e.target.reset();
+      loadBookings();
+    };
+  </script>
+</body>
+</html> 
