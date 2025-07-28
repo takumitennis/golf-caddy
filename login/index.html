@@ -58,7 +58,11 @@
         });
 
         if (!res.error) {
-          location.href = `../profile.html?role=${role}`;
+          // セッションが無ければ自動ログイン
+          if (!res.data.session) {
+            await supabase.auth.signInWithPassword({ email, password });
+          }
+          location.href = "/profile.html?role=" + role;
           return;
         }
       } else {

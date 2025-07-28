@@ -59,9 +59,12 @@ if (mode === "signup") {
 
   /* 🔑 メール確認を必須にしていない場合、ここで即セッションが返る */
   if (!res.error) {
-    // プロフィール入力ページへ（role をクエリで渡す）
-    location.href = `profile.html?role=${role}`;
-    return;                       // ← ここで終了（下の login には進まない）
+    // セッションが無ければ自動ログイン
+    if (!res.data.session) {
+      await supabase.auth.signInWithPassword({ email, password });
+    }
+    location.href = "/profile.html?role=" + role;
+    return;
   }
 
 } else {

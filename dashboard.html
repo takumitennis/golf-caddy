@@ -24,12 +24,22 @@
     );
 
     // 現在のユーザー取得
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
+        const user = data.user;
+        const role = user.user_metadata?.role || "guest";
+        let table = role === "golf" ? "golf_courses" : "caddies";
+        let { data: rows, error } = await supabase
+          .from(table)
+          .select("*")
+          .eq("email", user.email)
+          .limit(1);
+        const prof = rows && rows[0];
         document.getElementById("welcome").textContent =
-          "Hello, " + (data.user.email ?? "Guest") + " 👋";
+          role === "golf"
+            ? `ようこそ ${prof?.name ?? "ゴルフ場"} 様`
+            : `ようこそ ${prof?.name ?? "キャディ"} さん`;
       } else {
-        // 未ログインならトップへ戻す
         window.location.href = "/";
       }
     });
