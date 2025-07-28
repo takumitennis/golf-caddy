@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>プロフィール登録</title>
+  <style>
+    body{font-family:Helvetica,Arial,sans-serif;padding:30px}
+    form{max-width:400px;margin:auto}
+    label{display:block;margin:12px 0 4px}
+    input{width:100%;padding:8px}
+    button{margin-top:20px;padding:10px 24px;border:none;border-radius:6px;background:#006aad;color:#fff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h2 id="title">プロフィール入力</h2>
+  <form id="profForm"></form>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    /* ==== Supabase 初期化 ==== */
+    const SUPABASE_URL  = "https://vqjxajzaasuqfgvhvxci.supabase.co";
+    const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* ==== 役割判定（?role=golf or caddy） ==== */
+    const role  = new URLSearchParams(location.search).get("role") || "caddy";
+
+    const form  = document.getElementById("profForm");
+    const title = document.getElementById("title");
+
+    /* ==== 項目定義 ==== */
+    const FIELDS = {
+      golf: [
+        {id:"name",         label:"ゴルフ場名"},
+        {id:"contact_name", label:"担当者名"},
+        {id:"phone",        label:"電話番号"},
+        {id:"perks",        label:"キャディ特典（例：打ちっぱなし無料）"}
+      ],
+      caddy:[
+        {id:"name",        label:"氏名"},
+        {id:"phone",       label:"電話番号"},
+        {id:"line_id",     label:"LINE ID"},
+        {id:"golf_years",  label:"ゴルフ歴(年)",  type:"number"},
+        {id:"caddy_years", label:"キャディ歴(年)", type:"number"}
+      ]
+    };
+
+    /* ==== 1. フォーム描画 ==== */
+    title.textContent = role === "golf" ? "ゴルフ場プロフィール登録" : "キャディプロフィール登録";
+    FIELDS[role].forEach(f => {
+      form.insertAdjacentHTML("beforeend",
+        `<label for="${f.id}">${f.label}</label>
+         <input id="${f.id}" type="${f.type||'text'}" required />`);
+    });
+    form.insertAdjacentHTML("beforeend", `<button type="submit">登録</button>`);
+
+    /* ==== 2. 送信処理 ==== */
+    form.onsubmit = async e => {
+      e.preventDefault();
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { alert("未ログインです"); location.href="/"; return; }
+
+      /* 入力値をオブジェクト化 */
+      const data = Object.fromEntries(
+        FIELDS[role].map(f => [f.id, document.getElementById(f.id).value])
+      );
+      data.email = user.email;                // 👈 ここでメールを追加
+
+      /* 主キーを自動発行（g123456 / c123456） */
+      if (role === "golf")  data.gID = "g" + user.id.slice(0,6);
+      if (role === "caddy") data.cID = "c" + user.id.slice(0,6);
+
+      /* テーブル INSERT */
+      const table = role === "golf" ? "golf_courses" : "caddies";
+      const { error } = await supabase.from(table).insert(data);
+      if (error) { alert(error.message); return; }
+
+      alert("登録完了！");
+      location.href = "dashboard.html";
+    };
+  </script>
+</body>
+</html>
