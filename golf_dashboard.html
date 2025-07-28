@@ -7,6 +7,9 @@
   <style>
     body{font-family:Helvetica,Arial,sans-serif;padding:20px}
     h1{margin-bottom:20px}
+    .tabs button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#eaeaea;cursor:pointer}
+    .tabs button.active{border-bottom-color:#0077cc;background:#fff}
+    .hidden{display:none}
     form{margin-bottom:30px}
     input,button{padding:8px;margin-right:10px}
     table{width:100%;border-collapse:collapse}
@@ -18,20 +21,36 @@
   <h1>ゴルフ場ダッシュボード</h1>
   <div id="welcome"></div>
 
-  <!-- Booking creation form -->
-  <form id="createForm">
-    <label>日付: <input type="date" id="bDate" required></label>
-    <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
-    <button type="submit">募集作成</button>
-  </form>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button id="btnTab1" class="active">募集作成</button>
+    <button id="btnTab2">空きキャディ確認</button>
+  </div>
 
-  <!-- Bookings table -->
-  <table>
-    <thead>
-      <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
-    </thead>
-    <tbody id="bookBody"></tbody>
-  </table>
+  <!-- Tab 1: bookings -->
+  <div id="tab1">
+    <form id="createForm" style="margin-top:20px;">
+      <label>日付: <input type="date" id="bDate" required></label>
+      <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
+      <button type="submit">募集作成</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
+      </thead>
+      <tbody id="bookBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Tab 2: availability -->
+  <div id="tab2" class="hidden" style="margin-top:20px;">
+    <form id="availForm">
+      <label>確認日: <input type="date" id="aDate" required></label>
+      <button type="submit">空き人数を確認</button>
+    </form>
+    <div id="availResult" style="margin-top:15px;"></div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -84,6 +103,31 @@
       if (error){ alert(error.message); return; }
       e.target.reset();
       loadBookings();
+    };
+
+    // --- Tabs logic ---
+    const tab1=document.getElementById('tab1');
+    const tab2=document.getElementById('tab2');
+    document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
+    document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
+    function switchTab(idx){
+      if(idx===1){tab1.classList.remove('hidden');tab2.classList.add('hidden');
+        btnTab1.classList.add('active');btnTab2.classList.remove('active');}
+      else{tab2.classList.remove('hidden');tab1.classList.add('hidden');
+        btnTab2.classList.add('active');btnTab1.classList.remove('active');}
+    }
+
+    // --- Availability check --- (requires table caddy_availability: cid,date )
+    document.getElementById('availForm').onsubmit = async e => {
+      e.preventDefault();
+      const date = document.getElementById('aDate').value;
+      if(!date) return;
+      const { count, error } = await supabase
+          .from('caddy_availability')
+          .select('cid', { count: 'exact', head: true })
+          .eq('date', date);
+      if(error){ alert(error.message); return; }
+      document.getElementById('availResult').textContent = `${date} に対応可能なキャディは ${count} 名です。`;
     };
   </script>
 </body>
