@@ -69,8 +69,8 @@
       data.email = user.email;                // 👈 ここでメールを追加
 
       /* 主キーを自動発行（g123456 / c123456） */
-      if (role === "golf")  data.gID = "g" + user.id.slice(0,6);
-      if (role === "caddy") data.cID = "c" + user.id.slice(0,6);
+      if (role === "golf")  data.gid = "g" + user.id.slice(0,6);
+      if (role === "caddy") data.cid = "c" + user.id.slice(0,6);
 
       /* テーブル INSERT */
       const table = role === "golf" ? "golf_courses" : "caddies";
