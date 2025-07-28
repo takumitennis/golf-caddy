@@ -53,23 +53,6 @@
         `<label for="${f.id}">${f.label}</label>
          <input id="${f.id}" type="${f.type||'text'}" required />`);
     });
-    // ↓ 追加: 写真アップロード
-    form.insertAdjacentHTML("beforeend", `
-      <label for="avatar">プロフィール写真</label>
-      <input id="avatar" type="file" accept="image/*" />
-      <img id="preview" style="max-width:100%;margin-top:8px;display:none;" />
-    `);
-    // プレビュー表示
-    form.querySelector('#avatar').addEventListener('change', e => {
-      const file = e.target.files[0];
-      const preview = document.getElementById('preview');
-      if (file) {
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-      } else {
-        preview.style.display = 'none';
-      }
-    });
     form.insertAdjacentHTML("beforeend", `<button type="submit">登録</button>`);
 
     /* ==== 2. 送信処理 ==== */
@@ -84,14 +67,6 @@
         FIELDS[role].map(f => [f.id, document.getElementById(f.id).value])
       );
       data.email = user.email;                // 👈 ここでメールを追加
-
-      const avatarFile = document.getElementById('avatar').files[0];
-      if (avatarFile) {
-        const filePath = `${role}/${user.id}`;
-        await supabase.storage.from('avatars').upload(filePath, avatarFile, { upsert: true });
-        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        data.avatar_url = urlData.publicUrl;
-      }
 
       /* 主キーを自動発行（g123456 / c123456） */
       if (role === "golf")  data.gID = "g" + user.id.slice(0,6);
