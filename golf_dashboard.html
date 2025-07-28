@@ -15,6 +15,10 @@
     table{width:100%;border-collapse:collapse}
     th,td{border:1px solid #ccc;padding:8px;text-align:center}
     th{background:#f2f2f2}
+    .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}
+    .cal-green{background:#c8e6c9}
+    .cal-yellow{background:#fff9c4}
+    .cal-red{background:#ffcdd2}
   </style>
 </head>
 <body>
@@ -43,13 +47,15 @@
     </table>
   </div>
 
-  <!-- Tab 2: availability -->
+  <!-- Tab 2: availability calendar -->
   <div id="tab2" class="hidden" style="margin-top:20px;">
-    <form id="availForm">
-      <label>確認日: <input type="date" id="aDate" required></label>
-      <button type="submit">空き人数を確認</button>
-    </form>
-    <div id="availResult" style="margin-top:15px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="prevMonth">◀</button>
+      <span id="calTitle"></span>
+      <button id="nextMonth">▶</button>
+    </div>
+    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+    <small style="display:block;margin-top:8px;">緑=3名以上, 黄=1-2名, 赤=0名</small>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -110,25 +116,62 @@
     const tab2=document.getElementById('tab2');
     document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
     document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
+
+    // --- Calendar logic ---
+    let calMonth = new Date().getMonth();
+    let calYear = new Date().getFullYear();
+    document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
+    document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+
+    async function renderCal(){
+      const first = new Date(calYear,calMonth,1);
+      const last  = new Date(calYear,calMonth+1,0);
+      document.getElementById('calTitle').textContent = `${calYear}年 ${calMonth+1}月`;
+      // fetch availability rows for month
+      const { data, error } = await supabase
+        .from('caddy_availability')
+        .select('date')
+        .gte('date', first.toISOString().slice(0,10))
+        .lte('date', last.toISOString().slice(0,10));
+      const countMap = {};
+      if(!error){
+        data.forEach(r=>{countMap[r.date]=(countMap[r.date]||0)+1;});
+      }
+      // build calendar grid
+      const table=document.getElementById('calTable');
+      table.innerHTML='';
+      const headerRow=document.createElement('tr');
+      ['日','月','火','水','木','金','土'].forEach(d=>{
+        const th=document.createElement('th');th.textContent=d;headerRow.appendChild(th);
+      });
+      table.appendChild(headerRow);
+      let row=document.createElement('tr');
+      const startWeekDay=first.getDay();
+      for(let i=0;i<startWeekDay;i++){row.appendChild(document.createElement('td'));}
+      for(let day=1;day<=last.getDate();day++){
+        const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td=document.createElement('td');
+        const cnt=countMap[dateStr]||0;
+        if(cnt===0){td.className='cal-red';td.textContent='×';}
+        else if(cnt<3){td.className='cal-yellow';td.textContent=cnt;}
+        else{td.className='cal-green';td.textContent=cnt;}
+        td.style.cursor='default';
+        row.appendChild(td);
+        if((startWeekDay+day)%7===0){table.appendChild(row);row=document.createElement('tr');}
+      }
+      if(row.children.length) {
+        while(row.children.length<7)row.appendChild(document.createElement('td'));
+        table.appendChild(row);
+      }
+    }
+    // render calendar on tab switch
     function switchTab(idx){
       if(idx===1){tab1.classList.remove('hidden');tab2.classList.add('hidden');
         btnTab1.classList.add('active');btnTab2.classList.remove('active');}
       else{tab2.classList.remove('hidden');tab1.classList.add('hidden');
-        btnTab2.classList.add('active');btnTab1.classList.remove('active');}
+        btnTab2.classList.add('active');btnTab1.classList.remove('active');
+        renderCal();}
     }
-
-    // --- Availability check --- (requires table caddy_availability: cid,date )
-    document.getElementById('availForm').onsubmit = async e => {
-      e.preventDefault();
-      const date = document.getElementById('aDate').value;
-      if(!date) return;
-      const { count, error } = await supabase
-          .from('caddy_availability')
-          .select('cid', { count: 'exact', head: true })
-          .eq('date', date);
-      if(error){ alert(error.message); return; }
-      document.getElementById('availResult').textContent = `${date} に対応可能なキャディは ${count} 名です。`;
-    };
   </script>
 </body>
 </html> 
