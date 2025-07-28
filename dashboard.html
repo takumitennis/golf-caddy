@@ -36,9 +36,16 @@
           .limit(1);
         const prof = rows && rows[0];
         document.getElementById("welcome").textContent =
-          role === "golf"
-            ? `ようこそ ${prof?.name ?? "ゴルフ場"} 様`
-            : `ようこそ ${prof?.name ?? "キャディ"} さん`;
+          prof ? (role === "golf"
+            ? `ようこそ ${prof.name} 様`
+            : `ようこそ ${prof.name} さん`) : "プロフィール未登録です";
+        if (prof) {
+          const details = Object.entries(prof)
+            .filter(([k,v]) => !["email","created_at"].includes(k))
+            .map(([k,v]) => `<div><strong>${k}</strong>: ${v ?? ""}</div>`)
+            .join("");
+          document.querySelector(".card").insertAdjacentHTML("beforeend", details);
+        }
       } else {
         window.location.href = "/";
       }
