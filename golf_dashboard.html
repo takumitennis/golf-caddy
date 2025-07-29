@@ -3,177 +3,754 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Golf Dashboard</title>
+  <title>ゴルフ場マイページ</title>
   <style>
-    body{font-family:Helvetica,Arial,sans-serif;padding:20px}
-    h1{margin-bottom:20px}
-    .tabs button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#eaeaea;cursor:pointer}
-    .tabs button.active{border-bottom-color:#0077cc;background:#fff}
-    .hidden{display:none}
-    form{margin-bottom:30px}
-    input,button{padding:8px;margin-right:10px}
-    table{width:100%;border-collapse:collapse}
-    th,td{border:1px solid #ccc;padding:8px;text-align:center}
-    th{background:#f2f2f2}
-    .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}
-    .cal-green{background:#c8e6c9}
-    .cal-yellow{background:#fff9c4}
-    .cal-red{background:#ffcdd2}
+    body{font-family:Helvetica,Arial,sans-serif;margin:0;padding:0;background:#f5f5f5;}
+    .header{background:#006aad;color:white;padding:20px;text-align:center;position:relative;}
+    .header h1{margin:0;font-size:1.8em;}
+    .welcome{margin:5px 0 0 0;font-size:1.1em;opacity:0.9;}
+    .logout-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:14px;}
+    .logout-btn:hover{background:rgba(255,255,255,0.3);}
+    
+    .container{max-width:1200px;margin:0 auto;background:white;min-height:80vh;}
+    .tabs{display:flex;background:#fff;border-bottom:2px solid #eee;overflow-x:auto;}
+    .tab-btn{flex:1;min-width:120px;padding:15px 10px;border:none;background:transparent;cursor:pointer;font-size:14px;color:#666;border-bottom:3px solid transparent;transition:all 0.3s ease;white-space:nowrap;}
+    .tab-btn.active{color:#006aad;border-bottom-color:#006aad;background:#f8f9fa;}
+    .tab-btn:hover{background:#f0f6ff;}
+    
+    .tab-content{display:none;padding:30px;}
+    .tab-content.active{display:block;}
+    
+    /* Profile Tab Styles */
+    .profile-section{background:#f8f9fa;border-radius:8px;padding:25px;margin-bottom:20px;}
+    .profile-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;}
+    .profile-avatar{width:80px;height:80px;border-radius:50%;background:#006aad;display:flex;align-items:center;justify-content:center;color:white;font-size:2em;font-weight:bold;}
+    .profile-info h2{margin:0;color:#006aad;}
+    .profile-info p{margin:5px 0;color:#666;}
+    
+    .form-group{margin-bottom:20px;}
+    .form-group label{display:block;margin-bottom:8px;font-weight:bold;color:#333;}
+    .form-group input, .form-group textarea, .form-group select{width:100%;padding:12px;border:1px solid #ddd;border-radius:6px;font-size:14px;}
+    .form-group textarea{height:80px;resize:vertical;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .btn-primary{background:#006aad;color:white;border:none;padding:12px 30px;border-radius:6px;cursor:pointer;font-size:16px;}
+    .btn-primary:hover{background:#005a99;}
+    
+    /* Status Tab Styles */
+    .status-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:30px;}
+    .status-card{background:white;border:1px solid #eee;border-radius:8px;padding:20px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+    .status-card h3{margin:0 0 10px 0;color:#006aad;}
+    .status-value{font-size:2em;font-weight:bold;color:#333;margin:10px 0;}
+    .status-unit{color:#666;font-size:0.9em;}
+    
+    .facilities-list{background:white;border-radius:8px;padding:20px;}
+    .facility-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;}
+    .facility-item:last-child{border-bottom:none;}
+    .facility-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+    .status-available{background:#d4edda;color:#155724;}
+    .status-maintenance{background:#fff3cd;color:#856404;}
+    
+    /* Booking Management Styles */
+    .booking-form{background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:30px;}
+    .booking-form h3{margin-top:0;color:#006aad;}
+    .form-inline{display:flex;gap:15px;align-items:end;flex-wrap:wrap;}
+    .form-inline .form-group{margin-bottom:0;min-width:150px;}
+    
+    .booking-table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;}
+    .booking-table th{background:#006aad;color:white;padding:15px;text-align:left;}
+    .booking-table td{padding:12px 15px;border-bottom:1px solid #eee;}
+    .booking-table tr:hover{background:#f8f9fa;}
+    .status-badge{padding:4px 12px;border-radius:12px;font-size:12px;font-weight:bold;}
+    .status-open{background:#d4edda;color:#155724;}
+    .status-matched{background:#cce5ff;color:#004085;}
+    .status-completed{background:#e2e3e5;color:#383d41;}
+    
+    /* Calendar Styles */
+    .calendar-container{margin-top:20px;}
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:6px;}
+    .calendar-title{font-size:1.4em;font-weight:bold;color:#006aad;}
+    .calendar-nav{background:#006aad;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin:0 5px;}
+    .calendar-nav:hover{background:#005a99;}
+    
+    .calendar{width:100%;border-collapse:collapse;margin-bottom:20px;}
+    .calendar th{background:#006aad;color:white;padding:12px;text-align:center;font-weight:bold;}
+    .calendar td{width:14.28%;height:80px;border:1px solid #ddd;text-align:center;vertical-align:top;padding:5px;position:relative;}
+    .calendar td.other-month{background:#f8f8f8;color:#ccc;}
+    .day-number{font-weight:bold;margin-bottom:5px;}
+    .caddy-count{font-size:12px;margin:2px 0;}
+    .cal-green{background:#c8e6c9;}
+    .cal-yellow{background:#fff9c4;}
+    .cal-red{background:#ffcdd2;}
+    
+    /* History Tab Styles */
+    .history-controls{background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:20px;}
+    .history-controls h3{margin-top:0;color:#006aad;}
+    .date-range{display:flex;gap:15px;align-items:end;flex-wrap:wrap;}
+    .date-range .form-group{min-width:150px;}
+    
+    .history-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px;}
+    .summary-card{background:white;border:1px solid #eee;border-radius:8px;padding:20px;text-align:center;}
+    .summary-value{font-size:1.8em;font-weight:bold;color:#006aad;}
+    
+    .history-table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;}
+    .history-table th{background:#006aad;color:white;padding:15px;text-align:left;}
+    .history-table td{padding:12px 15px;border-bottom:1px solid #eee;}
+    .history-table tr:hover{background:#f8f9fa;}
+    
+    .legend{display:flex;justify-content:center;gap:30px;margin:20px 0;padding:15px;background:#f8f9fa;border-radius:6px;flex-wrap:wrap;}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:14px;}
+    .legend-color{width:16px;height:16px;border-radius:2px;}
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tabs{flex-direction:column;}
+      .tab-btn{min-width:auto;}
+      .profile-header{flex-direction:column;text-align:center;}
+      .status-cards{grid-template-columns:1fr;}
+      .form-inline, .date-range{flex-direction:column;}
+      .form-inline .form-group, .date-range .form-group{min-width:auto;}
+      .calendar td{height:60px;font-size:12px;}
+      .history-summary{grid-template-columns:1fr 1fr;}
+      .form-row{grid-template-columns:1fr;}
+    }
   </style>
 </head>
 <body>
-  <h1>ゴルフ場ダッシュボード</h1>
-  <div id="welcome"></div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button id="btnTab1" class="active">募集作成</button>
-    <button id="btnTab2">空きキャディ確認</button>
+  <!-- Header -->
+  <div class="header">
+    <button id="logout" class="logout-btn">ログアウト</button>
+    <h1>ゴルフ場マイページ</h1>
+    <div id="welcome" class="welcome">Loading...</div>
   </div>
 
-  <!-- Tab 1: bookings -->
-  <div id="tab1">
-    <form id="createForm" style="margin-top:20px;">
-      <label>日付: <input type="date" id="bDate" required></label>
-      <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
-      <button type="submit">募集作成</button>
-    </form>
-
-    <table>
-      <thead>
-        <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
-      </thead>
-      <tbody id="bookBody"></tbody>
-    </table>
-  </div>
-
-  <!-- Tab 2: availability calendar -->
-  <div id="tab2" class="hidden" style="margin-top:20px;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="prevMonth">◀</button>
-      <span id="calTitle"></span>
-      <button id="nextMonth">▶</button>
+  <div class="container">
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="profile">🏌️ プロフィール</button>
+      <button class="tab-btn" data-tab="status">📊 ステータス</button>
+      <button class="tab-btn" data-tab="bookings">📋 募集管理</button>
+      <button class="tab-btn" data-tab="caddies">👥 キャディ確認</button>
+      <button class="tab-btn" data-tab="history">📈 利用履歴</button>
     </div>
-    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small style="display:block;margin-top:8px;">緑=3名以上, 黄=1-2名, 赤=0名</small>
+
+    <!-- Profile Tab -->
+    <div id="profile" class="tab-content active">
+      <div class="profile-section">
+        <div class="profile-header">
+          <div class="profile-avatar" id="avatarInitial">G</div>
+          <div class="profile-info">
+            <h2 id="profileName">ゴルフクラブ名</h2>
+            <p id="profileEmail">golf@example.com</p>
+          </div>
+        </div>
+      </div>
+      
+      <form id="profileForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>ゴルフ場名</label>
+            <input type="text" id="name" placeholder="〇〇ゴルフクラブ" required>
+          </div>
+          <div class="form-group">
+            <label>電話番号</label>
+            <input type="tel" id="phone" placeholder="03-1234-5678">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>住所</label>
+          <input type="text" id="address" placeholder="東京都〇〇区〇〇...">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>ホール数</label>
+            <select id="holes">
+              <option value="">選択してください</option>
+              <option value="9">9ホール</option>
+              <option value="18">18ホール</option>
+              <option value="27">27ホール</option>
+              <option value="36">36ホール</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>営業時間</label>
+            <input type="text" id="business_hours" placeholder="6:00-18:00">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>キャディ基本料金</label>
+            <input type="number" id="caddy_fee" placeholder="8000" min="0">
+          </div>
+          <div class="form-group">
+            <label>ウェブサイト</label>
+            <input type="url" id="website" placeholder="https://example.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>施設説明</label>
+          <textarea id="description" placeholder="コース特徴、アクセス方法、施設情報などをご記入ください"></textarea>
+        </div>
+        <button type="submit" class="btn-primary">プロフィールを更新</button>
+      </form>
+    </div>
+
+    <!-- Status Tab -->
+    <div id="status" class="tab-content">
+      <div class="status-cards">
+        <div class="status-card">
+          <h3>今月の利用回数</h3>
+          <div class="status-value" id="monthlyBookings">15</div>
+          <div class="status-unit">回</div>
+        </div>
+        <div class="status-card">
+          <h3>総合評価</h3>
+          <div class="status-value" id="averageRating">4.6</div>
+          <div class="status-unit">/ 5.0 ⭐</div>
+        </div>
+        <div class="status-card">
+          <h3>登録キャディ数</h3>
+          <div class="status-value" id="registeredCaddies">28</div>
+          <div class="status-unit">名</div>
+        </div>
+        <div class="status-card">
+          <h3>今月の売上</h3>
+          <div class="status-value" id="monthlySales">480,000</div>
+          <div class="status-unit">円</div>
+        </div>
+      </div>
+      
+      <div class="facilities-list">
+        <h3 style="color:#006aad;margin-bottom:20px;">施設・設備状況</h3>
+        <div id="facilitiesStatus">
+          <div class="facility-item">
+            <div>
+              <strong>クラブハウス</strong>
+              <div style="color:#666;font-size:0.9em;">レストラン・ロッカー・風呂</div>
+            </div>
+            <span class="facility-status status-available">利用可能</span>
+          </div>
+          <div class="facility-item">
+            <div>
+              <strong>練習場</strong>
+              <div style="color:#666;font-size:0.9em;">ドライビングレンジ・パッティンググリーン</div>
+            </div>
+            <span class="facility-status status-available">利用可能</span>
+          </div>
+          <div class="facility-item">
+            <div>
+              <strong>カート道</strong>
+              <div style="color:#666;font-size:0.9em;">8番ホール付近</div>
+            </div>
+            <span class="facility-status status-maintenance">メンテナンス中</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bookings Management Tab -->
+    <div id="bookings" class="tab-content">
+      <div class="booking-form">
+        <h3>新規募集作成</h3>
+        <form id="createBookingForm">
+          <div class="form-inline">
+            <div class="form-group">
+              <label>日付</label>
+              <input type="date" id="bookingDate" required>
+            </div>
+            <div class="form-group">
+              <label>必要キャディ数</label>
+              <input type="number" id="bookingSlots" min="1" max="10" required>
+            </div>
+            <div class="form-group">
+              <label>開始時間</label>
+              <input type="time" id="startTime" value="07:00">
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn-primary">募集作成</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <table class="booking-table">
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>開始時間</th>
+            <th>必要人数</th>
+            <th>応募済み</th>
+            <th>ステータス</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="bookingTableBody">
+          <tr>
+            <td>2025/01/15</td>
+            <td>07:00</td>
+            <td>3名</td>
+            <td>2名</td>
+            <td><span class="status-badge status-open">募集中</span></td>
+            <td><button onclick="editBooking(1)" style="background:#28a745;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">編集</button></td>
+          </tr>
+          <tr>
+            <td>2025/01/12</td>
+            <td>08:30</td>
+            <td>2名</td>
+            <td>2名</td>
+            <td><span class="status-badge status-matched">マッチング完了</span></td>
+            <td><button onclick="viewBooking(2)" style="background:#007bff;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">詳細</button></td>
+          </tr>
+          <tr>
+            <td>2024/12/20</td>
+            <td>07:30</td>
+            <td>4名</td>
+            <td>4名</td>
+            <td><span class="status-badge status-completed">完了</span></td>
+            <td><button onclick="viewBooking(3)" style="background:#6c757d;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">詳細</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Caddy Availability Tab -->
+    <div id="caddies" class="tab-content">
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <button class="calendar-nav" id="prevMonth">◀ 前月</button>
+          <div class="calendar-title" id="calendarTitle">2025年1月</div>
+          <button class="calendar-nav" id="nextMonth">次月 ▶</button>
+        </div>
+        
+        <table class="calendar">
+          <thead>
+            <tr>
+              <th>日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th>
+            </tr>
+          </thead>
+          <tbody id="calendarBody">
+            <!-- Calendar will be generated here -->
+          </tbody>
+        </table>
+        
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color cal-green"></div>
+            <span>3名以上利用可能</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color cal-yellow"></div>
+            <span>1-2名利用可能</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color cal-red"></div>
+            <span>利用不可</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="history" class="tab-content">
+      <div class="history-controls">
+        <h3>期間を指定して検索</h3>
+        <div class="date-range">
+          <div class="form-group">
+            <label>開始日</label>
+            <input type="date" id="startDate">
+          </div>
+          <div class="form-group">
+            <label>終了日</label>
+            <input type="date" id="endDate">
+          </div>
+          <div class="form-group">
+            <button onclick="loadHistory()" class="btn-primary">検索</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="history-summary">
+        <div class="summary-card">
+          <h3>期間内利用回数</h3>
+          <div class="summary-value" id="periodBookings">15</div>
+        </div>
+        <div class="summary-card">
+          <h3>期間内売上</h3>
+          <div class="summary-value" id="periodSales">480,000円</div>
+        </div>
+        <div class="summary-card">
+          <h3>平均評価</h3>
+          <div class="summary-value" id="periodRating">4.6⭐</div>
+        </div>
+        <div class="summary-card">
+          <h3>利用キャディ数</h3>
+          <div class="summary-value" id="periodCaddies">12名</div>
+        </div>
+      </div>
+      
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>時間</th>
+            <th>キャディ名</th>
+            <th>料金</th>
+            <th>評価</th>
+            <th>ステータス</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr>
+            <td>2024/12/28</td>
+            <td>07:00-12:00</td>
+            <td>田中 太郎</td>
+            <td>8,000円</td>
+            <td>5.0⭐</td>
+            <td><span style="color:#28a745;font-weight:bold;">完了</span></td>
+          </tr>
+          <tr>
+            <td>2024/12/25</td>
+            <td>08:30-13:30</td>
+            <td>佐藤 花子</td>
+            <td>8,000円</td>
+            <td>4.8⭐</td>
+            <td><span style="color:#28a745;font-weight:bold;">完了</span></td>
+          </tr>
+          <tr>
+            <td>2024/12/22</td>
+            <td>07:30-12:30</td>
+            <td>鈴木 次郎</td>
+            <td>8,000円</td>
+            <td>4.9⭐</td>
+            <td><span style="color:#28a745;font-weight:bold;">完了</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      "https://vqjxajzaasuqfgvhvxci.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
-    );
+    const SUPABASE_URL = "https://vqjxajzaasuqfgvhvxci.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let gid;
-    // 1. Check login & role
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) { location.href = "/"; return; }
-      const role = data.user.user_metadata?.role;
-      if (role !== "golf") { location.href = "dashboard.html"; return; }
-      // get golf_courses row to fetch gid & name
-      const { data: rows } = await supabase
-        .from("golf_courses")
-        .select("gid,name")
-        .eq("email", data.user.email)
-        .single();
-      if (!rows) { alert("プロフィール未登録です"); location.href="/profile.html?role=golf"; return; }
-      gid = rows.gid;
-      document.getElementById("welcome").textContent = `ようこそ ${rows.name} 様`;
-      loadBookings();
+    let currentUser = null;
+    let golfCourseData = null;
+    let currentDate = new Date();
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        switchTab(tabName);
+      });
     });
 
-    // 2. load bookings
-    async function loadBookings(){
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("booking_id,date,slots,status")
-        .eq("gid", gid)
-        .order("date", { ascending: true });
-      const tbody = document.getElementById("bookBody");
-      tbody.innerHTML = "";
-      if (error){ console.error(error); return; }
-      data.forEach(b => {
-        tbody.insertAdjacentHTML("beforeend",
-          `<tr><td>${b.date}</td><td>${b.slots}</td><td>${b.status}</td></tr>`);
-      });
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+      
+      if (tabName === 'caddies') {
+        renderCalendar();
+      } else if (tabName === 'history') {
+        setDefaultDateRange();
+      }
     }
 
-    // 3. create booking
-    document.getElementById("createForm").onsubmit = async e => {
-      e.preventDefault();
-      const date = document.getElementById("bDate").value;
-      const slots = parseInt(document.getElementById("bSlots").value,10);
-      if (!date || !slots) return;
-      const { error } = await supabase.from("bookings").insert({ gid, date, slots });
-      if (error){ alert(error.message); return; }
-      e.target.reset();
-      loadBookings();
+    // Calendar navigation
+    document.getElementById('prevMonth').onclick = () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
     };
 
-    // --- Tabs logic ---
-    const tab1=document.getElementById('tab1');
-    const tab2=document.getElementById('tab2');
-    document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
-    document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
+    document.getElementById('nextMonth').onclick = () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    };
 
-    // --- Calendar logic ---
-    let calMonth = new Date().getMonth();
-    let calYear = new Date().getFullYear();
-    document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
-    document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+    // Logout
+    document.getElementById('logout').onclick = async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    };
 
-    async function renderCal(){
-      const first = new Date(calYear,calMonth,1);
-      const last  = new Date(calYear,calMonth+1,0);
-      document.getElementById('calTitle').textContent = `${calYear}年 ${calMonth+1}月`;
-      // fetch availability rows for month
-      const { data, error } = await supabase
-        .from('caddy_availability')
-        .select('date')
-        .gte('date', first.toISOString().slice(0,10))
-        .lte('date', last.toISOString().slice(0,10));
-      const countMap = {};
-      if(!error){
-        data.forEach(r=>{countMap[r.date]=(countMap[r.date]||0)+1;});
+    // Profile form submission
+    document.getElementById('profileForm').onsubmit = async (e) => {
+      e.preventDefault();
+      await saveProfile();
+    };
+
+    // Booking form submission
+    document.getElementById('createBookingForm').onsubmit = async (e) => {
+      e.preventDefault();
+      await createBooking();
+    };
+
+    // Initialize
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
       }
-      // build calendar grid
-      const table=document.getElementById('calTable');
-      table.innerHTML='';
-      const headerRow=document.createElement('tr');
-      ['日','月','火','水','木','金','土'].forEach(d=>{
-        const th=document.createElement('th');th.textContent=d;headerRow.appendChild(th);
-      });
-      table.appendChild(headerRow);
-      let row=document.createElement('tr');
-      const startWeekDay=first.getDay();
-      for(let i=0;i<startWeekDay;i++){row.appendChild(document.createElement('td'));}
-      for(let day=1;day<=last.getDate();day++){
-        const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        const td=document.createElement('td');
-        const cnt=countMap[dateStr]||0;
-        const label = cnt===0 ? '×' : cnt;
-        if(cnt===0){td.className='cal-red';}
-        else if(cnt<3){td.className='cal-yellow';}
-        else{td.className='cal-green';}
-        td.innerHTML = `<small>${day}</small><br>${label}`;
-        td.style.cursor='default';
-        row.appendChild(td);
-        if((startWeekDay+day)%7===0){table.appendChild(row);row=document.createElement('tr');}
+      
+      const role = user.user_metadata?.role;
+      if (role !== "golf") {
+        window.location.href = 'dashboard.html';
+        return;
       }
-      if(row.children.length) {
-        while(row.children.length<7)row.appendChild(document.createElement('td'));
-        table.appendChild(row);
+      
+      currentUser = user;
+      await loadProfile();
+      await loadBookings();
+      renderCalendar();
+      setDefaultDateRange();
+    }
+
+    async function loadProfile() {
+      if (!currentUser) return;
+      
+      const { data: golfCourses } = await supabase
+        .from('golf_courses')
+        .select('*')
+        .eq('email', currentUser.email)
+        .limit(1);
+      
+      const golfCourse = golfCourses && golfCourses[0];
+      
+      if (golfCourse) {
+        golfCourseData = golfCourse;
+        document.getElementById('welcome').textContent = `ようこそ ${golfCourse.name} 様`;
+        document.getElementById('profileName').textContent = golfCourse.name || 'ゴルフクラブ';
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('avatarInitial').textContent = (golfCourse.name || 'G')[0].toUpperCase();
+        
+        // Fill form
+        document.getElementById('name').value = golfCourse.name || '';
+        document.getElementById('phone').value = golfCourse.phone || '';
+        document.getElementById('address').value = golfCourse.address || '';
+        document.getElementById('holes').value = golfCourse.holes || '';
+        document.getElementById('business_hours').value = golfCourse.business_hours || '';
+        document.getElementById('caddy_fee').value = golfCourse.caddy_fee || '';
+        document.getElementById('website').value = golfCourse.website || '';
+        document.getElementById('description').value = golfCourse.description || '';
+      } else {
+        document.getElementById('welcome').textContent = 'プロフィール未登録です';
+        document.getElementById('profileEmail').textContent = currentUser.email;
       }
     }
-    // render calendar on tab switch
-    function switchTab(idx){
-      if(idx===1){tab1.classList.remove('hidden');tab2.classList.add('hidden');
-        btnTab1.classList.add('active');btnTab2.classList.remove('active');}
-      else{tab2.classList.remove('hidden');tab1.classList.add('hidden');
-        btnTab2.classList.add('active');btnTab1.classList.remove('active');
-        renderCal();}
+
+    async function saveProfile() {
+      if (!currentUser) return;
+      
+      const profileData = {
+        email: currentUser.email,
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        holes: document.getElementById('holes').value || null,
+        business_hours: document.getElementById('business_hours').value,
+        caddy_fee: parseInt(document.getElementById('caddy_fee').value) || null,
+        website: document.getElementById('website').value,
+        description: document.getElementById('description').value
+      };
+      
+      try {
+        const { error } = await supabase
+          .from('golf_courses')
+          .upsert(profileData);
+        
+        if (error) throw error;
+        
+        alert('プロフィールを更新しました！');
+        await loadProfile();
+      } catch (error) {
+        console.error('Profile save error:', error);
+        alert('更新に失敗しました: ' + error.message);
+      }
     }
+
+    async function loadBookings() {
+      if (!golfCourseData || !golfCourseData.gid) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('gid', golfCourseData.gid)
+          .order('date', { ascending: false });
+        
+        if (error) throw error;
+        
+        const tbody = document.getElementById('bookingTableBody');
+        tbody.innerHTML = '';
+        
+        if (data && data.length > 0) {
+          data.forEach(booking => {
+            const statusClass = booking.status === 'open' ? 'status-open' : 
+                               booking.status === 'matched' ? 'status-matched' : 'status-completed';
+            const statusText = booking.status === 'open' ? '募集中' : 
+                              booking.status === 'matched' ? 'マッチング完了' : '完了';
+            
+            tbody.innerHTML += `
+              <tr>
+                <td>${booking.date}</td>
+                <td>${booking.start_time || '07:00'}</td>
+                <td>${booking.slots}名</td>
+                <td>-名</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td><button onclick="editBooking('${booking.booking_id}')" style="background:#28a745;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">編集</button></td>
+              </tr>
+            `;
+          });
+        }
+      } catch (error) {
+        console.error('Load bookings error:', error);
+      }
+    }
+
+    async function createBooking() {
+      if (!golfCourseData || !golfCourseData.gid) return;
+      
+      const bookingData = {
+        gid: golfCourseData.gid,
+        date: document.getElementById('bookingDate').value,
+        slots: parseInt(document.getElementById('bookingSlots').value),
+        start_time: document.getElementById('startTime').value,
+        status: 'open'
+      };
+      
+      try {
+        const { error } = await supabase
+          .from('bookings')
+          .insert(bookingData);
+        
+        if (error) throw error;
+        
+        document.getElementById('createBookingForm').reset();
+        alert('募集を作成しました！');
+        await loadBookings();
+      } catch (error) {
+        console.error('Create booking error:', error);
+        alert('作成に失敗しました: ' + error.message);
+      }
+    }
+
+    async function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
+      
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay());
+      
+      // Load caddy availability data
+      try {
+        const { data } = await supabase
+          .from('caddy_availability')
+          .select('date')
+          .gte('date', firstDay.toISOString().slice(0, 10))
+          .lte('date', lastDay.toISOString().slice(0, 10))
+          .eq('is_available', true);
+        
+        const countMap = {};
+        if (data) {
+          data.forEach(r => {
+            countMap[r.date] = (countMap[r.date] || 0) + 1;
+          });
+        }
+        
+        const calendarBody = document.getElementById('calendarBody');
+        calendarBody.innerHTML = '';
+        
+        const today = new Date();
+        const currentDateObj = new Date(startDate);
+        
+        for (let week = 0; week < 6; week++) {
+          const row = document.createElement('tr');
+          
+          for (let day = 0; day < 7; day++) {
+            const cell = document.createElement('td');
+            const dateStr = formatDate(currentDateObj);
+            const isCurrentMonth = currentDateObj.getMonth() === month;
+            
+            const count = countMap[dateStr] || 0;
+            let className = '';
+            let displayText = count === 0 ? '×' : count;
+            
+            if (count === 0) className = 'cal-red';
+            else if (count < 3) className = 'cal-yellow';
+            else className = 'cal-green';
+            
+            cell.innerHTML = `
+              <div class="day-number">${currentDateObj.getDate()}</div>
+              <div class="caddy-count">${displayText}</div>
+            `;
+            
+            if (!isCurrentMonth) {
+              cell.classList.add('other-month');
+            } else {
+              cell.className = className;
+            }
+            
+            row.appendChild(cell);
+            currentDateObj.setDate(currentDateObj.getDate() + 1);
+          }
+          
+          calendarBody.appendChild(row);
+        }
+      } catch (error) {
+        console.error('Calendar render error:', error);
+      }
+    }
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function setDefaultDateRange() {
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      
+      document.getElementById('startDate').value = formatDate(firstDay);
+      document.getElementById('endDate').value = formatDate(lastDay);
+    }
+
+    function loadHistory() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      
+      if (!startDate || !endDate) {
+        alert('開始日と終了日を選択してください');
+        return;
+      }
+      
+      // TODO: Load actual history data from database
+      console.log('Loading history from', startDate, 'to', endDate);
+    }
+
+    function editBooking(bookingId) {
+      // TODO: Implement booking edit functionality
+      console.log('Edit booking:', bookingId);
+    }
+
+    function viewBooking(bookingId) {
+      // TODO: Implement booking view functionality
+      console.log('View booking:', bookingId);
+    }
+
+    // Start the app
+    init();
   </script>
 </body>
 </html> 
