@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Caddy Dashboard</title>
+  <style>
+    body{font-family:Helvetica,Arial,sans-serif;padding:20px}
+    h1{margin-bottom:20px}
+    .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}
+    .cal-ok{background:#bbdefb;cursor:pointer}
+    .cal-ng{background:#eeeeee;cursor:pointer}
+    .locked{opacity:0.5;cursor:not-allowed}
+  </style>
+</head>
+<body>
+  <h1>キャディダッシュボード</h1>
+  <div id="welcome"></div>
+  <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button id="prevMonth">◀</button>
+    <span id="calTitle"></span>
+    <button id="nextMonth">▶</button>
+  </div>
+  <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+  <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
+
+    let cid;
+    let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
+    const calTable=document.getElementById('calTable');
+    const lockInfo=document.getElementById('lockInfo');
+
+    supabase.auth.getUser().then(async ({ data })=>{
+      if(!data.user){location.href="/";return;}
+      const role=data.user.user_metadata?.role;
+      if(role!=="caddy"){location.href="dashboard.html";return;}
+      const { data: row } = await supabase.from('caddies').select('cid,name').eq('email',data.user.email).single();
+      if(!row){alert('プロフィール未登録');location.href='/profile.html?role=caddy';return;}
+      cid=row.cid;
+      document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
+      renderCal();
+    });
+
+    document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
+    document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+
+    async function renderCal(){
+      const first=new Date(calYear,calMonth,1);
+      const last=new Date(calYear,calMonth+1,0);
+      document.getElementById('calTitle').textContent=`${calYear}年 ${calMonth+1}月`;
+
+      // fetch own availability
+      const { data, error } = await supabase.from('caddy_availability')
+         .select('date')
+         .eq('cid', cid)
+         .gte('date', first.toISOString().slice(0,10))
+         .lte('date', last.toISOString().slice(0,10));
+      const availSet=new Set();
+      if(!error){ data.forEach(r=>availSet.add(r.date)); }
+
+      // determine lock flag (editing allowed?)
+      const deadline=new Date(calYear, calMonth-1, 15); // 前月15日
+      const today=new Date();
+      const locked = today > deadline;
+      lockInfo.textContent= locked? `${calMonth+1}月分の編集締切（前月15日）を過ぎています` : '';
+
+      calTable.innerHTML='';
+      const headerRow=document.createElement('tr');
+      ['日','月','火','水','木','金','土'].forEach(d=>{const th=document.createElement('th');th.textContent=d;headerRow.appendChild(th);});
+      calTable.appendChild(headerRow);
+      let row=document.createElement('tr');
+      const startWD=first.getDay();
+      for(let i=0;i<startWD;i++)row.appendChild(document.createElement('td'));
+      for(let day=1;day<=last.getDate();day++){
+        const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td=document.createElement('td');
+        const isAvail=availSet.has(dateStr);
+        td.className=isAvail?'cal-ok':'cal-ng';
+        td.innerHTML=`<small>${day}</small><br>${isAvail?'○':'❌'}`;
+        if(!locked){
+          td.onclick=()=>toggle(dateStr,isAvail);
+        } else {
+          td.classList.add('locked');
+        }
+        row.appendChild(td);
+        if((startWD+day)%7===0){calTable.appendChild(row);row=document.createElement('tr');}
+      }
+      if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
+    }
+
+    async function toggle(dateStr,isAvail){
+      if(isAvail){ // delete row
+        const { error } = await supabase.from('caddy_availability').delete().eq('cid',cid).eq('date',dateStr);
+        if(error){alert(error.message);return;}
+      } else {
+        const { error } = await supabase.from('caddy_availability').insert({ cid, date: dateStr });
+        if(error){alert(error.message);return;}
+      }
+      renderCal();
+    }
+  </script>
+</body>
+</html> 
