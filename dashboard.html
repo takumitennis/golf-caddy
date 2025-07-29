@@ -46,7 +46,13 @@
             .join("");
           document.querySelector(".card").insertAdjacentHTML("beforeend", details);
         }
-        if (role === "golf") { window.location.href = "golf_dashboard.html"; return; }
+        if (role === "golf") { 
+          window.location.href = "golf_dashboard.html"; 
+          return; 
+        } else if (role === "caddy") {
+          window.location.href = "caddy_dashboard.html";
+          return;
+        }
       } else {
         window.location.href = "/";
       }

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Caddy Dashboard</title>
+  <style>
+    body{font-family:Helvetica,Arial,sans-serif;padding:20px; background:#f5f5f5;}
+    .container{max-width:1000px; margin:0 auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+    h1{margin-bottom:20px; color:#2f8f2f; text-align:center;}
+    .welcome{text-align:center; margin-bottom:30px; font-size:1.1em; color:#666;}
+    .tabs button{padding:12px 20px;margin-right:8px;border:none;border-bottom:3px solid transparent;background:#eaeaea;cursor:pointer;border-radius:4px 4px 0 0; font-size:14px;}
+    .tabs button.active{border-bottom-color:#2f8f2f;background:#fff; color:#2f8f2f; font-weight:bold;}
+    .hidden{display:none}
+    
+    /* Schedule Calendar Styles */
+    .calendar-container{margin-top:20px;}
+    .calendar-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:15px; background:#f8f9fa; border-radius:6px;}
+    .calendar-title{font-size:1.4em; font-weight:bold; color:#2f8f2f;}
+    .calendar-nav{background:#2f8f2f; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin:0 5px;}
+    .calendar-nav:hover{background:#237123;}
+    
+    .calendar{width:100%; border-collapse:collapse; margin-bottom:20px;}
+    .calendar th{background:#2f8f2f; color:white; padding:12px; text-align:center; font-weight:bold;}
+    .calendar td{
+      width:14.28%; 
+      height:60px; 
+      border:1px solid #ddd; 
+      text-align:center; 
+      vertical-align:middle; 
+      cursor:pointer; 
+      position:relative;
+      transition:all 0.2s ease;
+    }
+    .calendar td:hover{background:#f0f8f0;}
+    .calendar td.other-month{background:#f8f8f8; color:#ccc;}
+    .calendar td.today{background:#fff3cd; border:2px solid #ffc107;}
+    
+    .day-number{font-weight:bold; margin-bottom:5px;}
+    .availability-status{font-size:20px; line-height:1;}
+    .available{color:#28a745;}
+    .unavailable{color:#dc3545;}
+    .not-set{color:#ccc;}
+    
+    .legend{display:flex; justify-content:center; gap:30px; margin:20px 0; padding:15px; background:#f8f9fa; border-radius:6px;}
+    .legend-item{display:flex; align-items:center; gap:8px; font-size:14px;}
+    .legend-symbol{font-size:18px; font-weight:bold;}
+    
+    .save-button{
+      background:#2f8f2f; 
+      color:white; 
+      border:none; 
+      padding:12px 30px; 
+      border-radius:6px; 
+      cursor:pointer; 
+      font-size:16px; 
+      margin:20px auto; 
+      display:block;
+    }
+    .save-button:hover{background:#237123;}
+    .save-button:disabled{background:#ccc; cursor:not-allowed;}
+    
+    .instructions{
+      background:#e8f5e8; 
+      border:1px solid #2f8f2f; 
+      border-radius:6px; 
+      padding:15px; 
+      margin-bottom:20px;
+      color:#1a5a1a;
+    }
+    .instructions h3{margin-top:0; color:#2f8f2f;}
+    
+    .logout-btn{
+      position:absolute; 
+      top:20px; 
+      right:20px; 
+      background:#dc3545; 
+      color:white; 
+      border:none; 
+      padding:8px 16px; 
+      border-radius:4px; 
+      cursor:pointer;
+    }
+    .logout-btn:hover{background:#c82333;}
+  </style>
+</head>
+<body>
+  <button id="logout" class="logout-btn">ログアウト</button>
+  
+  <div class="container">
+    <h1>キャディダッシュボード</h1>
+    <div id="welcome" class="welcome">Loading...</div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button id="btnTab1" class="active">スケジュール管理</button>
+      <button id="btnTab2">応募可能な募集</button>
+      <button id="btnTab3">応募履歴</button>
+    </div>
+
+    <!-- Tab 1: Schedule Management -->
+    <div id="tab1">
+      <div class="instructions">
+        <h3>📅 スケジュール入力方法</h3>
+        <ul>
+          <li>カレンダーの日付をクリックして空き状況を設定してください</li>
+          <li><span style="color:#28a745; font-size:18px;">⚪</span> = 勤務可能　<span style="color:#dc3545; font-size:18px;">✖️</span> = 勤務不可　<span style="color:#ccc; font-size:18px;">－</span> = 未設定</li>
+          <li>変更後は必ず「スケジュールを保存」ボタンを押してください</li>
+        </ul>
+      </div>
+      
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <button class="calendar-nav" id="prevMonth">◀ 前月</button>
+          <div class="calendar-title" id="calendarTitle">2025年2月</div>
+          <button class="calendar-nav" id="nextMonth">次月 ▶</button>
+        </div>
+        
+        <table class="calendar">
+          <thead>
+            <tr>
+              <th>日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th>
+            </tr>
+          </thead>
+          <tbody id="calendarBody">
+            <!-- Calendar will be generated here -->
+          </tbody>
+        </table>
+        
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-symbol available">⚪</span>
+            <span>勤務可能</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-symbol unavailable">✖️</span>
+            <span>勤務不可</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-symbol not-set">－</span>
+            <span>未設定</span>
+          </div>
+        </div>
+        
+        <button class="save-button" id="saveSchedule">スケジュールを保存</button>
+      </div>
+    </div>
+
+    <!-- Tab 2: Available Bookings (placeholder) -->
+    <div id="tab2" class="hidden">
+      <h3>応募可能な募集</h3>
+      <p>ゴルフ場からの募集一覧がここに表示されます（実装予定）</p>
+    </div>
+
+    <!-- Tab 3: Application History (placeholder) -->
+    <div id="tab3" class="hidden">
+      <h3>応募履歴</h3>
+      <p>過去の応募履歴がここに表示されます（実装予定）</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://vqjxajzaasuqfgvhvxci.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+    let currentDate = new Date();
+    let scheduleData = {}; // {YYYY-MM-DD: 'available'|'unavailable'}
+
+    // Tab switching
+    document.getElementById('btnTab1').onclick = () => switchTab(1);
+    document.getElementById('btnTab2').onclick = () => switchTab(2);
+    document.getElementById('btnTab3').onclick = () => switchTab(3);
+
+    function switchTab(tabNum) {
+      document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('[id^="tab"]').forEach(tab => tab.classList.add('hidden'));
+      
+      document.getElementById(`btnTab${tabNum}`).classList.add('active');
+      document.getElementById(`tab${tabNum}`).classList.remove('hidden');
+    }
+
+    // Calendar navigation
+    document.getElementById('prevMonth').onclick = () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    };
+
+    document.getElementById('nextMonth').onclick = () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    };
+
+    // Logout
+    document.getElementById('logout').onclick = async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    };
+
+    // Save schedule
+    document.getElementById('saveSchedule').onclick = saveSchedule;
+
+    // Initialize
+    async function init() {
+      // Check auth
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      currentUser = user;
+      
+      // Get caddy profile
+      const { data: caddies } = await supabase
+        .from('caddies')
+        .select('*')
+        .eq('email', user.email)
+        .limit(1);
+      
+      const caddy = caddies && caddies[0];
+      document.getElementById('welcome').textContent = 
+        caddy ? `ようこそ ${caddy.name} さん` : 'プロフィール未登録です';
+      
+      // Set initial date to next month
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      currentDate = nextMonth;
+      
+      await loadSchedule();
+      renderCalendar();
+    }
+
+    async function loadSchedule() {
+      if (!currentUser) return;
+      
+      const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+      
+      const { data } = await supabase
+        .from('caddy_availability')
+        .select('*')
+        .eq('caddy_email', currentUser.email)
+        .like('date', `${yearMonth}%`);
+      
+      scheduleData = {};
+      if (data) {
+        data.forEach(row => {
+          scheduleData[row.date] = row.is_available ? 'available' : 'unavailable';
+        });
+      }
+    }
+
+    async function saveSchedule() {
+      if (!currentUser) return;
+      
+      const saveBtn = document.getElementById('saveSchedule');
+      saveBtn.disabled = true;
+      saveBtn.textContent = '保存中...';
+      
+      try {
+        // Delete existing records for this month
+        const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+        await supabase
+          .from('caddy_availability')
+          .delete()
+          .eq('caddy_email', currentUser.email)
+          .like('date', `${yearMonth}%`);
+        
+        // Insert new records
+        const records = Object.entries(scheduleData).map(([date, status]) => ({
+          caddy_email: currentUser.email,
+          date: date,
+          is_available: status === 'available'
+        }));
+        
+        if (records.length > 0) {
+          const { error } = await supabase
+            .from('caddy_availability')
+            .insert(records);
+          
+          if (error) throw error;
+        }
+        
+        alert('スケジュールを保存しました！');
+      } catch (error) {
+        console.error('Save error:', error);
+        alert('保存に失敗しました: ' + error.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'スケジュールを保存';
+      }
+    }
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      document.getElementById('calendarTitle').textContent = 
+        `${year}年${month + 1}月`;
+      
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay());
+      
+      const calendarBody = document.getElementById('calendarBody');
+      calendarBody.innerHTML = '';
+      
+      const today = new Date();
+      const currentDateObj = new Date(startDate);
+      
+      for (let week = 0; week < 6; week++) {
+        const row = document.createElement('tr');
+        
+        for (let day = 0; day < 7; day++) {
+          const cell = document.createElement('td');
+          const dateStr = formatDate(currentDateObj);
+          const isCurrentMonth = currentDateObj.getMonth() === month;
+          const isToday = 
+            currentDateObj.getFullYear() === today.getFullYear() &&
+            currentDateObj.getMonth() === today.getMonth() &&
+            currentDateObj.getDate() === today.getDate();
+          
+          cell.innerHTML = `
+            <div class="day-number">${currentDateObj.getDate()}</div>
+            <div class="availability-status">${getStatusSymbol(dateStr)}</div>
+          `;
+          
+          if (!isCurrentMonth) {
+            cell.classList.add('other-month');
+          }
+          if (isToday) {
+            cell.classList.add('today');
+          }
+          
+          if (isCurrentMonth) {
+            cell.onclick = () => toggleAvailability(dateStr, cell);
+          }
+          
+          row.appendChild(cell);
+          currentDateObj.setDate(currentDateObj.getDate() + 1);
+        }
+        
+        calendarBody.appendChild(row);
+      }
+    }
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getStatusSymbol(dateStr) {
+      const status = scheduleData[dateStr];
+      if (status === 'available') return '⚪';
+      if (status === 'unavailable') return '✖️';
+      return '－';
+    }
+
+    function toggleAvailability(dateStr, cell) {
+      const currentStatus = scheduleData[dateStr];
+      let newStatus;
+      
+      if (currentStatus === 'available') {
+        newStatus = 'unavailable';
+      } else if (currentStatus === 'unavailable') {
+        newStatus = undefined;
+      } else {
+        newStatus = 'available';
+      }
+      
+      if (newStatus) {
+        scheduleData[dateStr] = newStatus;
+      } else {
+        delete scheduleData[dateStr];
+      }
+      
+      cell.querySelector('.availability-status').textContent = getStatusSymbol(dateStr);
+    }
+
+    // Start the app
+    init();
+  </script>
+</body>
+</html>
