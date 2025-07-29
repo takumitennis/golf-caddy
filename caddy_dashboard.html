@@ -3,116 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Caddy Dashboard</title>
+  <title>キャディマイページ</title>
   <style>
-    body{font-family:Helvetica,Arial,sans-serif;padding:20px; background:#f5f5f5;}
-    .container{max-width:1000px; margin:0 auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-    h1{margin-bottom:20px; color:#2f8f2f; text-align:center;}
-    .welcome{text-align:center; margin-bottom:30px; font-size:1.1em; color:#666;}
-    .tabs button{padding:12px 20px;margin-right:8px;border:none;border-bottom:3px solid transparent;background:#eaeaea;cursor:pointer;border-radius:4px 4px 0 0; font-size:14px;}
-    .tabs button.active{border-bottom-color:#2f8f2f;background:#fff; color:#2f8f2f; font-weight:bold;}
-    .hidden{display:none}
+    body{font-family:Helvetica,Arial,sans-serif;margin:0;padding:0;background:#f5f5f5;}
+    .header{background:#2f8f2f;color:white;padding:20px;text-align:center;position:relative;}
+    .header h1{margin:0;font-size:1.8em;}
+    .welcome{margin:5px 0 0 0;font-size:1.1em;opacity:0.9;}
+    .logout-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:14px;}
+    .logout-btn:hover{background:rgba(255,255,255,0.3);}
     
-    /* Schedule Calendar Styles */
+    .container{max-width:1000px;margin:0 auto;background:white;min-height:80vh;}
+    .tabs{display:flex;background:#fff;border-bottom:2px solid #eee;overflow-x:auto;}
+    .tab-btn{flex:1;min-width:120px;padding:15px 10px;border:none;background:transparent;cursor:pointer;font-size:14px;color:#666;border-bottom:3px solid transparent;transition:all 0.3s ease;white-space:nowrap;}
+    .tab-btn.active{color:#2f8f2f;border-bottom-color:#2f8f2f;background:#f8f9fa;}
+    .tab-btn:hover{background:#f0f8f0;}
+    
+    .tab-content{display:none;padding:30px;}
+    .tab-content.active{display:block;}
+    
+    /* Profile Tab Styles */
+    .profile-section{background:#f8f9fa;border-radius:8px;padding:25px;margin-bottom:20px;}
+    .profile-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;}
+    .profile-avatar{width:80px;height:80px;border-radius:50%;background:#2f8f2f;display:flex;align-items:center;justify-content:center;color:white;font-size:2em;font-weight:bold;}
+    .profile-info h2{margin:0;color:#2f8f2f;}
+    .profile-info p{margin:5px 0;color:#666;}
+    
+    .form-group{margin-bottom:20px;}
+    .form-group label{display:block;margin-bottom:8px;font-weight:bold;color:#333;}
+    .form-group input, .form-group textarea, .form-group select{width:100%;padding:12px;border:1px solid #ddd;border-radius:6px;font-size:14px;}
+    .form-group textarea{height:80px;resize:vertical;}
+    .btn-primary{background:#2f8f2f;color:white;border:none;padding:12px 30px;border-radius:6px;cursor:pointer;font-size:16px;}
+    .btn-primary:hover{background:#237123;}
+    
+    /* Status Tab Styles */
+    .status-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:30px;}
+    .status-card{background:white;border:1px solid #eee;border-radius:8px;padding:20px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+    .status-card h3{margin:0 0 10px 0;color:#2f8f2f;}
+    .status-value{font-size:2em;font-weight:bold;color:#333;margin:10px 0;}
+    .status-unit{color:#666;font-size:0.9em;}
+    
+    .training-list{background:white;border-radius:8px;padding:20px;}
+    .training-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;}
+    .training-item:last-child{border-bottom:none;}
+    .training-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+    .status-completed{background:#d4edda;color:#155724;}
+    .status-pending{background:#fff3cd;color:#856404;}
+    
+    /* Schedule Tab Styles */
     .calendar-container{margin-top:20px;}
-    .calendar-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:15px; background:#f8f9fa; border-radius:6px;}
-    .calendar-title{font-size:1.4em; font-weight:bold; color:#2f8f2f;}
-    .calendar-nav{background:#2f8f2f; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin:0 5px;}
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:6px;}
+    .calendar-title{font-size:1.4em;font-weight:bold;color:#2f8f2f;}
+    .calendar-nav{background:#2f8f2f;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin:0 5px;}
     .calendar-nav:hover{background:#237123;}
     
-    .calendar{width:100%; border-collapse:collapse; margin-bottom:20px;}
-    .calendar th{background:#2f8f2f; color:white; padding:12px; text-align:center; font-weight:bold;}
+    .calendar{width:100%;border-collapse:collapse;margin-bottom:20px;}
+    .calendar th{background:#2f8f2f;color:white;padding:12px;text-align:center;font-weight:bold;}
     .calendar td{
-      width:14.28%; 
-      height:60px; 
-      border:1px solid #ddd; 
-      text-align:center; 
-      vertical-align:middle; 
-      cursor:pointer; 
-      position:relative;
-      transition:all 0.2s ease;
+      width:14.28%;height:80px;border:1px solid #ddd;text-align:center;vertical-align:top;padding:5px;position:relative;
     }
-    .calendar td:hover{background:#f0f8f0;}
-    .calendar td.other-month{background:#f8f8f8; color:#ccc;}
-    .calendar td.today{background:#fff3cd; border:2px solid #ffc107;}
+    .calendar td.other-month{background:#f8f8f8;color:#ccc;}
+    .calendar td.today{background:#fff3cd;border:2px solid #ffc107;}
+    .day-number{font-weight:bold;margin-bottom:5px;}
+    .day-status{font-size:12px;margin:2px 0;}
+    .status-available{color:#28a745;font-weight:bold;}
+    .status-unavailable{color:#dc3545;font-weight:bold;}
+    .status-booked{background:#007bff;color:white;padding:2px 6px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block;}
+    .status-booked:hover{background:#0056b3;}
     
-    .day-number{font-weight:bold; margin-bottom:5px;}
-    .availability-status{font-size:20px; line-height:1;}
-    .available{color:#28a745;}
-    .unavailable{color:#dc3545;}
-    .not-set{color:#ccc;}
+    /* History Tab Styles */
+    .history-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px;}
+    .summary-card{background:white;border:1px solid #eee;border-radius:8px;padding:20px;text-align:center;}
+    .summary-value{font-size:1.8em;font-weight:bold;color:#2f8f2f;}
     
-    .legend{display:flex; justify-content:center; gap:30px; margin:20px 0; padding:15px; background:#f8f9fa; border-radius:6px;}
-    .legend-item{display:flex; align-items:center; gap:8px; font-size:14px;}
-    .legend-symbol{font-size:18px; font-weight:bold;}
+    .history-table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;}
+    .history-table th{background:#2f8f2f;color:white;padding:15px;text-align:left;}
+    .history-table td{padding:12px 15px;border-bottom:1px solid #eee;}
+    .history-table tr:hover{background:#f8f9fa;}
     
-    .save-button{
-      background:#2f8f2f; 
-      color:white; 
-      border:none; 
-      padding:12px 30px; 
-      border-radius:6px; 
-      cursor:pointer; 
-      font-size:16px; 
-      margin:20px auto; 
-      display:block;
+    .legend{display:flex;justify-content:center;gap:30px;margin:20px 0;padding:15px;background:#f8f9fa;border-radius:6px;flex-wrap:wrap;}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:14px;}
+    .legend-symbol{font-size:16px;font-weight:bold;}
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tabs{flex-direction:column;}
+      .tab-btn{min-width:auto;}
+      .profile-header{flex-direction:column;text-align:center;}
+      .status-cards{grid-template-columns:1fr;}
+      .calendar td{height:60px;font-size:12px;}
+      .history-summary{grid-template-columns:1fr 1fr;}
     }
-    .save-button:hover{background:#237123;}
-    .save-button:disabled{background:#ccc; cursor:not-allowed;}
-    
-    .instructions{
-      background:#e8f5e8; 
-      border:1px solid #2f8f2f; 
-      border-radius:6px; 
-      padding:15px; 
-      margin-bottom:20px;
-      color:#1a5a1a;
-    }
-    .instructions h3{margin-top:0; color:#2f8f2f;}
-    
-    .logout-btn{
-      position:absolute; 
-      top:20px; 
-      right:20px; 
-      background:#dc3545; 
-      color:white; 
-      border:none; 
-      padding:8px 16px; 
-      border-radius:4px; 
-      cursor:pointer;
-    }
-    .logout-btn:hover{background:#c82333;}
   </style>
 </head>
 <body>
-  <button id="logout" class="logout-btn">ログアウト</button>
-  
-  <div class="container">
-    <h1>キャディダッシュボード</h1>
+  <!-- Header -->
+  <div class="header">
+    <button id="logout" class="logout-btn">ログアウト</button>
+    <h1>キャディマイページ</h1>
     <div id="welcome" class="welcome">Loading...</div>
+  </div>
 
-    <!-- Tabs -->
+  <div class="container">
+    <!-- Tab Navigation -->
     <div class="tabs">
-      <button id="btnTab1" class="active">スケジュール管理</button>
-      <button id="btnTab2">応募可能な募集</button>
-      <button id="btnTab3">応募履歴</button>
+      <button class="tab-btn active" data-tab="profile">📋 プロフィール</button>
+      <button class="tab-btn" data-tab="status">📊 ステータス</button>
+      <button class="tab-btn" data-tab="schedule">📅 スケジュール</button>
+      <button class="tab-btn" data-tab="history">📈 履歴</button>
     </div>
 
-    <!-- Tab 1: Schedule Management -->
-    <div id="tab1">
-      <div class="instructions">
-        <h3>📅 スケジュール入力方法</h3>
-        <ul>
-          <li>カレンダーの日付をクリックして空き状況を設定してください</li>
-          <li><span style="color:#28a745; font-size:18px;">⚪</span> = 勤務可能　<span style="color:#dc3545; font-size:18px;">✖️</span> = 勤務不可　<span style="color:#ccc; font-size:18px;">－</span> = 未設定</li>
-          <li>変更後は必ず「スケジュールを保存」ボタンを押してください</li>
-        </ul>
+    <!-- Profile Tab -->
+    <div id="profile" class="tab-content active">
+      <div class="profile-section">
+        <div class="profile-header">
+          <div class="profile-avatar" id="avatarInitial">K</div>
+          <div class="profile-info">
+            <h2 id="profileName">キャディ 太郎</h2>
+            <p id="profileEmail">caddy@example.com</p>
+          </div>
+        </div>
       </div>
       
+      <form id="profileForm">
+        <div class="form-group">
+          <label>氏名</label>
+          <input type="text" id="name" placeholder="山田 太郎" required>
+        </div>
+        <div class="form-group">
+          <label>電話番号</label>
+          <input type="tel" id="phone" placeholder="090-1234-5678">
+        </div>
+        <div class="form-group">
+          <label>住所</label>
+          <input type="text" id="address" placeholder="東京都渋谷区...">
+        </div>
+        <div class="form-group">
+          <label>生年月日</label>
+          <input type="date" id="birthdate">
+        </div>
+        <div class="form-group">
+          <label>経験年数</label>
+          <select id="experience">
+            <option value="">選択してください</option>
+            <option value="1年未満">1年未満</option>
+            <option value="1-3年">1-3年</option>
+            <option value="3-5年">3-5年</option>
+            <option value="5-10年">5-10年</option>
+            <option value="10年以上">10年以上</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>自己PR</label>
+          <textarea id="bio" placeholder="ゴルフ歴やキャディとしての強みなどをご記入ください"></textarea>
+        </div>
+        <button type="submit" class="btn-primary">プロフィールを更新</button>
+      </form>
+    </div>
+
+    <!-- Status Tab -->
+    <div id="status" class="tab-content">
+      <div class="status-cards">
+        <div class="status-card">
+          <h3>現在の単価</h3>
+          <div class="status-value" id="currentRate">8,000</div>
+          <div class="status-unit">円/日</div>
+        </div>
+        <div class="status-card">
+          <h3>総合評価</h3>
+          <div class="status-value" id="averageRating">4.8</div>
+          <div class="status-unit">/ 5.0 ⭐</div>
+        </div>
+        <div class="status-card">
+          <h3>今月の勤務日数</h3>
+          <div class="status-value" id="monthlyDays">12</div>
+          <div class="status-unit">日</div>
+        </div>
+      </div>
+      
+      <div class="training-list">
+        <h3 style="color:#2f8f2f;margin-bottom:20px;">研修済みゴルフ場</h3>
+        <div id="trainingHistory">
+          <div class="training-item">
+            <div>
+              <strong>東京ゴルフクラブ</strong>
+              <div style="color:#666;font-size:0.9em;">2024年1月完了</div>
+            </div>
+            <span class="training-status status-completed">研修済み</span>
+          </div>
+          <div class="training-item">
+            <div>
+              <strong>千葉カントリークラブ</strong>
+              <div style="color:#666;font-size:0.9em;">2024年3月完了</div>
+            </div>
+            <span class="training-status status-completed">研修済み</span>
+          </div>
+          <div class="training-item">
+            <div>
+              <strong>神奈川リゾートゴルフ</strong>
+              <div style="color:#666;font-size:0.9em;">予定：2025年2月</div>
+            </div>
+            <span class="training-status status-pending">予定</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule Tab -->
+    <div id="schedule" class="tab-content">
       <div class="calendar-container">
         <div class="calendar-header">
           <button class="calendar-nav" id="prevMonth">◀ 前月</button>
-          <div class="calendar-title" id="calendarTitle">2025年2月</div>
+          <div class="calendar-title" id="calendarTitle">2025年1月</div>
           <button class="calendar-nav" id="nextMonth">次月 ▶</button>
         </div>
         
@@ -129,33 +230,91 @@
         
         <div class="legend">
           <div class="legend-item">
-            <span class="legend-symbol available">⚪</span>
+            <span class="legend-symbol" style="color:#28a745;">⚪</span>
             <span>勤務可能</span>
           </div>
           <div class="legend-item">
-            <span class="legend-symbol unavailable">✖️</span>
+            <span class="legend-symbol" style="color:#dc3545;">✖️</span>
             <span>勤務不可</span>
           </div>
           <div class="legend-item">
-            <span class="legend-symbol not-set">－</span>
+            <span class="legend-symbol" style="color:#007bff;">📋</span>
+            <span>予約成立</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-symbol" style="color:#ccc;">－</span>
             <span>未設定</span>
           </div>
         </div>
-        
-        <button class="save-button" id="saveSchedule">スケジュールを保存</button>
       </div>
     </div>
 
-    <!-- Tab 2: Available Bookings (placeholder) -->
-    <div id="tab2" class="hidden">
-      <h3>応募可能な募集</h3>
-      <p>ゴルフ場からの募集一覧がここに表示されます（実装予定）</p>
+    <!-- History Tab -->
+    <div id="history" class="tab-content">
+      <div class="history-summary">
+        <div class="summary-card">
+          <h3>今月の売上</h3>
+          <div class="summary-value">96,000円</div>
+        </div>
+        <div class="summary-card">
+          <h3>累計勤務日数</h3>
+          <div class="summary-value">156日</div>
+        </div>
+        <div class="summary-card">
+          <h3>累計売上</h3>
+          <div class="summary-value">1,248,000円</div>
+        </div>
+        <div class="summary-card">
+          <h3>平均評価</h3>
+          <div class="summary-value">4.8⭐</div>
+        </div>
+      </div>
+      
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>ゴルフ場</th>
+            <th>単価</th>
+            <th>評価</th>
+            <th>ステータス</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr>
+            <td>2024/12/28</td>
+            <td>東京ゴルフクラブ</td>
+            <td>8,000円</td>
+            <td>5.0⭐</td>
+            <td><span style="color:#28a745;font-weight:bold;">完了</span></td>
+          </tr>
+          <tr>
+            <td>2024/12/25</td>
+            <td>千葉カントリークラブ</td>
+            <td>8,000円</td>
+            <td>4.8⭐</td>
+            <td><span style="color:#28a745;font-weight:bold;">完了</span></td>
+          </tr>
+          <tr>
+            <td>2024/12/22</td>
+            <td>東京ゴルフクラブ</td>
+            <td>8,000円</td>
+            <td>4.9⭐</td>
+            <td><span style="color:#28a745;font-weight:bold;">完了</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- Tab 3: Application History (placeholder) -->
-    <div id="tab3" class="hidden">
-      <h3>応募履歴</h3>
-      <p>過去の応募履歴がここに表示されます（実装予定）</p>
+  <!-- Booking Detail Modal -->
+  <div id="bookingModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:30px;border-radius:8px;max-width:500px;width:90%;">
+      <h3 style="margin-top:0;color:#2f8f2f;">予約詳細</h3>
+      <div id="bookingDetails">
+        <!-- Booking details will be populated here -->
+      </div>
+      <button onclick="closeBookingModal()" style="background:#666;color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;margin-top:20px;">閉じる</button>
     </div>
   </div>
 
@@ -167,29 +326,39 @@
 
     let currentUser = null;
     let currentDate = new Date();
-    let scheduleData = {}; // {YYYY-MM-DD: 'available'|'unavailable'}
+    let scheduleData = {};
+    let bookingData = {}; // Store booking information
 
     // Tab switching
-    document.getElementById('btnTab1').onclick = () => switchTab(1);
-    document.getElementById('btnTab2').onclick = () => switchTab(2);
-    document.getElementById('btnTab3').onclick = () => switchTab(3);
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        switchTab(tabName);
+      });
+    });
 
-    function switchTab(tabNum) {
-      document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('[id^="tab"]').forEach(tab => tab.classList.add('hidden'));
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
       
-      document.getElementById(`btnTab${tabNum}`).classList.add('active');
-      document.getElementById(`tab${tabNum}`).classList.remove('hidden');
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+      
+      if (tabName === 'schedule') {
+        renderCalendar();
+      }
     }
 
     // Calendar navigation
     document.getElementById('prevMonth').onclick = () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
+      loadScheduleAndBookings();
       renderCalendar();
     };
 
     document.getElementById('nextMonth').onclick = () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
+      loadScheduleAndBookings();
       renderCalendar();
     };
 
@@ -199,12 +368,14 @@
       window.location.href = 'index.html';
     };
 
-    // Save schedule
-    document.getElementById('saveSchedule').onclick = saveSchedule;
+    // Profile form submission
+    document.getElementById('profileForm').onsubmit = async (e) => {
+      e.preventDefault();
+      await saveProfile();
+    };
 
     // Initialize
     async function init() {
-      // Check auth
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         window.location.href = 'index.html';
@@ -212,93 +383,101 @@
       }
       
       currentUser = user;
-      
-      // Get caddy profile
-      const { data: caddies } = await supabase
-        .from('caddies')
-        .select('*')
-        .eq('email', user.email)
-        .limit(1);
-      
-      const caddy = caddies && caddies[0];
-      document.getElementById('welcome').textContent = 
-        caddy ? `ようこそ ${caddy.name} さん` : 'プロフィール未登録です';
-      
-      // Set initial date to next month
-      const nextMonth = new Date();
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      currentDate = nextMonth;
-      
-      await loadSchedule();
+      await loadProfile();
+      await loadScheduleAndBookings();
       renderCalendar();
     }
 
-    async function loadSchedule() {
+    async function loadProfile() {
+      if (!currentUser) return;
+      
+      const { data: caddies } = await supabase
+        .from('caddies')
+        .select('*')
+        .eq('email', currentUser.email)
+        .limit(1);
+      
+      const caddy = caddies && caddies[0];
+      
+      if (caddy) {
+        document.getElementById('welcome').textContent = `ようこそ ${caddy.name} さん`;
+        document.getElementById('profileName').textContent = caddy.name || 'キャディ';
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('avatarInitial').textContent = (caddy.name || 'K')[0].toUpperCase();
+        
+        // Fill form
+        document.getElementById('name').value = caddy.name || '';
+        document.getElementById('phone').value = caddy.phone || '';
+        document.getElementById('address').value = caddy.address || '';
+        document.getElementById('birthdate').value = caddy.birthdate || '';
+        document.getElementById('experience').value = caddy.experience || '';
+        document.getElementById('bio').value = caddy.bio || '';
+      } else {
+        document.getElementById('welcome').textContent = 'プロフィール未登録です';
+        document.getElementById('profileEmail').textContent = currentUser.email;
+      }
+    }
+
+    async function saveProfile() {
+      if (!currentUser) return;
+      
+      const profileData = {
+        email: currentUser.email,
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        birthdate: document.getElementById('birthdate').value || null,
+        experience: document.getElementById('experience').value,
+        bio: document.getElementById('bio').value
+      };
+      
+      try {
+        const { error } = await supabase
+          .from('caddies')
+          .upsert(profileData);
+        
+        if (error) throw error;
+        
+        alert('プロフィールを更新しました！');
+        await loadProfile();
+      } catch (error) {
+        console.error('Profile save error:', error);
+        alert('更新に失敗しました: ' + error.message);
+      }
+    }
+
+    async function loadScheduleAndBookings() {
       if (!currentUser) return;
       
       const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
       
-      const { data } = await supabase
+      // Load availability
+      const { data: availability } = await supabase
         .from('caddy_availability')
         .select('*')
         .eq('caddy_email', currentUser.email)
         .like('date', `${yearMonth}%`);
       
       scheduleData = {};
-      if (data) {
-        data.forEach(row => {
+      if (availability) {
+        availability.forEach(row => {
           scheduleData[row.date] = row.is_available ? 'available' : 'unavailable';
         });
       }
-    }
-
-    async function saveSchedule() {
-      if (!currentUser) return;
       
-      const saveBtn = document.getElementById('saveSchedule');
-      saveBtn.disabled = true;
-      saveBtn.textContent = '保存中...';
-      
-      try {
-        // Delete existing records for this month
-        const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-        await supabase
-          .from('caddy_availability')
-          .delete()
-          .eq('caddy_email', currentUser.email)
-          .like('date', `${yearMonth}%`);
-        
-        // Insert new records
-        const records = Object.entries(scheduleData).map(([date, status]) => ({
-          caddy_email: currentUser.email,
-          date: date,
-          is_available: status === 'available'
-        }));
-        
-        if (records.length > 0) {
-          const { error } = await supabase
-            .from('caddy_availability')
-            .insert(records);
-          
-          if (error) throw error;
-        }
-        
-        alert('スケジュールを保存しました！');
-      } catch (error) {
-        console.error('Save error:', error);
-        alert('保存に失敗しました: ' + error.message);
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'スケジュールを保存';
-      }
+      // Load bookings (dummy data for now)
+      bookingData = {
+        '2025-01-15': { golf_course: '東京ゴルフクラブ', start_time: '07:00', rate: 8000 },
+        '2025-01-20': { golf_course: '千葉カントリークラブ', start_time: '08:30', rate: 8000 },
+        '2025-01-25': { golf_course: '神奈川リゾートゴルフ', start_time: '07:30', rate: 8500 }
+      };
     }
 
     function renderCalendar() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       
-      document.getElementById('calendarTitle').textContent = 
-        `${year}年${month + 1}月`;
+      document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
       
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
@@ -323,9 +502,16 @@
             currentDateObj.getMonth() === today.getMonth() &&
             currentDateObj.getDate() === today.getDate();
           
+          let statusHtml = '';
+          if (bookingData[dateStr]) {
+            statusHtml = `<a href="#" class="status-booked" onclick="showBookingDetail('${dateStr}')">予約成立</a>`;
+          } else {
+            statusHtml = `<div class="day-status ${getStatusClass(dateStr)}">${getStatusSymbol(dateStr)}</div>`;
+          }
+          
           cell.innerHTML = `
             <div class="day-number">${currentDateObj.getDate()}</div>
-            <div class="availability-status">${getStatusSymbol(dateStr)}</div>
+            ${statusHtml}
           `;
           
           if (!isCurrentMonth) {
@@ -333,10 +519,6 @@
           }
           if (isToday) {
             cell.classList.add('today');
-          }
-          
-          if (isCurrentMonth) {
-            cell.onclick = () => toggleAvailability(dateStr, cell);
           }
           
           row.appendChild(cell);
@@ -361,26 +543,40 @@
       return '－';
     }
 
-    function toggleAvailability(dateStr, cell) {
-      const currentStatus = scheduleData[dateStr];
-      let newStatus;
-      
-      if (currentStatus === 'available') {
-        newStatus = 'unavailable';
-      } else if (currentStatus === 'unavailable') {
-        newStatus = undefined;
-      } else {
-        newStatus = 'available';
-      }
-      
-      if (newStatus) {
-        scheduleData[dateStr] = newStatus;
-      } else {
-        delete scheduleData[dateStr];
-      }
-      
-      cell.querySelector('.availability-status').textContent = getStatusSymbol(dateStr);
+    function getStatusClass(dateStr) {
+      const status = scheduleData[dateStr];
+      if (status === 'available') return 'status-available';
+      if (status === 'unavailable') return 'status-unavailable';
+      return '';
     }
+
+    function showBookingDetail(dateStr) {
+      const booking = bookingData[dateStr];
+      if (!booking) return;
+      
+      document.getElementById('bookingDetails').innerHTML = `
+        <p><strong>日付:</strong> ${dateStr}</p>
+        <p><strong>ゴルフ場:</strong> ${booking.golf_course}</p>
+        <p><strong>開始時間:</strong> ${booking.start_time}</p>
+        <p><strong>単価:</strong> ${booking.rate.toLocaleString()}円</p>
+        <p><strong>ステータス:</strong> <span style="color:#28a745;font-weight:bold;">予約確定</span></p>
+        <hr style="margin:15px 0;">
+        <p style="color:#666;font-size:0.9em;">当日の詳細については、ゴルフ場からの連絡をお待ちください。</p>
+      `;
+      
+      document.getElementById('bookingModal').style.display = 'block';
+    }
+
+    function closeBookingModal() {
+      document.getElementById('bookingModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('bookingModal').onclick = (e) => {
+      if (e.target.id === 'bookingModal') {
+        closeBookingModal();
+      }
+    };
 
     // Start the app
     init();
