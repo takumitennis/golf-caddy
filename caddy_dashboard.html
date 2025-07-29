@@ -8,7 +8,8 @@
     body{font-family:Helvetica,Arial,sans-serif;padding:20px}
     h1{margin-bottom:20px}
     .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}
-    .cal-ok{background:#bbdefb;cursor:pointer}
+    .cal-ok{background:#ffffff;cursor:pointer}
+    .ok-circle{display:inline-block;width:16px;height:16px;border:2px solid #4caf50;border-radius:50%}
     .cal-ng{background:#eeeeee;cursor:pointer}
     .locked{opacity:0.5;cursor:not-allowed}
   </style>
@@ -83,7 +84,7 @@
         const td=document.createElement('td');
         const isAvail=availSet.has(dateStr);
         td.className=isAvail?'cal-ok':'cal-ng';
-        td.innerHTML=`<small>${day}</small><br>${isAvail?'○':'❌'}`;
+        td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
         if(!locked){
           td.onclick=()=>toggle(dateStr,isAvail);
         } else {
