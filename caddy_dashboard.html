@@ -12,11 +12,20 @@
     .ok-circle{display:inline-block;width:16px;height:16px;border:2px solid #4caf50;border-radius:50%}
     .cal-ng{background:#eeeeee;cursor:pointer}
     .locked{opacity:0.5;cursor:not-allowed}
+    .tabs-main button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#e0e0e0;cursor:pointer}
+    .tabs-main button.active{border-bottom-color:#0077cc;background:#fff}
   </style>
 </head>
 <body>
-  <h1>キャディダッシュボード</h1>
-  <div id="welcome"></div>
+  <h1>キャディマイページ</h1>
+  <div class="tabs-main">
+    <button id="btnMainProf">プロフィール</button>
+    <button id="btnMainStat" class="active">ステータス</button>
+    <button id="logoutBtn" style="margin-left:auto;">Logout</button>
+  </div>
+  <div id="welcome" style="margin-top:10px;"></div>
+  <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
+  <div id="mainStatus">
   <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
   <div style="display:flex;align-items:center;gap:10px;">
     <button id="prevMonth">◀</button>
@@ -25,6 +34,7 @@
   </div>
   <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
   <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -46,6 +56,10 @@
       if(!row){alert('プロフィール未登録');location.href='/profile.html?role=caddy';return;}
       cid=row.cid;
       document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
+      document.getElementById('mainProfile').innerHTML=`
+        <table style='border-collapse:collapse;width:100%;max-width:400px'>
+          <tr><th style='text-align:left'>氏名</th><td>${row.name}</td></tr>
+        </table>`;
       renderCal();
     });
 
@@ -106,6 +120,17 @@
       }
       renderCal();
     }
+
+    // main tabs
+    const mainProf=document.getElementById('mainProfile');
+    const mainStat=document.getElementById('mainStatus');
+    document.getElementById('btnMainProf').onclick=()=>switchMain('p');
+    document.getElementById('btnMainStat').onclick=()=>switchMain('s');
+    function switchMain(m){
+      if(m==='p'){mainProf.classList.remove('hidden');mainStat.classList.add('hidden');btnMainProf.classList.add('active');btnMainStat.classList.remove('active');}
+      else{mainStat.classList.remove('hidden');mainProf.classList.add('hidden');btnMainStat.classList.add('active');btnMainProf.classList.remove('active');}
+    }
+    document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
   </script>
 </body>
 </html> 

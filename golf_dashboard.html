@@ -19,11 +19,22 @@
     .cal-green{background:#c8e6c9}
     .cal-yellow{background:#fff9c4}
     .cal-red{background:#ffcdd2}
+    .tabs-main button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#e0e0e0;cursor:pointer}
+    .tabs-main button.active{border-bottom-color:#0077cc;background:#fff}
   </style>
 </head>
 <body>
-  <h1>ゴルフ場ダッシュボード</h1>
-  <div id="welcome"></div>
+  <h1>ゴルフ場マイページ</h1>
+  <div class="tabs-main">
+    <button id="btnMainProf">プロフィール</button>
+    <button id="btnMainStat" class="active">ステータス</button>
+    <button id="logoutBtn" style="margin-left:auto;">Logout</button>
+  </div>
+  <div id="welcome" style="margin-top:10px;"></div>
+  <!-- Profile Tab -->
+  <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
+  <!-- Status Tab (existing content) -->
+  <div id="mainStatus">
 
   <!-- Tabs -->
   <div class="tabs">
@@ -74,12 +85,21 @@
       // get golf_courses row to fetch gid & name
       const { data: rows } = await supabase
         .from("golf_courses")
-        .select("gid,name")
+        .select("gid,name,contact_name,phone,perks")
         .eq("email", data.user.email)
         .single();
       if (!rows) { alert("プロフィール未登録です"); location.href="/profile.html?role=golf"; return; }
       gid = rows.gid;
       document.getElementById("welcome").textContent = `ようこそ ${rows.name} 様`;
+      // populate profile tab
+      const profHtml = `
+        <table style="border-collapse:collapse;width:100%;max-width:400px">
+          <tr><th style="text-align:left">ゴルフ場名</th><td>${rows.name}</td></tr>
+          <tr><th style="text-align:left">担当者名</th><td>${rows.contact_name??''}</td></tr>
+          <tr><th style="text-align:left">電話番号</th><td>${rows.phone??''}</td></tr>
+          <tr><th style="text-align:left">特典</th><td>${rows.perks??''}</td></tr>
+        </table>`;
+      document.getElementById('mainProfile').innerHTML = profHtml;
       loadBookings();
     });
 
@@ -174,6 +194,26 @@
         btnTab2.classList.add('active');btnTab1.classList.remove('active');
         renderCal();}
     }
+
+    // ---- main tabs ----
+    const mainProfileDiv=document.getElementById('mainProfile');
+    const mainStatusDiv=document.getElementById('mainStatus');
+    document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
+    document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
+    function switchMain(mode){
+      if(mode==='prof'){
+        mainProfileDiv.classList.remove('hidden');
+        mainStatusDiv.classList.add('hidden');
+        btnMainProf.classList.add('active');btnMainStat.classList.remove('active');
+      }else{
+        mainStatusDiv.classList.remove('hidden');
+        mainProfileDiv.classList.add('hidden');
+        btnMainStat.classList.add('active');btnMainProf.classList.remove('active');
+      }
+    }
+
+    // logout
+    document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
   </script>
 </body>
 </html> 
