@@ -27,8 +27,11 @@
     }
 
     header {
-      background-image: url("https://cdn.pixabay.com/photo/2016/07/11/15/43/golf-1509607_1280.jpg");
-      background-color: #1a3a1a; /* Fallback color */
+      /* Use a golf-themed gradient as primary background */
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      /* Try to load external images as overlay */
+      background-image: 
+          url("https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
