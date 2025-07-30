@@ -23,18 +23,49 @@
       font-family: "Helvetica Neue", Arial, sans-serif;
       color: var(--text-color);
       line-height: 1.6;
-      background:url('https://images.unsplash.com/photo-1502810190503-8300277746b2?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat fixed;
+      /* This background was being overridden by header, now removed */
     }
 
     header {
-      background: url("https://images.unsplash.com/photo-1502810190503-8300277746b2?auto=format&fit=crop&w=1400&q=80") center / cover no-repeat;
+      background: url("https://images.unsplash.com/photo-1502810190503-8300277746b2?auto=format&fit=crop&w=1500&q=80") center/cover no-repeat;
       color: var(--secondary-color);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      height: 60vh;
+      height: 100vh; /* Make header full screen */
       padding: 0 1rem;
+      position: relative; /* For overlay */
+      z-index: 1;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+      z-index: -1;
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 2;
+      background: var(--secondary-color); /* Make other sections have a white background */
+    }
+
+    /* Apply wrapper to sections that should not be part of the hero */
+    .features, .how-it-works, footer, .login-buttons {
+      /* These will be wrapped in the new content-wrapper div */
+    }
+
+    /* Adjust button styles for visibility on the image */
+    .login-buttons {
+      padding: 20px 0;
+      background: #ffffff; /* Give buttons a solid background */
+      text-align: center;
     }
 
     header .hero-content {
@@ -171,59 +202,60 @@
       <a href="#" class="btn-primary">Reserve a Caddy</a>
     </div>
   </header>
-<!-- Login / Sign-up ボタン -->
-<!-- ▼ ここに貼り替え ▼ -->
-<div style="display:flex; gap:20px; justify-content:center; margin:20px 0;">
-    <button onclick="location.href='login/?role=golf'"
-            style="padding:12px 24px; background:#006aad; color:#fff;
-                   border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
-      ゴルフ場でログイン
-    </button>
-  
-    <button onclick="location.href='login/?role=caddy'"
-            style="padding:12px 24px; background:#2f8f2f; color:#fff;
-                   border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
-      キャディでログイン
-    </button>
-  </div>
-  <!-- ▲ ここまで ▲ -->
-  <!-- Features Section -->
-  <section class="features">
-    <div class="container">
-      <div class="feature">
-        <h3>Fast Booking</h3>
-        <p>数タップでキャディを予約。時間を無駄にしません。</p>
-      </div>
-      <div class="feature">
-        <h3>Reliable Caddies</h3>
-        <p>経験豊富なキャディのみを厳選。安心してプレーに集中できます。</p>
-      </div>
-      <div class="feature">
-        <h3>Real-time Ratings</h3>
-        <p>リアルタイムの評価システムで常にサービス品質を維持。</p>
-      </div>
-    </div>
-  </section>
+<div class="content-wrapper">
+    <!-- Login / Sign-up ボタン -->
+    <div class="login-buttons" style="display:flex; gap:20px; justify-content:center; margin:20px 0;">
+        <button onclick="location.href='login/?role=golf'"
+                style="padding:12px 24px; background:#006aad; color:#fff;
+                       border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
+            ゴルフ場でログイン
+        </button>
 
-  <!-- How It Works Section -->
-  <section class="how-it-works">
-    <div class="container">
-      <h2>How it Works</h2>
-      <ol class="steps">
-        <li>ゴルフ場とキャディがプラットフォームに登録</li>
-        <li>ゴルフ場が必要な日程でキャディを予約</li>
-        <li>キャディに LINE 通知が届き、勤務確定</li>
-        <li>プレー当日：キャディが現地でサポート</li>
-        <li>勤務完了後、双方が完了ボタン＆評価</li>
-      </ol>
+        <button onclick="location.href='login/?role=caddy'"
+                style="padding:12px 24px; background:#2f8f2f; color:#fff;
+                       border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
+            キャディでログイン
+        </button>
     </div>
-  </section>
 
-  <!-- Footer -->
-  <footer>
-    <p>お問い合わせ: <a href="mailto:info@golfcaddyservice.com" style="color:#8bc34a;">info@golfcaddyservice.com</a></p>
-    <p>&copy; 2025 Golf-Caddy Matching Service. All rights reserved.</p>
-  </footer>
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="feature">
+                <h3>Fast Booking</h3>
+                <p>数タップでキャディを予約。時間を無駄にしません。</p>
+            </div>
+            <div class="feature">
+                <h3>Reliable Caddies</h3>
+                <p>経験豊富なキャディのみを厳選。安心してプレーに集中できます。</p>
+            </div>
+            <div class="feature">
+                <h3>Real-time Ratings</h3>
+                <p>リアルタイムの評価システムで常にサービス品質を維持。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How it Works</h2>
+            <ol class="steps">
+                <li>ゴルフ場とキャディがプラットフォームに登録</li>
+                <li>ゴルフ場が必要な日程でキャディを予約</li>
+                <li>キャディに LINE 通知が届き、勤務確定</li>
+                <li>プレー当日：キャディが現地でサポート</li>
+                <li>勤務完了後、双方が完了ボタン＆評価</li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>お問い合わせ: <a href="mailto:info@golfcaddyservice.com" style="color:#8bc34a;">info@golfcaddyservice.com</a></p>
+        <p>&copy; 2025 Golf-Caddy Matching Service. All rights reserved.</p>
+    </footer>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // 👉 あなたの Supabase 情報を貼り付け
