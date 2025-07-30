@@ -88,7 +88,12 @@
         .select("gid,name,contact_name,phone,perks")
         .eq("email", data.user.email)
         .single();
-      if (!rows) { alert("プロフィール未登録です"); location.href="/profile.html?role=golf"; return; }
+      if (!rows) {
+        document.getElementById('welcome').textContent = 'プロフィール未登録です (プロフィールタブから入力してください)';
+        // Hide status content until profile exists
+        document.getElementById('mainStatus').classList.add('hidden');
+        return;
+      }
       gid = rows.gid;
       document.getElementById("welcome").textContent = `ようこそ ${rows.name} 様`;
       // populate profile tab
