@@ -12,20 +12,24 @@
     .ok-circle{display:inline-block;width:16px;height:16px;border:2px solid #4caf50;border-radius:50%}
     .cal-ng{background:#eeeeee;cursor:pointer}
     .locked{opacity:0.5;cursor:not-allowed}
-    .tabs-main button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#e0e0e0;cursor:pointer}
+    .tabs-main button{padding:10px 14px;margin-right:6px;border:none;border-bottom:2px solid transparent;background:#e0e0e0;cursor:pointer;font-size:0.9rem}
     .tabs-main button.active{border-bottom-color:#0077cc;background:#fff}
   </style>
 </head>
 <body>
   <h1>キャディマイページ</h1>
   <div class="tabs-main">
-    <button id="btnMainProf">プロフィール</button>
-    <button id="btnMainStat" class="active">ステータス</button>
+    <button id="btnMainProf"   class="active">プロフィール</button>
+    <button id="btnMainShift">シフト</button>
+    <button id="btnMainStat">ステータス</button>
+    <button id="btnMainHist">履歴</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
   <div id="welcome" style="margin-top:10px;"></div>
-  <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
-  <div id="mainStatus">
+  <div id="mainProfile" style="margin-top:15px;"></div>
+  <div id="mainShift" class="hidden">
+  <div id="mainStatus" class="hidden" style="margin-top:15px;"></div>
+  <div id="mainHistory" class="hidden" style="margin-top:15px;"></div>
   <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
   <div style="display:flex;align-items:center;gap:10px;">
     <button id="prevMonth">◀</button>
@@ -52,14 +56,31 @@
       if(!data.user){location.href="/";return;}
       const role=data.user.user_metadata?.role;
       if(role!=="caddy"){location.href="dashboard.html";return;}
-      const { data: row } = await supabase.from('caddies').select('cid,name').eq('email',data.user.email).single();
+      const { data: row } = await supabase.from('caddies').select('cid,name,avatar_url,birth_date,phone,university,golf_years,caddy_years,appeal,rating,rate,trained_courses').eq('email',data.user.email).single();
       if(!row){alert('プロフィール未登録');location.href='/profile.html?role=caddy';return;}
       cid=row.cid;
       document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
+      // profile details
       document.getElementById('mainProfile').innerHTML=`
-        <table style='border-collapse:collapse;width:100%;max-width:400px'>
-          <tr><th style='text-align:left'>氏名</th><td>${row.name}</td></tr>
+        <div style='display:flex;gap:16px;align-items:center'>
+          <img src='${row.avatar_url??"https://placehold.co/100x100"}' style='width:100px;height:100px;border-radius:50%;object-fit:cover;'>
+          <h2>${row.name}</h2>
+        </div>
+        <table style='border-collapse:collapse;width:100%;max-width:480px;margin-top:10px'>
+          <tr><th style='text-align:left'>生年月日</th><td>${row.birth_date??"-"}</td></tr>
+          <tr><th style='text-align:left'>メール</th><td>${data.user.email}</td></tr>
+          <tr><th style='text-align:left'>電話番号</th><td>${row.phone??""}</td></tr>
+          <tr><th style='text-align:left'>所属大学</th><td>${row.university??""}</td></tr>
+          <tr><th style='text-align:left'>ゴルフ歴</th><td>${row.golf_years??0} 年</td></tr>
+          <tr><th style='text-align:left'>キャディ歴</th><td>${row.caddy_years??0} 年</td></tr>
+          <tr><th style='text-align:left'>アピール</th><td>${row.appeal??""}</td></tr>
         </table>`;
+
+      // status tab placeholder
+      document.getElementById('mainStatus').innerHTML=`
+        <p>評価: ${row.rating??0} ⭐️</p>
+        <p>キャディ単価: ${row.rate??'-'} 円</p>
+        <p>研修済ゴルフ場: ${(row.trained_courses??[]).join(', ')}</p>`;
       renderCal();
     });
 
@@ -123,12 +144,30 @@
 
     // main tabs
     const mainProf=document.getElementById('mainProfile');
+    const mainShift=document.getElementById('mainShift');
     const mainStat=document.getElementById('mainStatus');
-    document.getElementById('btnMainProf').onclick=()=>switchMain('p');
-    document.getElementById('btnMainStat').onclick=()=>switchMain('s');
-    function switchMain(m){
-      if(m==='p'){mainProf.classList.remove('hidden');mainStat.classList.add('hidden');btnMainProf.classList.add('active');btnMainStat.classList.remove('active');}
-      else{mainStat.classList.remove('hidden');mainProf.classList.add('hidden');btnMainStat.classList.add('active');btnMainProf.classList.remove('active');}
+    const mainHist=document.getElementById('mainHistory');
+    document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
+    document.getElementById('btnMainShift').onclick=()=>switchMain('shift');
+    document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
+    document.getElementById('btnMainHist').onclick=()=>switchMain('hist');
+    function switchMain(k){
+      [mainProf,mainShift,mainStat,mainHist].forEach(el=>el.classList.add('hidden'));
+      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainStat.classList.remove('active');btnMainHist.classList.remove('active');
+      if(k==='prof'){mainProf.classList.remove('hidden');btnMainProf.classList.add('active');}
+      if(k==='shift'){mainShift.classList.remove('hidden');btnMainShift.classList.add('active');}
+      if(k==='stat'){mainStat.classList.remove('hidden');btnMainStat.classList.add('active');}
+      if(k==='hist'){mainHist.classList.remove('hidden');btnMainHist.classList.add('active');loadHistory();}
+    }
+
+    async function loadHistory(){
+      const { data, error } = await supabase.from('bookings')
+        .select('date,gid,slots,caddy_rate')
+        .eq('status','done')
+        .contains('caddies', [cid]); // assumes bookings.caddies array
+      if(error){console.error(error);return;}
+      mainHist.innerHTML='<table style="border-collapse:collapse;width:100%"><thead><tr><th>日付</th><th>ゴルフ場</th><th>単価</th></tr></thead><tbody>'+
+        data.map(r=>`<tr><td>${r.date}</td><td>${r.gid}</td><td>${r.caddy_rate??'-'}</td></tr>`).join('')+ '</tbody></table>';
     }
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
   </script>
