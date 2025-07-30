@@ -67,7 +67,40 @@
       document.getElementById('mainStatus').innerHTML=`
         <p>評価: ${row.rating??0} ⭐️</p>
         <p>キャディ単価: ${row.rate??'-'} 円</p>
-        <p>研修済ゴルフ場: ${(row.trained_courses??[]).join(', ')}</p>`;
+        <p>研修済ゴルフ場: ${(row.trained_courses??[]).join(', ')}</p>
+        <button id='reqTrainingBtn'>研修を希望する</button>`;
+
+      // training request modal
+      document.body.insertAdjacentHTML('beforeend',`
+        <div id='trainModal' style='display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;'>
+          <div style='background:#fff;padding:20px;border-radius:6px;min-width:260px;'>
+            <h3>研修希望ゴルフ場選択</h3>
+            <select id='courseSelect' style='width:100%;margin-top:10px;'></select>
+            <div style='margin-top:15px;text-align:right;'>
+              <button id='cancelModal'>キャンセル</button>
+              <button id='sendReq' style='margin-left:10px;'>送信</button>
+            </div>
+          </div>
+        </div>`);
+
+      const modal=document.getElementById('trainModal');
+      document.getElementById('reqTrainingBtn').onclick=async()=>{
+        // fetch golf courses list
+        const { data:courses } = await supabase.from('golf_courses').select('gid,name,email');
+        const sel=document.getElementById('courseSelect');
+        sel.innerHTML=courses.map(c=>`<option value='${c.gid}' data-email='${c.email}'>${c.name}</option>`).join('');
+        modal.style.display='flex';
+      };
+      document.getElementById('cancelModal').onclick=()=>modal.style.display='none';
+      document.getElementById('sendReq').onclick=async()=>{
+        const sel=document.getElementById('courseSelect');
+        const gid=sel.value; const email=sel.options[sel.selectedIndex].dataset.email;
+        await supabase.from('training_requests').insert({cid,gid});
+        // rudimentary mailto fallback
+        window.open(`mailto:${email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${document.getElementById('pName')?.value||''} が研修を希望しています。`);
+        alert('研修希望を送信しました');
+        modal.style.display='none';
+      };
       // 初期はプロフィールタブ表示
       initialShowProfile = true;
     });
