@@ -74,7 +74,7 @@
 
       /* テーブル INSERT */
       const table = role === "golf" ? "golf_courses" : "caddies";
-      const { error } = await supabase.from(table).insert(data);
+      const { error } = await supabase.from(table).upsert(data, { onConflict: role === 'golf' ? 'gid' : 'cid' });
       if (error) { alert(error.message); return; }
 
       alert("登録完了！");
