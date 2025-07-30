@@ -72,7 +72,12 @@ if (mode === "signup") {
   res = await supabase.auth.signInWithPassword({ email, password });
 
   if (!res.error) {
-    // 既にプロフィールがある想定でダッシュボードへ
+    const user = res.data.user;
+    if (user?.user_metadata?.role !== role) {
+      alert("このアカウントは別の種類のログインページからアクセスしてください");
+      await supabase.auth.signOut();
+      return;
+    }
     location.href = "dashboard.html";
     return;
   }

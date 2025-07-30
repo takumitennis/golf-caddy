@@ -57,31 +57,18 @@
       const role=data.user.user_metadata?.role;
       if(role!=="caddy"){location.href="dashboard.html";return;}
       const { data: row } = await supabase.from('caddies').select('cid,name,avatar_url,birth_date,phone,university,golf_years,caddy_years,appeal,rating,rate,trained_courses').eq('email',data.user.email).single();
-      if(!row){alert('プロフィール未登録');location.href='/profile.html?role=caddy';return;}
-      cid=row.cid;
-      document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
-      // profile details
-      document.getElementById('mainProfile').innerHTML=`
-        <div style='display:flex;gap:16px;align-items:center'>
-          <img src='${row.avatar_url??"https://placehold.co/100x100"}' style='width:100px;height:100px;border-radius:50%;object-fit:cover;'>
-          <h2>${row.name}</h2>
-        </div>
-        <table style='border-collapse:collapse;width:100%;max-width:480px;margin-top:10px'>
-          <tr><th style='text-align:left'>生年月日</th><td>${row.birth_date??"-"}</td></tr>
-          <tr><th style='text-align:left'>メール</th><td>${data.user.email}</td></tr>
-          <tr><th style='text-align:left'>電話番号</th><td>${row.phone??""}</td></tr>
-          <tr><th style='text-align:left'>所属大学</th><td>${row.university??""}</td></tr>
-          <tr><th style='text-align:left'>ゴルフ歴</th><td>${row.golf_years??0} 年</td></tr>
-          <tr><th style='text-align:left'>キャディ歴</th><td>${row.caddy_years??0} 年</td></tr>
-          <tr><th style='text-align:left'>アピール</th><td>${row.appeal??""}</td></tr>
-        </table>`;
-
+      if(!row){
+        renderProfileForm();
+      } else {
+        cid=row.cid;
+        renderProfileDisplay(row);
+      }
       // status tab placeholder
       document.getElementById('mainStatus').innerHTML=`
         <p>評価: ${row.rating??0} ⭐️</p>
         <p>キャディ単価: ${row.rate??'-'} 円</p>
         <p>研修済ゴルフ場: ${(row.trained_courses??[]).join(', ')}</p>`;
-      renderCal();
+      switchMain('prof');
     });
 
     document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
@@ -155,7 +142,7 @@
       [mainProf,mainShift,mainStat,mainHist].forEach(el=>el.classList.add('hidden'));
       btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainStat.classList.remove('active');btnMainHist.classList.remove('active');
       if(k==='prof'){mainProf.classList.remove('hidden');btnMainProf.classList.add('active');}
-      if(k==='shift'){mainShift.classList.remove('hidden');btnMainShift.classList.add('active');}
+      if(k==='shift'){mainShift.classList.remove('hidden');btnMainShift.classList.add('active');renderCal();}
       if(k==='stat'){mainStat.classList.remove('hidden');btnMainStat.classList.add('active');}
       if(k==='hist'){mainHist.classList.remove('hidden');btnMainHist.classList.add('active');loadHistory();}
     }
@@ -170,6 +157,57 @@
         data.map(r=>`<tr><td>${r.date}</td><td>${r.gid}</td><td>${r.caddy_rate??'-'}</td></tr>`).join('')+ '</tbody></table>';
     }
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
+
+    function renderProfileDisplay(row){
+       document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
+       document.getElementById('mainProfile').innerHTML=`
+        <div style='display:flex;gap:16px;align-items:center'>
+          <img src='${row.avatar_url??"https://placehold.co/100x100"}' style='width:100px;height:100px;border-radius:50%;object-fit:cover;'>
+          <h2>${row.name}</h2>
+          <button id='editProfBtn'>編集</button>
+        </div>`;
+       document.getElementById('editProfBtn').onclick=renderProfileForm.bind(null,row);
+    }
+
+    function renderProfileForm(row={}){
+      document.getElementById('mainProfile').innerHTML=`
+        <form id='profForm' style='max-width:480px'>
+          <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
+          <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
+          <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
+          <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
+          <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
+          <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
+          <label>アピール<textarea id='pAppeal'>${row.appeal??""}</textarea></label><br>
+          <button type='submit'>保存</button>
+        </form>`;
+      document.getElementById('profForm').onsubmit=saveProfile.bind(null,row);
+    }
+
+    async function saveProfile(row,e){
+      e.preventDefault();
+      const payload={
+        name:document.getElementById('pName').value,
+        birth_date:document.getElementById('pBirth').value||null,
+        phone:document.getElementById('pPhone').value,
+        university:document.getElementById('pUni').value,
+        golf_years:parseInt(document.getElementById('pGolf').value)||0,
+        caddy_years:parseInt(document.getElementById('pCaddy').value)||0,
+        appeal:document.getElementById('pAppeal').value
+      };
+      if(row.cid){
+        const { error } = await supabase.from('caddies').update(payload).eq('cid',row.cid);
+        if(error){alert(error.message);return;}
+        renderProfileDisplay({...row,...payload});
+      } else {
+        const { data:userData } = await supabase.auth.getUser();
+        const newCid='c'+userData.user.id.slice(0,6);
+        const { error } = await supabase.from('caddies').insert({...payload,cid:newCid,email:userData.user.email});
+        if(error){alert(error.message);return;}
+        cid=newCid;
+        renderProfileDisplay({...payload,cid:newCid});
+      }
+    }
   </script>
 </body>
 </html> 
