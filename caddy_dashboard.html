@@ -39,7 +39,8 @@
       <button id="nextMonth">▶</button>
     </div>
     <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small>
+    <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
+    <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
   </div>
   <div id="mainStatus" class="hidden" style="margin-top:15px;"></div>
   <div id="mainHistory" class="hidden" style="margin-top:15px;"></div>
@@ -224,6 +225,7 @@
           <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
           <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
           <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
+          <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
           <label>アピール<textarea id='pAppeal'>${row.appeal??""}</textarea></label><br>
           <button type='submit'>保存</button>
         </form>`;
@@ -253,7 +255,18 @@
         cid=newCid;
         renderProfileDisplay({...payload,cid:newCid});
       }
+      const file=document.getElementById('pAvatar').files[0];
+      if(file){
+        const path=`avatars/${cid||'tmp_'+Date.now()}`;
+        await supabase.storage.from('avatars').upload(path,file,{upsert:true});
+        const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+        payload.avatar_url=urlData.publicUrl;
+      }
     }
+
+    document.getElementById('confirmShiftBtn').onclick=async()=>{
+      alert('シフトを確定しました');
+    };
   </script>
 </body>
 </html> 
