@@ -27,7 +27,7 @@
     }
 
     header {
-      background-image: url("https://images.pexels.com/photos/163338/golf-meadow-club-ball-163338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+      background-image: url("https://cdn.pixabay.com/photo/2016/07/11/15/43/golf-1509607_1280.jpg");
       background-color: #1a3a1a; /* Fallback color */
       background-size: cover;
       background-position: center;
@@ -42,16 +42,19 @@
       z-index: 1;
     }
 
+    /* Temporarily disable overlay to check if image loads */
+    /*
     header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.3); /* Dark overlay, slightly lighter */
-      z-index: -1;
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: -1;
     }
+    */
 
     .content-wrapper {
       position: relative;
