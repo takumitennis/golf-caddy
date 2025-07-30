@@ -27,14 +27,16 @@
     }
 
     header {
-      background: url("https://images.unsplash.com/photo-1502810190503-8300277746b2?auto=format&fit=crop&w=1500&q=80") center/cover no-repeat;
+      background-image: url("https://images.pexels.com/photos/163338/golf-meadow-club-ball-163338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+      background-color: #1a3a1a; /* Fallback color */
+      background-size: cover;
+      background-position: center;
       color: var(--secondary-color);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       height: 100vh; /* Make header full screen */
-      padding: 0 1rem;
       position: relative; /* For overlay */
       z-index: 1;
     }
