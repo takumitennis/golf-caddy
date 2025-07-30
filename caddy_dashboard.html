@@ -140,16 +140,21 @@
     document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
     document.getElementById('btnMainHist').onclick=()=>switchMain('hist');
     function switchMain(k){
-      [mainProf,mainShift,mainStat,mainHist].forEach(el=>el.classList.add('hidden'));
+      const map={prof:mainProf,shift:mainShift,stat:mainStat,hist:mainHist};
+      // hide all
+      Object.values(map).forEach(el=>{el.style.display='none';});
       btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainStat.classList.remove('active');btnMainHist.classList.remove('active');
-      if(k==='prof'){mainProf.classList.remove('hidden');btnMainProf.classList.add('active');}
-      if(k==='shift'){mainShift.classList.remove('hidden');btnMainShift.classList.add('active');renderCal();}
-      if(k==='stat'){mainStat.classList.remove('hidden');btnMainStat.classList.add('active');}
-      if(k==='hist'){mainHist.classList.remove('hidden');btnMainHist.classList.add('active');loadHistory();}
+
+      // show selected
+      if(map[k]){map[k].style.display='block';}
+      if(k==='prof') btnMainProf.classList.add('active');
+      if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
+      if(k==='stat') btnMainStat.classList.add('active');
+      if(k==='hist'){btnMainHist.classList.add('active');loadHistory();}
     }
 
-    // 初期呼び出し
-    if(typeof initialShowProfile!=='undefined') switchMain('prof');
+    // 初期表示
+    switchMain('prof');
 
     async function loadHistory(){
       const { data, error } = await supabase.from('bookings')
