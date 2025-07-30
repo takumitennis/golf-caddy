@@ -61,31 +61,28 @@
       let res;
 
 if (mode === "signup") {
-  /* ---------------- 新規登録 ---------------- */
+  /* ---------- 新規登録 ---------- */
   res = await supabase.auth.signUp({
-    email,
+    email: emailVal, // Use the value
     password,
-    options: { data: { role } }   // user_metadata に role を保存
+    options: { data: { role } }
   });
 
-  /* 🔑 メール確認を必須にしていない場合、ここで即セッションが返る */
   if (!res.error) {
     // セッションが無ければ自動ログイン
     if (!res.data.session) {
-      await supabase.auth.signInWithPassword({ email, password });
+      await supabase.auth.signInWithPassword({ email: emailVal, password }); // Use the value
     }
     location.href = "/profile.html?role=" + role;
     return;
   }
-
 } else {
-  /* ---------------- ログイン ---------------- */
-  res = await supabase.auth.signInWithPassword({ email, password });
-
+  /* ---------- ログイン ---------- */
+  res = await supabase.auth.signInWithPassword({ email: emailVal, password }); // Use the value
   if (!res.error) {
     const user = res.data.user;
-    if (user?.user_metadata?.role !== role) {
-      alert("このアカウントは別の種類のログインページからアクセスしてください");
+    if(user?.user_metadata?.role!==role){
+      alert('このアカウントは別の種類のログインページからアクセスしてください');
       await supabase.auth.signOut();
       return;
     }
