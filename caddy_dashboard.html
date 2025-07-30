@@ -68,7 +68,8 @@
         <p>評価: ${row.rating??0} ⭐️</p>
         <p>キャディ単価: ${row.rate??'-'} 円</p>
         <p>研修済ゴルフ場: ${(row.trained_courses??[]).join(', ')}</p>`;
-      switchMain('prof');
+      // 初期はプロフィールタブ表示
+      initialShowProfile = true;
     });
 
     document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
@@ -146,6 +147,9 @@
       if(k==='stat'){mainStat.classList.remove('hidden');btnMainStat.classList.add('active');}
       if(k==='hist'){mainHist.classList.remove('hidden');btnMainHist.classList.add('active');loadHistory();}
     }
+
+    // 初期呼び出し
+    if(typeof initialShowProfile!=='undefined') switchMain('prof');
 
     async function loadHistory(){
       const { data, error } = await supabase.from('bookings')
