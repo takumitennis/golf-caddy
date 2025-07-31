@@ -245,6 +245,11 @@
       color: var(--primary-color);
     }
 
+    .feature:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+
     /* How It Works */
     .how-it-works {
       padding: 4rem 1rem;
@@ -299,6 +304,92 @@
       padding: 2rem 1rem;
       font-size: 0.9rem;
     }
+
+    /* Detailed benefits sections */
+    .benefits-section {
+      padding: 4rem 0;
+      margin: 3rem 0;
+    }
+
+    .benefits-section:nth-of-type(1) {
+      background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    }
+
+    .benefits-section:nth-of-type(2) {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .benefits-section:nth-of-type(3) {
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    }
+
+    .benefits-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .benefits-header h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .benefits-header p {
+      font-size: 1.2rem;
+      color: #666;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .benefit-card {
+      background: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .benefit-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    }
+
+    .benefit-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .benefit-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .benefit-description {
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .golf-course-benefits .benefits-header h2 { color: #006aad; }
+    .golf-course-benefits .benefit-title { color: #006aad; }
+    .golf-course-benefits .benefit-icon { color: #006aad; }
+
+    .caddy-benefits .benefits-header h2 { color: var(--primary-color); }
+    .caddy-benefits .benefit-title { color: var(--primary-color); }
+    .caddy-benefits .benefit-icon { color: var(--primary-color); }
+
+    .user-benefits .benefits-header h2 { color: #8b5cf6; }
+    .user-benefits .benefit-title { color: #8b5cf6; }
+    .user-benefits .benefit-icon { color: #8b5cf6; }
+
+    /* Features Section */
 
     @media (max-width: 600px) {
       header {
@@ -465,17 +556,26 @@
     <!-- Features Section -->
     <section class="features">
         <div class="container">
-            <div class="feature">
-                <h3>Fast Booking</h3>
-                <p>数タップでキャディを予約。時間を無駄にしません。</p>
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: var(--text-color);">
+                3つの立場、それぞれにメリット
+            </h2>
+            <div class="feature" onclick="location.href='#golf-course-benefits'" style="cursor: pointer; transition: transform 0.3s ease;">
+                <div class="feature-icon" style="font-size: 3rem; margin-bottom: 1rem;">🏌️‍♂️</div>
+                <h3 style="color: #006aad; margin-bottom: 1rem;">ゴルフ場</h3>
+                <p>お客様のキャディ要望に応えられないということはもうありません</p>
+                <div class="learn-more" style="color: #006aad; margin-top: 1rem; font-weight: 600;">詳しく見る →</div>
             </div>
-            <div class="feature">
-                <h3>Reliable Caddies</h3>
-                <p>経験豊富なキャディのみを厳選。安心してプレーに集中できます。</p>
+            <div class="feature" onclick="location.href='#caddy-benefits'" style="cursor: pointer; transition: transform 0.3s ease;">
+                <div class="feature-icon" style="font-size: 3rem; margin-bottom: 1rem;">👨‍🎓</div>
+                <h3 style="color: #2f8f2f; margin-bottom: 1rem;">キャディ</h3>
+                <p>大好きなゴルフ場で経験を生かして働きましょう</p>
+                <div class="learn-more" style="color: #2f8f2f; margin-top: 1rem; font-weight: 600;">詳しく見る →</div>
             </div>
-            <div class="feature">
-                <h3>Real-time Ratings</h3>
-                <p>リアルタイムの評価システムで常にサービス品質を維持。</p>
+            <div class="feature" onclick="location.href='#user-benefits'" style="cursor: pointer; transition: transform 0.3s ease;">
+                <div class="feature-icon" style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+                <h3 style="color: #8b5cf6; margin-bottom: 1rem;">利用者</h3>
+                <p>キャディのいない接待・コンペとはおさらば</p>
+                <div class="learn-more" style="color: #8b5cf6; margin-top: 1rem; font-weight: 600;">詳しく見る →</div>
             </div>
         </div>
     </section>
@@ -492,6 +592,103 @@
                 <li>勤務完了後、双方が完了ボタン＆評価</li>
             </ol>
         </div>
+    </section>
+
+    <!-- Detailed benefits sections -->
+    <section class="benefits-section golf-course-benefits" id="golf-course-benefits">
+      <div class="container">
+        <div class="benefits-header">
+          <h2>ゴルフ場のメリット</h2>
+          <p>お客様のキャディ要望に確実に応え、サービス品質と顧客満足度を向上させることができます。</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">🎯</div>
+            <div class="benefit-title">確実なキャディ確保</div>
+            <div class="benefit-description">
+              お客様からキャディの依頼があった際、「キャディが不足している」と断る必要がありません。常に適切な人数のキャディを確保できるため、予約時の機会損失を防げます。
+            </div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">📈</div>
+            <div class="benefit-title">顧客満足度の向上</div>
+            <div class="benefit-description">
+              研修済みの質の高いキャディを提供することで、お客様のゴルフ体験が向上し、リピート率の増加と口コミによる新規顧客獲得が期待できます。
+            </div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">⚙️</div>
+            <div class="benefit-title">運営の効率化</div>
+            <div class="benefit-description">
+              キャディの予約・管理・評価をシステム化することで、人事管理コストを削減し、よりスムーズなゴルフ場運営が可能になります。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="benefits-section caddy-benefits" id="caddy-benefits">
+      <div class="container">
+        <div class="benefits-header">
+          <h2>キャディのメリット</h2>
+          <p>大好きなゴルフ場で経験とスキルを活かしながら、安定した収入を得ることができます。</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">💰</div>
+            <div class="benefit-title">安定した収入機会</div>
+            <div class="benefit-description">
+              複数のゴルフ場と提携することで、より多くの勤務機会を獲得できます。好きな時間に好きなゴルフ場で働くことができ、効率的に収入を得られます。
+            </div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">🎓</div>
+            <div class="benefit-title">スキルアップ機会</div>
+            <div class="benefit-description">
+              各ゴルフ場での研修プログラムを通じて、キャディとしてのスキルを向上させることができます。様々なコースでの経験により、プロフェッショナルとして成長できます。
+            </div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">🤝</div>
+            <div class="benefit-title">ネットワークの拡大</div>
+            <div class="benefit-description">
+              複数のゴルフ場、多様なお客様との接触を通じて、ゴルフ業界でのネットワークを構築できます。将来のキャリア発展にも役立ちます。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="benefits-section user-benefits" id="user-benefits">
+      <div class="container">
+        <div class="benefits-header">
+          <h2>利用者のメリット</h2>
+          <p>接待やコンペでキャディの心配をすることなく、質の高いゴルフ体験を楽しめます。</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">🎉</div>
+            <div class="benefit-title">安心の接待・コンペ</div>
+            <div class="benefit-description">
+              「キャディがいない」という理由で接待やコンペが台無しになることはありません。事前に確実にキャディを手配できるため、安心して重要なゴルフの予定を組めます。
+            </div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">⭐</div>
+            <div class="benefit-title">高品質なサービス</div>
+            <div class="benefit-description">
+              研修を受けた経験豊富なキャディがサポートするため、ゴルフのスコア向上や快適なラウンドが期待できます。プロフェッショナルなサービスを受けられます。
+            </div>
+          </div>
+          <div class="benefit-card">
+            <div class="benefit-icon">🕒</div>
+            <div class="benefit-title">時間の有効活用</div>
+            <div class="benefit-description">
+              キャディのサポートにより、クラブの準備や距離測定などに時間を取られることなく、ゴルフそのものやビジネス会話に集中できます。
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Footer -->
