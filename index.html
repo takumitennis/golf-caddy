@@ -70,41 +70,7 @@
       /* These will be wrapped in the new content-wrapper div */
     }
 
-    /* Login buttons responsive styling */
-    .login-buttons-header {
-      position: absolute;
-      top: 70px;
-      right: 20px;
-      display: flex;
-      gap: 12px;
-      z-index: 10;
-    }
 
-    .login-buttons-header button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-      transition: all 0.3s ease;
-    }
-
-    .login-buttons-header button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-
-    .golf-login-btn {
-      background: rgba(0,106,173,0.9) !important;
-      color: #fff !important;
-    }
-
-    .caddy-login-btn {
-      background: rgba(47,143,47,0.9) !important;
-      color: #fff !important;
-    }
 
     /* Navigation tabs styling */
     .top-nav {
@@ -133,13 +99,49 @@
       transition: all 0.3s ease;
       font-weight: 600;
       font-size: 1.1rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
       display: block;
       letter-spacing: 0.02em;
       font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
     }
 
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
 
+    /* Login section in navigation */
+    .login-section {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-left: 20px;
+    }
+
+    .nav-login-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .nav-login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .nav-login-btn.golf-login-btn {
+      background: rgba(0,106,173,0.8);
+    }
+
+    .nav-login-btn.caddy-login-btn {
+      background: rgba(47,143,47,0.8);
+    }
 
     /* Dropdown menu styling */
     .dropdown-menu {
@@ -173,7 +175,6 @@
       transition: all 0.3s ease;
       font-size: 0.95rem;
       font-weight: 500;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
@@ -320,14 +321,29 @@
       }
 
       .top-nav {
-        gap: 20px;
+        gap: 15px;
         padding: 12px 15px;
+        flex-wrap: wrap;
       }
 
       .nav-tab {
         padding: 8px 12px;
         font-size: 0.9rem;
         font-weight: 500;
+      }
+
+      .login-section {
+        margin-left: 0;
+        gap: 8px;
+        order: 1;
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
+      }
+
+      .nav-login-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
       }
 
       .dropdown-menu {
@@ -340,16 +356,7 @@
         font-size: 0.85rem;
       }
 
-      .login-buttons-header {
-        top: 55px;
-        right: 15px;
-        gap: 8px;
-      }
 
-      .login-buttons-header button {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-      }
 
       .container {
         padding: 1.5rem 1rem;
@@ -410,7 +417,7 @@
                 ゴルフ場の皆様
             </a>
             <div class="dropdown-menu">
-                <a href="#usage-examples" class="dropdown-item">活用例</a>
+                <a href="#booking-flow" class="dropdown-item">キャディ予約までのフロー</a>
                 <a href="#partner-golf-clubs" class="dropdown-item">提携ゴルフ部</a>
             </div>
         </div>
@@ -420,22 +427,21 @@
                 キャディの皆様
             </a>
             <div class="dropdown-menu">
-                <a href="#partner-golf-clubs" class="dropdown-item">提携ゴルフクラブ</a>
                 <a href="#participation-flow" class="dropdown-item">参加までのフロー</a>
+                <a href="#partner-golf-courses" class="dropdown-item">提携ゴルフ場</a>
             </div>
         </div>
+
+        <!-- Login buttons in navigation bar -->
+        <div class="nav-item login-section">
+            <button onclick="location.href='login/?role=golf'" class="nav-login-btn golf-login-btn">
+                ゴルフ場でログイン
+            </button>
+            <button onclick="location.href='login/?role=caddy'" class="nav-login-btn caddy-login-btn">
+                キャディでログイン
+            </button>
+        </div>
     </nav>
-
-    <!-- Login buttons in top right -->
-    <div class="login-buttons-header">
-        <button onclick="location.href='login/?role=golf'" class="golf-login-btn">
-            ゴルフ場でログイン
-        </button>
-
-        <button onclick="location.href='login/?role=caddy'" class="caddy-login-btn">
-            キャディでログイン
-        </button>
-    </div>
 
     <div class="hero-content">
       <h1 class="main-phrase animated-text">ゴルフ場に関わる全ての人を</h1>
