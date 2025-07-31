@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>キャディ予約フロー - Golf-Caddy Matching Service</title>
+  <style>
+    :root {
+      --primary-color: #2f8f2f;
+      --secondary-color: #ffffff;
+      --text-color: #333333;
+      --bg-light: #f9f9f9;
+      --max-width: 1200px;
+      --accent-blue: #3b82f6;
+      --accent-orange: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-color);
+      line-height: 1.6;
+      background: var(--bg-light);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #228B22 100%);
+      color: var(--secondary-color);
+      padding: 3rem 0;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 1.3rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin: 2rem 0;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #1f5f1f;
+    }
+
+    .flow-container {
+      margin: 3rem 0;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      margin-bottom: 3rem;
+      background: var(--secondary-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .flow-step:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    }
+
+    .flow-step:nth-child(1) { border-left: 6px solid var(--accent-blue); }
+    .flow-step:nth-child(2) { border-left: 6px solid var(--accent-orange); }
+    .flow-step:nth-child(3) { border-left: 6px solid var(--accent-purple); }
+    .flow-step:nth-child(4) { border-left: 6px solid var(--accent-green); }
+
+    .step-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+
+    .step-icon.blue { background: linear-gradient(135deg, var(--accent-blue), #60a5fa); }
+    .step-icon.orange { background: linear-gradient(135deg, var(--accent-orange), #fbbf24); }
+    .step-icon.purple { background: linear-gradient(135deg, var(--accent-purple), #a78bfa); }
+    .step-icon.green { background: linear-gradient(135deg, var(--accent-green), #34d399); }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-number {
+      background: rgba(47, 143, 47, 0.1);
+      color: var(--primary-color);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 0.8rem;
+    }
+
+    .step-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    .step-description {
+      font-size: 1.1rem;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .arrow-down {
+      text-align: center;
+      margin: 1.5rem 0;
+      font-size: 2rem;
+      color: var(--primary-color);
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    .training-note {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 3rem 0;
+      text-align: center;
+    }
+
+    .training-note p {
+      font-size: 0.95rem;
+      color: #92400e;
+      margin-bottom: 0.5rem;
+    }
+
+    .training-link {
+      color: #b45309;
+      font-weight: 600;
+      text-decoration: underline;
+      transition: color 0.3s ease;
+    }
+
+    .training-link:hover {
+      color: #92400e;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2.2rem;
+      }
+
+      .flow-step {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .step-icon {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+      }
+
+      .step-title {
+        font-size: 1.5rem;
+      }
+
+      .step-description {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h1>キャディ予約フロー</h1>
+      <p>簡単4ステップでプロフェッショナルなキャディサービスをご利用いただけます</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <a href="/" class="back-link">← ホームに戻る</a>
+    
+    <div class="flow-container">
+      <div class="flow-step">
+        <div class="step-icon blue">👤</div>
+        <div class="step-content">
+          <div class="step-number">STEP 1</div>
+          <h2 class="step-title">会員登録</h2>
+          <p class="step-description">
+            ゴルフ場として初回登録を行います。ゴルフ場名、担当者情報、連絡先、キャディへの特典内容などを入力いただきます。登録完了後、専用のゴルフ場IDが発行されます。
+          </p>
+        </div>
+      </div>
+
+      <div class="arrow-down">⬇️</div>
+
+      <div class="flow-step">
+        <div class="step-icon orange">📅</div>
+        <div class="step-content">
+          <div class="step-number">STEP 2</div>
+          <h2 class="step-title">カレンダーから空き情報を確認し予約</h2>
+          <p class="step-description">
+            専用ダッシュボードからカレンダー形式でキャディの空き状況をリアルタイムで確認できます。希望の日時と必要な人数を選択して予約リクエストを送信します。空き状況は色分けで分かりやすく表示されます。
+          </p>
+        </div>
+      </div>
+
+      <div class="arrow-down">⬇️</div>
+
+      <div class="flow-step">
+        <div class="step-icon purple">✉️</div>
+        <div class="step-content">
+          <div class="step-number">STEP 3</div>
+          <h2 class="step-title">予約確定後に決定したキャディ情報が届く</h2>
+          <p class="step-description">
+            予約が確定次第、アサインされたキャディの詳細情報（名前、経験年数、評価、連絡先など）をメールでお送りします。事前にキャディのプロフィールを確認できるので、安心してお迎えいただけます。
+          </p>
+        </div>
+      </div>
+
+      <div class="arrow-down">⬇️</div>
+
+      <div class="flow-step">
+        <div class="step-icon green">⛳</div>
+        <div class="step-content">
+          <div class="step-number">STEP 4</div>
+          <h2 class="step-title">当日キャディが来て、お客様とラウンド</h2>
+          <p class="step-description">
+            当日は研修を受けたプロフェッショナルなキャディがゴルフ場にお伺いします。お客様のラウンドをサポートし、快適なゴルフ体験を提供いたします。ラウンド終了後は評価システムで品質向上に努めています。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="training-note">
+      <p>※ キャディには本番前に研修を受けてもらう必要があります。</p>
+      <a href="training-program.html" class="training-link">研修についてはこちら</a>
+    </div>
+  </div>
+</body>
+</html> 
