@@ -70,6 +70,42 @@
       /* These will be wrapped in the new content-wrapper div */
     }
 
+    /* Login buttons responsive styling */
+    .login-buttons-header {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .login-buttons-header button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .login-buttons-header button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .golf-login-btn {
+      background: rgba(0,106,173,0.9) !important;
+      color: #fff !important;
+    }
+
+    .caddy-login-btn {
+      background: rgba(47,143,47,0.9) !important;
+      color: #fff !important;
+    }
+
     /* Adjust button styles for visibility on the image */
     .login-buttons {
       padding: 20px 0;
@@ -200,11 +236,47 @@
         padding: 1.5rem 1rem;
       }
     }
+
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 2rem;
+      }
+
+      .hero-content p {
+        font-size: 1rem;
+      }
+
+      .login-buttons-header {
+        top: 15px;
+        right: 15px;
+        gap: 8px;
+      }
+
+      .login-buttons-header button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+
+      .container {
+        padding: 1.5rem 1rem;
+      }
+    }
   </style>
 </head>
 <body>
   <!-- Hero Section -->
   <header>
+    <!-- Login buttons in top right -->
+    <div class="login-buttons-header">
+        <button onclick="location.href='login/?role=golf'" class="golf-login-btn">
+            ゴルフ場でログイン
+        </button>
+
+        <button onclick="location.href='login/?role=caddy'" class="caddy-login-btn">
+            キャディでログイン
+        </button>
+    </div>
+
     <div class="hero-content">
       <h1>Golf-Caddy Matching Service</h1>
       <p>ゴルフ場と信頼できるキャディをスピーディにマッチング</p>
@@ -212,21 +284,6 @@
     </div>
   </header>
 <div class="content-wrapper">
-    <!-- Login / Sign-up ボタン -->
-    <div class="login-buttons" style="display:flex; gap:20px; justify-content:center; margin:20px 0;">
-        <button onclick="location.href='login/?role=golf'"
-                style="padding:12px 24px; background:#006aad; color:#fff;
-                       border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
-            ゴルフ場でログイン
-        </button>
-
-        <button onclick="location.href='login/?role=caddy'"
-                style="padding:12px 24px; background:#2f8f2f; color:#fff;
-                       border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
-            キャディでログイン
-        </button>
-    </div>
-
     <!-- Features Section -->
     <section class="features">
         <div class="container">
