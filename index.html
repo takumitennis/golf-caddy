@@ -79,12 +79,18 @@
       left: 0;
       right: 0;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
       gap: 50px;
       padding: 18px 20px;
       background: rgba(0,0,0,0.4);
       backdrop-filter: blur(12px);
       z-index: 5;
+    }
+
+    .nav-main {
+      display: flex;
+      gap: 50px;
     }
 
     .nav-item {
@@ -115,7 +121,6 @@
       display: flex;
       gap: 12px;
       align-items: center;
-      margin-left: 20px;
     }
 
     .nav-login-btn {
@@ -406,34 +411,36 @@
   <header>
     <!-- Navigation tabs in top -->
     <nav class="top-nav">
-        <div class="nav-item">
-            <a href="#caddy-plus" class="nav-tab">
-                キャディタス
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#golf-courses" class="nav-tab">
-                ゴルフ場の皆様
-            </a>
-            <div class="dropdown-menu">
-                <a href="#booking-flow" class="dropdown-item">キャディ予約までのフロー</a>
-                <a href="#partner-golf-clubs" class="dropdown-item">提携ゴルフ部</a>
+        <div class="nav-main">
+            <div class="nav-item">
+                <a href="#caddy-plus" class="nav-tab">
+                    キャディタス
+                </a>
             </div>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#caddies" class="nav-tab">
-                キャディの皆様
-            </a>
-            <div class="dropdown-menu">
-                <a href="#participation-flow" class="dropdown-item">参加までのフロー</a>
-                <a href="#partner-golf-courses" class="dropdown-item">提携ゴルフ場</a>
+            
+            <div class="nav-item">
+                <a href="#golf-courses" class="nav-tab">
+                    ゴルフ場の皆様
+                </a>
+                <div class="dropdown-menu">
+                    <a href="#booking-flow" class="dropdown-item">キャディ予約フロー</a>
+                    <a href="#partner-golf-clubs" class="dropdown-item">提携ゴルフ部</a>
+                </div>
+            </div>
+            
+            <div class="nav-item">
+                <a href="#caddies" class="nav-tab">
+                    キャディの皆様
+                </a>
+                <div class="dropdown-menu">
+                    <a href="#participation-flow" class="dropdown-item">参加までのフロー</a>
+                    <a href="partner-golf-courses.html" class="dropdown-item">提携ゴルフ場</a>
+                </div>
             </div>
         </div>
 
-        <!-- Login buttons in navigation bar -->
-        <div class="nav-item login-section">
+        <!-- Login buttons aligned to right -->
+        <div class="login-section">
             <button onclick="location.href='login/?role=golf'" class="nav-login-btn golf-login-btn">
                 ゴルフ場でログイン
             </button>

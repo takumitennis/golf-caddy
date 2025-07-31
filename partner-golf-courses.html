@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>提携ゴルフ場 - Golf-Caddy Matching Service</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary-color: #2f8f2f;
+      --secondary-color: #ffffff;
+      --text-color: #333333;
+      --bg-light: #f9f9f9;
+      --max-width: 1200px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-color);
+      line-height: 1.6;
+      background: var(--bg-light);
+    }
+
+    .header {
+      background: var(--primary-color);
+      color: var(--secondary-color);
+      padding: 2rem 0;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin: 2rem 0;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #1f5f1f;
+    }
+
+    .golf-courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .golf-course-card {
+      background: var(--secondary-color);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .golf-course-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .course-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .course-info {
+      margin-bottom: 1rem;
+    }
+
+    .course-info-label {
+      font-weight: 600;
+      color: #666;
+      display: inline-block;
+      min-width: 80px;
+    }
+
+    .course-address {
+      color: #555;
+      margin-bottom: 0.5rem;
+    }
+
+    .course-perks {
+      background: #f0f8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .course-perks h4 {
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .course-description {
+      color: #666;
+      line-height: 1.7;
+      margin-top: 1rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    .no-courses {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .golf-courses-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .golf-course-card {
+        padding: 1.5rem;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h1>提携ゴルフ場</h1>
+      <p>キャディタスと提携しているゴルフ場の一覧です</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <a href="/" class="back-link">← ホームに戻る</a>
+    
+    <div id="loading" class="loading">
+      ゴルフ場情報を読み込み中...
+    </div>
+
+    <div id="golf-courses-container" class="golf-courses-grid" style="display: none;">
+      <!-- Golf courses will be populated here -->
+    </div>
+
+    <div id="no-courses" class="no-courses" style="display: none;">
+      まだ提携ゴルフ場の登録がありません。
+    </div>
+  </div>
+
+  <script>
+    // Initialize Supabase
+    const supabaseUrl = 'https://vqjxajzaasuqfgvhvxci.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanoaYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE5MDQ3MTQsImV4cCI6MjA0NzQ4MDcxNH0.7YWcH2PmXtR2rSFVHCwePWUH0a3_nDQh6o1C7oy7rvk';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function loadGolfCourses() {
+      try {
+        const { data: golfCourses, error } = await supabase
+          .from('golf_courses')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const loadingElement = document.getElementById('loading');
+        const containerElement = document.getElementById('golf-courses-container');
+        const noCoursesElement = document.getElementById('no-courses');
+
+        loadingElement.style.display = 'none';
+
+        if (error) {
+          throw error;
+        }
+
+        if (!golfCourses || golfCourses.length === 0) {
+          noCoursesElement.style.display = 'block';
+          return;
+        }
+
+        containerElement.style.display = 'grid';
+        
+        golfCourses.forEach(course => {
+          const courseCard = createGolfCourseCard(course);
+          containerElement.appendChild(courseCard);
+        });
+
+      } catch (error) {
+        console.error('Error loading golf courses:', error);
+        document.getElementById('loading').textContent = 'ゴルフ場情報の読み込みに失敗しました。';
+      }
+    }
+
+    function createGolfCourseCard(course) {
+      const card = document.createElement('div');
+      card.className = 'golf-course-card';
+      
+      card.innerHTML = `
+        <div class="course-name">${course.name || 'ゴルフ場名未設定'}</div>
+        
+        <div class="course-info">
+          <span class="course-info-label">担当者:</span>
+          ${course.contact_name || '未設定'}
+        </div>
+        
+        <div class="course-info">
+          <span class="course-info-label">電話:</span>
+          ${course.phone || '未設定'}
+        </div>
+        
+        <div class="course-info">
+          <span class="course-info-label">メール:</span>
+          ${course.email || '未設定'}
+        </div>
+        
+        ${course.perks ? `
+          <div class="course-perks">
+            <h4>🎁 キャディ特典</h4>
+            <p>${course.perks}</p>
+          </div>
+        ` : ''}
+        
+        <div class="course-description">
+          登録日: ${new Date(course.created_at).toLocaleDateString('ja-JP')}
+        </div>
+      `;
+      
+      return card;
+    }
+
+    // Load golf courses when page loads
+    document.addEventListener('DOMContentLoaded', loadGolfCourses);
+  </script>
+</body>
+</html> 
