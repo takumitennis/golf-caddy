@@ -31,7 +31,7 @@
       background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
       /* Try to load external images as overlay */
       background-image: 
-          url("https://media.istockphoto.com/id/503286535/ja/%E3%82%B9%E3%83%88%E3%83%83%E3%82%AF%E3%83%95%E3%82%A9%E3%83%88/%E3%82%B4%E3%83%AB%E3%83%95%E3%82%A1%E3%83%BC%E3%82%AD%E3%83%A3%E3%83%87%E3%82%A3%E3%83%BC%E4%B8%8A%E3%81%A3%E3%81%9F%E3%83%95%E3%82%A7%E3%82%A2%E3%82%A6%E3%82%A7%E3%82%A4.jpg?s=1024x1024&w=0&k=20&c=IpeSvH8gB8r3TNj3Sdo4gneQrgFGkiwkc9JGXW6nIVI=");
+          url("https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -73,7 +73,7 @@
     /* Login buttons responsive styling */
     .login-buttons-header {
       position: absolute;
-      top: 20px;
+      top: 70px;
       right: 20px;
       display: flex;
       gap: 12px;
@@ -104,6 +104,35 @@
     .caddy-login-btn {
       background: rgba(47,143,47,0.9) !important;
       color: #fff !important;
+    }
+
+    /* Navigation tabs styling */
+    .top-nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 15px 20px;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+
+    .nav-tab {
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
     }
 
     /* Adjust button styles for visibility on the image */
@@ -246,8 +275,18 @@
         font-size: 1rem;
       }
 
+      .top-nav {
+        gap: 20px;
+        padding: 10px 15px;
+      }
+
+      .nav-tab {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+      }
+
       .login-buttons-header {
-        top: 15px;
+        top: 55px;
         right: 15px;
         gap: 8px;
       }
@@ -266,6 +305,19 @@
 <body>
   <!-- Hero Section -->
   <header>
+    <!-- Navigation tabs in top -->
+    <nav class="top-nav">
+        <a href="#caddy-plus" class="nav-tab">
+            キャディ＋
+        </a>
+        <a href="#partner-golf-courses" class="nav-tab">
+            提携ゴルフ場
+        </a>
+        <a href="#partner-golf-clubs" class="nav-tab">
+            提携ゴルフ部
+        </a>
+    </nav>
+
     <!-- Login buttons in top right -->
     <div class="login-buttons-header">
         <button onclick="location.href='login/?role=golf'" class="golf-login-btn">
