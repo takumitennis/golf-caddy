@@ -23,33 +23,47 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
     );
 
-    // 現在のユーザー取得
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session && session.user) {
-            const user = session.user;
-            const role = user.user_metadata?.role || "guest";
-            let table = role === "golf" ? "golf_courses" : "caddies";
+    // ログイン後の振り分け処理
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
 
-            let { data: prof, error } = await supabase
-                .from(table)
-                .select("email")
-                .eq("email", user.email)
-                .single();
-
-            if (prof) {
-                if (role === "golf") {
-                    window.location.href = "golf_dashboard.html";
-                } else if (role === "caddy") {
-                    window.location.href = "caddy_dashboard.html";
-                }
-            } else {
-                // profile.htmlにroleパラメータを渡す
-                window.location.href = `profile.html?role=${role}`;
-            }
-        } else {
-            window.location.href = "/";
+      if (user) {
+        const role = user.user_metadata?.role;
+        if (!role || role === 'guest') {
+          // 役割がない場合はホームページに戻す
+          window.location.href = "/";
+          return;
         }
-    });
+
+        const table = role === "golf" ? "golf_courses" : "caddies";
+        const { data: profile, error } = await supabase
+          .from(table)
+          .select('email')
+          .eq('email', user.email)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+          window.location.href = "/"; // エラー時も安全にホームへ
+          return;
+        }
+
+        if (profile) {
+          // プロフィールあり: 各ダッシュボードへ
+          if (role === "golf") {
+            window.location.href = "golf_dashboard.html";
+          } else {
+            window.location.href = "caddy_dashboard.html";
+          }
+        } else {
+          // プロフィールなし: 各情報入力画面へ
+          window.location.href = `profile.html?role=${role}`;
+        }
+      } else {
+        // 未ログイン: ホームページへ
+        window.location.href = "/";
+      }
+    })();
 
     // ログアウト処理
     document.getElementById("logout").onclick = async () => {
