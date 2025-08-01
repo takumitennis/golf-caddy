@@ -102,26 +102,26 @@
           document.getElementById("pass").classList.add("error");
         } else {
           alert("ログインしました");
-          location.href = "dashboard.html";
+          // 絶対パスでダッシュボードハブへ
+          window.location.href = "/dashboard.html";
         }
       } else {
+        // 新規登録フロー
         const tempPassword = Math.random().toString(36).slice(-8) + "Tmp123!";
         try {
-          const res = await supabase.auth.signUp({ 
+          const { data, error } = await supabase.auth.signUp({ 
             email, 
             password: tempPassword,
             options: { data: { role: role } }
           });
           
-          if (res.error) {
-            console.error("Signup error:", res.error);
-            alert("登録に失敗しました: " + res.error.message);
-            document.getElementById("email").classList.add("error");
-            return;
+          if (error) {
+            throw error;
           }
           
-          alert("登録が完了しました。最初の情報入力画面に遷移します。");
-          location.href = "dashboard.html"; // 登録後もdashboardへ
+          alert("登録が完了しました。プロフィール情報入力画面に遷移します。");
+          // 絶対パスで直接プロフィール画面へ
+          window.location.href = `/profile.html?role=${role}`;
           
         } catch (error) {
           console.error("Registration error:", error);
