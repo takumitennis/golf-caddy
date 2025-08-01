@@ -6,11 +6,11 @@
   <title>Login / Sign-up</title>
   <style>
     body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa;display:flex;justify-content:center;align-items:flex-start;padding-top:60px}
-    .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;width:90%;max-width:380px;padding:32px 24px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+    .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;width:90%;max-width:380px;padding:32px 32px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
     h2{margin:0 0 24px;font-size:1.25rem;color:#004b8d;border-left:4px solid #004b8d;padding-left:8px}
     label{display:block;margin-top:18px;font-weight:600}
-    input{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:4px;font-size:1rem}
-    input:invalid{border-color:#e53935;background:#ffebee}
+    input{width:calc(100% - 20px);padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:4px;font-size:1rem}
+    input.error{border-color:#e53935;background:#ffebee}
     .err{color:#e53935;font-size:.85rem;margin-top:4px;display:none}
     button{width:100%;margin-top:26px;padding:12px;border:none;border-radius:4px;background:#ff7043;color:#fff;font-size:1rem;cursor:pointer}
     small{display:block;margin-top:14px;color:#004b8d;text-align:right;font-size:.85rem}
@@ -46,57 +46,67 @@
 
     toggle.onclick = () => {
       mode  = mode === "login" ? "signup" : "login";
-      title.textContent = mode === "login" ? "Login" : "Sign-up";
-      toggle.textContent = mode === "login" ? "Create new account" : "I have an account";
+      title.textContent = mode === "login" ? "ログイン" : "新規登録";
+      toggle.textContent = mode === "login" ? "新規登録はこちら" : "ログインはこちら";
     };
 
     form.onsubmit = async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email");
-      const emailVal=email.value;
-      document.getElementById('errEmail').style.display = emailVal? 'none':'block';
-      if(!emailVal){return;}
+      
+      // エラークラスをリセット
+      document.getElementById("email").classList.remove("error");
+      document.getElementById("pass").classList.remove("error");
+      
+      const email = document.getElementById("email").value;
       const password = document.getElementById("pass").value;
+      
+      // バリデーション
+      let hasError = false;
+      if (!email) {
+        document.getElementById("email").classList.add("error");
+        hasError = true;
+      }
+      if (!password) {
+        document.getElementById("pass").classList.add("error");
+        hasError = true;
+      }
+      
+      if (hasError) {
+        alert("全ての項目を入力してください");
+        return;
+      }
 
-      let res;
-
-if (mode === "signup") {
-  /* ---------------- 新規登録 ---------------- */
-  res = await supabase.auth.signUp({
-    email: emailVal, // Use the value, not the element
-    password,
-    options: { data: { role } }   // user_metadata に role を保存
-  });
-
-  /* 🔑 メール確認を必須にしていない場合、ここで即セッションが返る */
-  if (!res.error) {
-    // セッションが無ければ自動ログイン
-    if (!res.data.session) {
-      await supabase.auth.signInWithPassword({ email: emailVal, password }); // Use the value
-    }
-    location.href = "/profile.html?role=" + role;
-    return;
-  }
-
-} else {
-  /* ---------------- ログイン ---------------- */
-  res = await supabase.auth.signInWithPassword({ email: emailVal, password }); // Use the value
-
-  if (!res.error) {
-    const user = res.data.user;
-    if (user?.user_metadata?.role !== role) {
-      alert("このアカウントは別の種類のログインページからアクセスしてください");
-      await supabase.auth.signOut();
-      return;
-    }
-    location.href = "dashboard.html";
-    return;
-  }
-}
-
-/* ----- ここに来るのはエラー時のみ ----- */
-alert(res.error?.message || "Unknown error");
-};
+      if (mode === "login") {
+        const res = await supabase.auth.signInWithPassword({ email, password });
+        if (res.error) {
+          alert("ログインに失敗しました: " + res.error.message);
+          document.getElementById("email").classList.add("error");
+          document.getElementById("pass").classList.add("error");
+        } else {
+          alert("ログインしました");
+          location.href = "dashboard.html";
+        }
+      } else {
+        const res = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: { role: role }
+          }
+        });
+        if (res.error) {
+          alert("登録に失敗しました: " + res.error.message);
+          document.getElementById("email").classList.add("error");
+          document.getElementById("pass").classList.add("error");
+        } else {
+          if (!res.data.session) {
+            await supabase.auth.signInWithPassword({ email, password });
+          }
+          alert("登録が完了しました");
+          location.href = "profile.html";
+        }
+      }
+    };
   </script>
 </body>
 </html>
