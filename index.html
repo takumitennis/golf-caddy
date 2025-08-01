@@ -337,8 +337,18 @@
     }
 
     .benefits-section.caddy-benefits {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      background-image: url('images/キャディ.jpg');
+      background: url('images/キャディ.jpg') center/cover no-repeat fixed;
+    }
+
+    .benefits-section.caddy-benefits::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
     }
 
     .benefits-section.golfer-benefits {
