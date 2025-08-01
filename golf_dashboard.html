@@ -100,26 +100,32 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
     );
 
-    let gid;
-    // 1. Check login & role
+    let gid = null;
+    let isInitialized = false;
+    
+    // 1. Check login & role and initialize everything
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { location.href = "/"; return; }
       const role = data.user.user_metadata?.role;
       if (role !== "golf") { location.href = "dashboard.html"; return; }
+      
       // get golf_courses row to fetch gid & name
       const { data: rows } = await supabase
         .from("golf_courses")
         .select("gid,name,contact_name,phone,perks")
         .eq("email", data.user.email)
         .single();
+        
       if (!rows) {
         document.getElementById('welcome').textContent = 'プロフィール未登録です (プロフィールタブから入力してください)';
         // Hide status content until profile exists
         document.getElementById('mainStatus').classList.add('hidden');
         return;
       }
+      
       gid = rows.gid;
       document.getElementById("welcome").textContent = `ようこそ ${rows.name} 様`;
+      
       // populate profile tab
       const profHtml = `
         <table style="border-collapse:collapse;width:100%;max-width:400px">
@@ -129,7 +135,12 @@
           <tr><th style="text-align:left">特典</th><td>${rows.perks??''}</td></tr>
         </table>`;
       document.getElementById('mainProfile').innerHTML = profHtml;
-      loadBookings();
+      
+      await loadBookings();
+      
+      // Initialize all event listeners after gid is set
+      initializeEventListeners();
+      isInitialized = true;
     });
 
     // 2. load bookings
@@ -160,26 +171,50 @@
       loadBookings();
     };
 
-    // --- Tabs logic ---
-    const tab1=document.getElementById('tab1');
-    const tab2=document.getElementById('tab2');
-    const tab3=document.getElementById('tab3');
-    const tab4=document.getElementById('tab4');
-    const btnTab1=document.getElementById('btnTab1');
-    const btnTab2=document.getElementById('btnTab2');
-    const btnTab3=document.getElementById('btnTab3');
-    const btnTab4=document.getElementById('btnTab4');
-    
-    document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
-    document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
-    document.getElementById('btnTab3').onclick=()=>{switchTab(3)};
-    document.getElementById('btnTab4').onclick=()=>{switchTab(4)};
+    // Initialize all event listeners after gid is available
+    function initializeEventListeners() {
+      // --- Tabs logic ---
+      const tab1=document.getElementById('tab1');
+      const tab2=document.getElementById('tab2');
+      const tab3=document.getElementById('tab3');
+      const tab4=document.getElementById('tab4');
+      const btnTab1=document.getElementById('btnTab1');
+      const btnTab2=document.getElementById('btnTab2');
+      const btnTab3=document.getElementById('btnTab3');
+      const btnTab4=document.getElementById('btnTab4');
+      
+      document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
+      document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
+      document.getElementById('btnTab3').onclick=()=>{switchTab(3)};
+      document.getElementById('btnTab4').onclick=()=>{switchTab(4)};
 
-    // --- Calendar logic ---
+      // --- Calendar logic ---
+      document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
+      document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+      
+      // Training calendar navigation
+      document.getElementById('prevTrainingMonth').onclick=()=>{
+        if(--trainingCalMonth<0){trainingCalMonth=11;trainingCalYear--;} 
+        renderTrainingCal();
+      };
+      document.getElementById('nextTrainingMonth').onclick=()=>{
+        if(++trainingCalMonth>11){trainingCalMonth=0;trainingCalYear++;} 
+        renderTrainingCal();
+      };
+
+      // ---- main tabs ----
+      const mainProfileDiv=document.getElementById('mainProfile');
+      const mainStatusDiv=document.getElementById('mainStatus');
+      document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
+      document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
+      
+      // logout
+      document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
+    }
+
+    // --- Calendar variables (moved outside initializeEventListeners) ---
     let calMonth = new Date().getMonth();
     let calYear = new Date().getFullYear();
-    document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
-    document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
 
     async function renderCal(){
       const first = new Date(calYear,calMonth,1);
@@ -224,19 +259,9 @@
         table.appendChild(row);
       }
     }
-    // Training calendar variables
+    // Training calendar variables (moved outside initializeEventListeners)
     let trainingCalMonth = new Date().getMonth();
     let trainingCalYear = new Date().getFullYear();
-    
-    // Training calendar navigation
-    document.getElementById('prevTrainingMonth').onclick=()=>{
-      if(--trainingCalMonth<0){trainingCalMonth=11;trainingCalYear--;} 
-      renderTrainingCal();
-    };
-    document.getElementById('nextTrainingMonth').onclick=()=>{
-      if(++trainingCalMonth>11){trainingCalMonth=0;trainingCalYear++;} 
-      renderTrainingCal();
-    };
 
     // render calendar on tab switch
     function switchTab(idx){
@@ -436,8 +461,6 @@
       }
     };
 
-    // logout
-    document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
   </script>
 </body>
 </html> 

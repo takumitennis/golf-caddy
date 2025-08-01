@@ -81,17 +81,15 @@
         }
       }
 
-      // ステータスタブのHTMLを生成
-      document.getElementById('mainStatus').innerHTML = `
-        <div class="card">
-          <h3>ステータス</h3>
-          <p><strong>今までのキャディ派遣回数:</strong> ${dispatchCount} 回</p>
-          <p><strong>研修済ゴルフ場:</strong> ${(row && row.trained_courses && row.trained_courses.length > 0 ? row.trained_courses.join(', ') : 'なし')}</p>
-          <button id='reqTrainingBtn'>研修を希望する</button>
-        </div>`;
-
-      // Only set up modal events if profile exists
+      // ステータスタブのHTMLを生成（プロフィールが存在する場合のみ）
       if (row && row.cid) {
+        document.getElementById('mainStatus').innerHTML = `
+          <div class="card">
+            <h3>ステータス</h3>
+            <p><strong>今までのキャディ派遣回数:</strong> ${dispatchCount} 回</p>
+            <p><strong>研修済ゴルフ場:</strong> ${(row.trained_courses && row.trained_courses.length > 0 ? row.trained_courses.join(', ') : 'なし')}</p>
+            <button id='reqTrainingBtn'>研修を希望する</button>
+          </div>`;
         // 研修希望モーダルのHTMLを一度だけ追加
         if (!document.getElementById('trainModal')) {
           document.body.insertAdjacentHTML('beforeend',`
@@ -290,8 +288,15 @@
       if(initialShowProfile) {
         switchMain('prof');
         initialShowProfile = false;
+              }
+      } else {
+        // プロフィールが存在しない場合のステータス表示
+        document.getElementById('mainStatus').innerHTML = `
+          <div class="card">
+            <h3>ステータス</h3>
+            <p>プロフィール登録後にステータス情報が表示されます。</p>
+          </div>`;
       }
-      } // Close the if (row && row.cid) block
     });
 
     document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
