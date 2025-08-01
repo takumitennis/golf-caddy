@@ -309,18 +309,41 @@
     .benefits-section {
       padding: 4rem 0;
       margin: 3rem 0;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .benefits-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.92);
+      z-index: 1;
+    }
+
+    .benefits-section .container {
+      position: relative;
+      z-index: 2;
     }
 
     .benefits-section:nth-of-type(1) {
       background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+      background-image: url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
     }
 
     .benefits-section:nth-of-type(2) {
       background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      background-image: url('https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
     }
 
     .benefits-section:nth-of-type(3) {
       background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+      background-image: url('https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
     }
 
     .benefits-header {
@@ -556,8 +579,9 @@
     <!-- Features Section -->
     <section class="features">
         <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: var(--text-color);">
-                3つの立場、それぞれにメリット
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: var(--text-color); line-height: 1.4;">
+                <div style="margin-bottom: 0.5rem;">3つの立場</div>
+                <div>それぞれにメリット</div>
             </h2>
             <div class="feature" onclick="location.href='#golf-course-benefits'" style="cursor: pointer; transition: transform 0.3s ease;">
                 <div class="feature-icon" style="font-size: 3rem; margin-bottom: 1rem;">🏌️‍♂️</div>
