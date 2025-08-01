@@ -68,20 +68,25 @@
         cid=row.cid;
         renderProfileDisplay(row);
       }
-      // 派遣回数を取得
-      const { count, error: countError } = await supabase
-        .from('booking_caddies')
-        .select('*', { count: 'exact', head: true })
-        .eq('cID', cid);
-      
-      const dispatchCount = countError ? '取得エラー' : (count || 0);
+      // 派遣回数を取得（rowが存在する場合のみ）
+      let dispatchCount = 0;
+      if (row && row.cid) {
+        const { count, error: countError } = await supabase
+          .from('booking_caddies')
+          .select('*', { count: 'exact', head: true })
+          .eq('cID', row.cid);
+        
+        if (!countError && count !== null) {
+          dispatchCount = count;
+        }
+      }
 
       // ステータスタブのHTMLを生成
       document.getElementById('mainStatus').innerHTML = `
         <div class="card">
           <h3>ステータス</h3>
           <p><strong>今までのキャディ派遣回数:</strong> ${dispatchCount} 回</p>
-          <p><strong>研修済ゴルフ場:</strong> ${(row.trained_courses && row.trained_courses.length > 0 ? row.trained_courses.join(', ') : 'なし')}</p>
+          <p><strong>研修済ゴルフ場:</strong> ${(row && row.trained_courses && row.trained_courses.length > 0 ? row.trained_courses.join(', ') : 'なし')}</p>
           <button id='reqTrainingBtn'>研修を希望する</button>
         </div>`;
 
@@ -89,12 +94,28 @@
       if (!document.getElementById('trainModal')) {
         document.body.insertAdjacentHTML('beforeend',`
           <div id='trainModal' style='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;'>
-            <div style='background:#fff;padding:24px;border-radius:8px;width:90%;max-width:400px;'>
-              <h3>研修希望ゴルフ場選択</h3>
-              <select id='courseSelect' style='width:100%;margin-top:12px;padding:8px;font-size:1rem;'></select>
-              <div style='margin-top:20px;text-align:right;'>
-                <button id='cancelModal' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>キャンセル</button>
-                <button id='sendReq' style='margin-left:10px;padding:8px 16px;border:none;background:#2ecc71;color:#fff;border-radius:4px;cursor:pointer;'>送信</button>
+            <div style='background:#fff;padding:24px;border-radius:8px;width:90%;max-width:500px;'>
+              <div id='step1'>
+                <h3>研修希望ゴルフ場選択</h3>
+                <select id='courseSelect' style='width:100%;margin-top:12px;padding:8px;font-size:1rem;'></select>
+                <div style='margin-top:20px;text-align:right;'>
+                  <button id='cancelModal' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>キャンセル</button>
+                  <button id='nextStep' style='margin-left:10px;padding:8px 16px;border:none;background:#3498db;color:#fff;border-radius:4px;cursor:pointer;'>次へ</button>
+                </div>
+              </div>
+              <div id='step2' style='display:none;'>
+                <h3>研修日選択</h3>
+                <div style='display:flex;align-items:center;gap:10px;margin:12px 0;'>
+                  <button id='prevTrainingMonth2'>◀</button>
+                  <span id='trainingCalTitle2'></span>
+                  <button id='nextTrainingMonth2'>▶</button>
+                </div>
+                <table id='trainingCalTable2' style='width:100%;border-collapse:collapse;'></table>
+                <div id='selectedDateDisplay' style='margin:12px 0;font-weight:bold;'></div>
+                <div style='margin-top:20px;text-align:right;'>
+                  <button id='backStep' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>戻る</button>
+                  <button id='sendReq' style='margin-left:10px;padding:8px 16px;border:none;background:#2ecc71;color:#fff;border-radius:4px;cursor:pointer;' disabled>予約送信</button>
+                </div>
               </div>
             </div>
           </div>`);
@@ -106,22 +127,164 @@
       const newReqBtn = oldReqBtn.cloneNode(true);
       oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
 
+      // Modal state variables
+      let selectedGolfCourse = null;
+      let selectedTrainingDate = null;
+      let trainingCalMonth2 = new Date().getMonth();
+      let trainingCalYear2 = new Date().getFullYear();
+
+      // Step 1: Golf course selection
       newReqBtn.onclick = async () => {
         const { data: courses } = await supabase.from('golf_courses').select('gid,name,email');
         const sel = document.getElementById('courseSelect');
-        sel.innerHTML = courses.map(c => `<option value='${c.gid}' data-email='${c.email}'>${c.name}</option>`).join('');
+        sel.innerHTML = courses.map(c => `<option value='${c.gid}' data-email='${c.email}' data-name='${c.name}'>${c.name}</option>`).join('');
+        
+        // Reset modal state
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        selectedGolfCourse = null;
+        selectedTrainingDate = null;
+        
         modal.style.display = 'flex';
       };
+
+      // Cancel modal
       document.getElementById('cancelModal').onclick = () => modal.style.display = 'none';
-      document.getElementById('sendReq').onclick = async () => {
+
+      // Next step: Show calendar
+      document.getElementById('nextStep').onclick = async () => {
         const sel = document.getElementById('courseSelect');
-        const gid = sel.value; 
-        const email = sel.options[sel.selectedIndex].dataset.email;
-        await supabase.from('training_requests').insert({ cid, gid });
-        window.open(`mailto:${email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${row.name || ''} が研修を希望しています。`);
-        alert('研修希望を送信しました');
-        modal.style.display = 'none';
+        selectedGolfCourse = {
+          gid: sel.value,
+          name: sel.options[sel.selectedIndex].dataset.name,
+          email: sel.options[sel.selectedIndex].dataset.email
+        };
+        
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        
+        await renderTrainingCalendar2();
       };
+
+      // Back step
+      document.getElementById('backStep').onclick = () => {
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step1').style.display = 'block';
+      };
+
+      // Calendar navigation
+      document.getElementById('prevTrainingMonth2').onclick = () => {
+        if(--trainingCalMonth2 < 0) { trainingCalMonth2 = 11; trainingCalYear2--; }
+        renderTrainingCalendar2();
+      };
+      document.getElementById('nextTrainingMonth2').onclick = () => {
+        if(++trainingCalMonth2 > 11) { trainingCalMonth2 = 0; trainingCalYear2++; }
+        renderTrainingCalendar2();
+      };
+
+      // Send training request
+      document.getElementById('sendReq').onclick = async () => {
+        if (!selectedGolfCourse || !selectedTrainingDate) {
+          alert('ゴルフ場と日付を選択してください');
+          return;
+        }
+        
+        try {
+          await supabase.from('training_requests').insert({ 
+            cid, 
+            gid: selectedGolfCourse.gid, 
+            training_date: selectedTrainingDate,
+            status: 'pending'
+          });
+          
+          window.open(`mailto:${selectedGolfCourse.email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${row.name || ''}%0A希望研修日:${selectedTrainingDate}%0A研修を希望しています。`);
+          alert('研修希望を送信しました');
+          modal.style.display = 'none';
+        } catch (error) {
+          alert('送信エラー: ' + error.message);
+        }
+      };
+
+      // Render training calendar function
+      async function renderTrainingCalendar2() {
+        const first = new Date(trainingCalYear2, trainingCalMonth2, 1);
+        const last = new Date(trainingCalYear2, trainingCalMonth2 + 1, 0);
+        document.getElementById('trainingCalTitle2').textContent = `${trainingCalYear2}年 ${trainingCalMonth2 + 1}月`;
+        
+        // Fetch available training dates for selected golf course
+        const { data: availData, error } = await supabase
+          .from('training_availability')
+          .select('date')
+          .eq('gid', selectedGolfCourse.gid)
+          .gte('date', first.toISOString().slice(0,10))
+          .lte('date', last.toISOString().slice(0,10));
+        
+        const availableSet = new Set();
+        if (!error && availData) {
+          availData.forEach(r => availableSet.add(r.date));
+        }
+        
+        // Build calendar
+        const table = document.getElementById('trainingCalTable2');
+        table.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        ['日','月','火','水','木','金','土'].forEach(d => {
+          const th = document.createElement('th');
+          th.textContent = d;
+          th.style.border = '1px solid #ccc';
+          th.style.padding = '4px';
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+        
+        let row = document.createElement('tr');
+        const startWeekDay = first.getDay();
+        for(let i = 0; i < startWeekDay; i++){
+          row.appendChild(document.createElement('td'));
+        }
+        
+        for(let day = 1; day <= last.getDate(); day++){
+          const dateStr = `${trainingCalYear2}-${String(trainingCalMonth2 + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+          const td = document.createElement('td');
+          const isAvailable = availableSet.has(dateStr);
+          const isSelected = selectedTrainingDate === dateStr;
+          
+          td.innerHTML = `<div style="padding:8px;">${day}</div>`;
+          td.style.border = '1px solid #ccc';
+          td.style.textAlign = 'center';
+          
+          if (isSelected) {
+            td.style.backgroundColor = '#3498db';
+            td.style.color = '#fff';
+          } else if (isAvailable) {
+            td.style.backgroundColor = '#c8e6c9';
+            td.style.cursor = 'pointer';
+          } else {
+            td.style.backgroundColor = '#ffcdd2';
+            td.style.color = '#666';
+          }
+          
+          if (isAvailable) {
+            td.onclick = () => {
+              selectedTrainingDate = dateStr;
+              document.getElementById('selectedDateDisplay').textContent = `選択日: ${dateStr}`;
+              document.getElementById('sendReq').disabled = false;
+              renderTrainingCalendar2(); // Re-render to show selection
+            };
+          }
+          
+          row.appendChild(td);
+          if((startWeekDay + day) % 7 === 0){
+            table.appendChild(row);
+            row = document.createElement('tr');
+          }
+        }
+        
+        if(row.children.length) {
+          while(row.children.length < 7) row.appendChild(document.createElement('td'));
+          table.appendChild(row);
+        }
+      }
 
       if(initialShowProfile) {
         switchMain('prof');

@@ -44,6 +44,8 @@
   <div class="tabs">
     <button id="btnTab1" class="active">募集作成</button>
     <button id="btnTab2">空きキャディ確認</button>
+    <button id="btnTab3">研修可能日設定</button>
+    <button id="btnTab4">研修予約者一覧</button>
   </div>
 
   <!-- Tab 1: bookings -->
@@ -71,6 +73,24 @@
     </div>
     <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
     <small style="display:block;margin-top:8px;">緑=3名以上, 黄=1-2名, 赤=0名</small>
+  </div>
+
+  <!-- Tab 3: Training availability -->
+  <div id="tab3" class="hidden" style="margin-top:20px;">
+    <h3>研修可能日設定</h3>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="prevTrainingMonth">◀</button>
+      <span id="trainingCalTitle"></span>
+      <button id="nextTrainingMonth">▶</button>
+    </div>
+    <table class="calendar" id="trainingCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+    <small style="display:block;margin-top:8px;">クリックで研修可能日を設定/解除</small>
+  </div>
+
+  <!-- Tab 4: Training requests -->
+  <div id="tab4" class="hidden" style="margin-top:20px;">
+    <h3>研修予約者一覧</h3>
+    <div id="trainingRequestsList"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -143,8 +163,17 @@
     // --- Tabs logic ---
     const tab1=document.getElementById('tab1');
     const tab2=document.getElementById('tab2');
+    const tab3=document.getElementById('tab3');
+    const tab4=document.getElementById('tab4');
+    const btnTab1=document.getElementById('btnTab1');
+    const btnTab2=document.getElementById('btnTab2');
+    const btnTab3=document.getElementById('btnTab3');
+    const btnTab4=document.getElementById('btnTab4');
+    
     document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
     document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
+    document.getElementById('btnTab3').onclick=()=>{switchTab(3)};
+    document.getElementById('btnTab4').onclick=()=>{switchTab(4)};
 
     // --- Calendar logic ---
     let calMonth = new Date().getMonth();
@@ -195,13 +224,42 @@
         table.appendChild(row);
       }
     }
+    // Training calendar variables
+    let trainingCalMonth = new Date().getMonth();
+    let trainingCalYear = new Date().getFullYear();
+    
+    // Training calendar navigation
+    document.getElementById('prevTrainingMonth').onclick=()=>{
+      if(--trainingCalMonth<0){trainingCalMonth=11;trainingCalYear--;} 
+      renderTrainingCal();
+    };
+    document.getElementById('nextTrainingMonth').onclick=()=>{
+      if(++trainingCalMonth>11){trainingCalMonth=0;trainingCalYear++;} 
+      renderTrainingCal();
+    };
+
     // render calendar on tab switch
     function switchTab(idx){
-      if(idx===1){tab1.classList.remove('hidden');tab2.classList.add('hidden');
-        btnTab1.classList.add('active');btnTab2.classList.remove('active');}
-      else{tab2.classList.remove('hidden');tab1.classList.add('hidden');
-        btnTab2.classList.add('active');btnTab1.classList.remove('active');
-        renderCal();}
+      // Hide all tabs
+      [tab1, tab2, tab3, tab4].forEach(tab => tab.classList.add('hidden'));
+      [btnTab1, btnTab2, btnTab3, btnTab4].forEach(btn => btn.classList.remove('active'));
+      
+      if(idx===1){
+        tab1.classList.remove('hidden');
+        btnTab1.classList.add('active');
+      } else if(idx===2){
+        tab2.classList.remove('hidden');
+        btnTab2.classList.add('active');
+        renderCal();
+      } else if(idx===3){
+        tab3.classList.remove('hidden');
+        btnTab3.classList.add('active');
+        renderTrainingCal();
+      } else if(idx===4){
+        tab4.classList.remove('hidden');
+        btnTab4.classList.add('active');
+        loadTrainingRequests();
+      }
     }
 
     // ---- main tabs ----
@@ -220,6 +278,146 @@
         btnMainStat.classList.add('active');btnMainProf.classList.remove('active');
       }
     }
+
+    // Training calendar rendering
+    async function renderTrainingCal(){
+      const first = new Date(trainingCalYear, trainingCalMonth, 1);
+      const last = new Date(trainingCalYear, trainingCalMonth + 1, 0);
+      document.getElementById('trainingCalTitle').textContent = `${trainingCalYear}年 ${trainingCalMonth + 1}月`;
+      
+      // Fetch existing training availability
+      const { data: availData, error } = await supabase
+        .from('training_availability')
+        .select('date')
+        .eq('gid', gid)
+        .gte('date', first.toISOString().slice(0,10))
+        .lte('date', last.toISOString().slice(0,10));
+      
+      const availableSet = new Set();
+      if (!error && availData) {
+        availData.forEach(r => availableSet.add(r.date));
+      }
+      
+      // Build calendar grid
+      const table = document.getElementById('trainingCalTable');
+      table.innerHTML = '';
+      const headerRow = document.createElement('tr');
+      ['日','月','火','水','木','金','土'].forEach(d => {
+        const th = document.createElement('th');
+        th.textContent = d;
+        headerRow.appendChild(th);
+      });
+      table.appendChild(headerRow);
+      
+      let row = document.createElement('tr');
+      const startWeekDay = first.getDay();
+      for(let i = 0; i < startWeekDay; i++){
+        row.appendChild(document.createElement('td'));
+      }
+      
+      for(let day = 1; day <= last.getDate(); day++){
+        const dateStr = `${trainingCalYear}-${String(trainingCalMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td = document.createElement('td');
+        const isAvailable = availableSet.has(dateStr);
+        
+        td.innerHTML = `<div style="padding:4px;">${day}</div>`;
+        td.style.cursor = 'pointer';
+        td.style.backgroundColor = isAvailable ? '#c8e6c9' : '#fff';
+        td.style.border = '1px solid #ccc';
+        
+        td.onclick = async () => {
+          if (isAvailable) {
+            // Remove availability
+            await supabase
+              .from('training_availability')
+              .delete()
+              .eq('gid', gid)
+              .eq('date', dateStr);
+          } else {
+            // Add availability
+            await supabase
+              .from('training_availability')
+              .insert({ gid, date: dateStr, max_slots: 1 });
+          }
+          renderTrainingCal(); // Re-render
+        };
+        
+        row.appendChild(td);
+        if((startWeekDay + day) % 7 === 0){
+          table.appendChild(row);
+          row = document.createElement('tr');
+        }
+      }
+      
+      if(row.children.length) {
+        while(row.children.length < 7) row.appendChild(document.createElement('td'));
+        table.appendChild(row);
+      }
+    }
+
+    // Load training requests
+    async function loadTrainingRequests(){
+      const { data, error } = await supabase
+        .from('training_requests')
+        .select(`
+          id, cid, training_date, status, created_at,
+          caddies!inner(name, phone, email, university, golf_years, caddy_years, appeal)
+        `)
+        .eq('gid', gid)
+        .order('created_at', { ascending: false });
+      
+      const container = document.getElementById('trainingRequestsList');
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p>研修予約はありません。</p>';
+        return;
+      }
+      
+      let html = '';
+      data.forEach(request => {
+        const caddy = request.caddies;
+        const statusText = request.status === 'pending' ? '申込中' : 
+                          request.status === 'confirmed' ? '確定' : 
+                          request.status === 'completed' ? '完了' : '取消';
+        
+        html += `
+          <div style="border:1px solid #ddd; margin-bottom:12px; padding:16px; border-radius:6px; background:#fff;">
+            <h4>研修申込 (${statusText})</h4>
+            <p><strong>申込日:</strong> ${request.created_at?.slice(0,10) || '不明'}</p>
+            <p><strong>希望研修日:</strong> ${request.training_date || '日付未選択'}</p>
+            <hr>
+            <h5>キャディ情報</h5>
+            <p><strong>名前:</strong> ${caddy?.name || '不明'}</p>
+            <p><strong>電話:</strong> ${caddy?.phone || '不明'}</p>
+            <p><strong>メール:</strong> ${caddy?.email || '不明'}</p>
+            <p><strong>大学:</strong> ${caddy?.university || '不明'}</p>
+            <p><strong>ゴルフ歴:</strong> ${caddy?.golf_years || '不明'}年</p>
+            <p><strong>キャディ歴:</strong> ${caddy?.caddy_years || '不明'}年</p>
+            <p><strong>アピール:</strong> ${caddy?.appeal || 'なし'}</p>
+            ${request.status === 'pending' ? `
+              <button onclick="updateTrainingStatus('${request.id}', 'confirmed')" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-right:8px;">承認</button>
+              <button onclick="updateTrainingStatus('${request.id}', 'cancelled')" style="background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">拒否</button>
+            ` : ''}
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // Update training request status
+    window.updateTrainingStatus = async (requestId, status) => {
+      const { error } = await supabase
+        .from('training_requests')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', requestId);
+      
+      if (error) {
+        alert('ステータス更新に失敗しました: ' + error.message);
+      } else {
+        alert('ステータスを更新しました');
+        loadTrainingRequests(); // Reload the list
+      }
+    };
 
     // logout
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
