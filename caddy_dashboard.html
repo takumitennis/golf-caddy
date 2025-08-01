@@ -68,46 +68,65 @@
         cid=row.cid;
         renderProfileDisplay(row);
       }
-      // status tab placeholder
-      document.getElementById('mainStatus').innerHTML=`
-        <p>評価: ${row.rating??0} ⭐️</p>
-        <p>キャディ単価: ${row.rate??'-'} 円</p>
-        <p>研修済ゴルフ場: ${(row.trained_courses??[]).join(', ')}</p>
-        <button id='reqTrainingBtn'>研修を希望する</button>`;
+      // 派遣回数を取得
+      const { count, error: countError } = await supabase
+        .from('booking_caddies')
+        .select('*', { count: 'exact', head: true })
+        .eq('cID', cid);
+      
+      const dispatchCount = countError ? '取得エラー' : (count || 0);
 
-      // training request modal
-      document.body.insertAdjacentHTML('beforeend',`
-        <div id='trainModal' style='display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;'>
-          <div style='background:#fff;padding:20px;border-radius:6px;min-width:260px;'>
-            <h3>研修希望ゴルフ場選択</h3>
-            <select id='courseSelect' style='width:100%;margin-top:10px;'></select>
-            <div style='margin-top:15px;text-align:right;'>
-              <button id='cancelModal'>キャンセル</button>
-              <button id='sendReq' style='margin-left:10px;'>送信</button>
+      // ステータスタブのHTMLを生成
+      document.getElementById('mainStatus').innerHTML = `
+        <div class="card">
+          <h3>ステータス</h3>
+          <p><strong>今までのキャディ派遣回数:</strong> ${dispatchCount} 回</p>
+          <p><strong>研修済ゴルフ場:</strong> ${(row.trained_courses && row.trained_courses.length > 0 ? row.trained_courses.join(', ') : 'なし')}</p>
+          <button id='reqTrainingBtn'>研修を希望する</button>
+        </div>`;
+
+      // 研修希望モーダルのHTMLを一度だけ追加
+      if (!document.getElementById('trainModal')) {
+        document.body.insertAdjacentHTML('beforeend',`
+          <div id='trainModal' style='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;'>
+            <div style='background:#fff;padding:24px;border-radius:8px;width:90%;max-width:400px;'>
+              <h3>研修希望ゴルフ場選択</h3>
+              <select id='courseSelect' style='width:100%;margin-top:12px;padding:8px;font-size:1rem;'></select>
+              <div style='margin-top:20px;text-align:right;'>
+                <button id='cancelModal' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>キャンセル</button>
+                <button id='sendReq' style='margin-left:10px;padding:8px 16px;border:none;background:#2ecc71;color:#fff;border-radius:4px;cursor:pointer;'>送信</button>
+              </div>
             </div>
-          </div>
-        </div>`);
+          </div>`);
+      }
 
-      const modal=document.getElementById('trainModal');
-      document.getElementById('reqTrainingBtn').onclick=async()=>{
-        // fetch golf courses list
-        const { data:courses } = await supabase.from('golf_courses').select('gid,name,email');
-        const sel=document.getElementById('courseSelect');
-        sel.innerHTML=courses.map(c=>`<option value='${c.gid}' data-email='${c.email}'>${c.name}</option>`).join('');
-        modal.style.display='flex';
+      const modal = document.getElementById('trainModal');
+      // イベントリスナーを（もし存在すれば）一度削除してから再設定
+      const oldReqBtn = document.getElementById('reqTrainingBtn');
+      const newReqBtn = oldReqBtn.cloneNode(true);
+      oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
+
+      newReqBtn.onclick = async () => {
+        const { data: courses } = await supabase.from('golf_courses').select('gid,name,email');
+        const sel = document.getElementById('courseSelect');
+        sel.innerHTML = courses.map(c => `<option value='${c.gid}' data-email='${c.email}'>${c.name}</option>`).join('');
+        modal.style.display = 'flex';
       };
-      document.getElementById('cancelModal').onclick=()=>modal.style.display='none';
-      document.getElementById('sendReq').onclick=async()=>{
-        const sel=document.getElementById('courseSelect');
-        const gid=sel.value; const email=sel.options[sel.selectedIndex].dataset.email;
-        await supabase.from('training_requests').insert({cid,gid});
-        // rudimentary mailto fallback
-        window.open(`mailto:${email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${document.getElementById('pName')?.value||''} が研修を希望しています。`);
+      document.getElementById('cancelModal').onclick = () => modal.style.display = 'none';
+      document.getElementById('sendReq').onclick = async () => {
+        const sel = document.getElementById('courseSelect');
+        const gid = sel.value; 
+        const email = sel.options[sel.selectedIndex].dataset.email;
+        await supabase.from('training_requests').insert({ cid, gid });
+        window.open(`mailto:${email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${row.name || ''} が研修を希望しています。`);
         alert('研修希望を送信しました');
-        modal.style.display='none';
+        modal.style.display = 'none';
       };
-      // 初期はプロフィールタブ表示
-      initialShowProfile = true;
+
+      if(initialShowProfile) {
+        switchMain('prof');
+        initialShowProfile = false;
+      }
     });
 
     document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
