@@ -469,6 +469,22 @@
         transform: translateX(0);
       }
     }
+
+    .nav-logo {
+      height: 40px;
+      width: auto;
+      filter: brightness(1.1);
+      transition: all 0.3s ease;
+    }
+
+    .logo-tab {
+      padding: 8px 16px !important;
+    }
+
+    .logo-tab:hover .nav-logo {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
   </style>
 </head>
 <body>
@@ -478,8 +494,8 @@
     <nav class="top-nav">
         <div class="nav-main">
             <div class="nav-item">
-                <a href="#caddy-plus" class="nav-tab">
-                    キャディタス
+                <a href="#caddy-plus" class="nav-tab logo-tab">
+                    <img src="images/キャディタス.png" alt="キャディタス" class="nav-logo">
                 </a>
             </div>
             
