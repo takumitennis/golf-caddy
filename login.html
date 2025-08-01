@@ -19,11 +19,11 @@
 <body>
   <form id="authForm" class="card" novalidate>
     <h2 id="title">ログイン</h2>
-    <label>ログインID
+    <label id="emailLabel">ログインID
       <input id="email"  type="email" required />
       <span class="err" id="errEmail">ログインIDを入力してください。</span>
     </label>
-    <label>パスワード
+    <label id="passwordLabel">パスワード
       <input id="pass"   type="password" required />
     </label>
     <button type="submit">ログイン</button>
@@ -52,15 +52,16 @@
       // パスワードフィールドの表示/非表示
       const passwordField = document.getElementById("pass").parentElement;
       const submitButton = document.querySelector("button[type='submit']");
+      const emailLabel = document.getElementById("emailLabel");
       
       if (mode === "signup") {
         passwordField.style.display = "none";
         submitButton.textContent = "登録";
-        document.querySelector("label").textContent = "メールアドレス";
+        emailLabel.firstChild.textContent = "メールアドレス";
       } else {
         passwordField.style.display = "block";
         submitButton.textContent = "ログイン";
-        document.querySelector("label").textContent = "ログインID";
+        emailLabel.firstChild.textContent = "ログインID";
       }
     };
 
