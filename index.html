@@ -315,25 +315,24 @@
       background-attachment: fixed;
     }
 
-    .benefits-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.6);
-      z-index: 1;
-    }
-
     .benefits-section .container {
       position: relative;
       z-index: 2;
     }
 
     .benefits-section.golf-course-benefits {
-      background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-      background-image: url('images/ゴルフ場.jpg');
+      background: url('images/ゴルフ場.jpg') center/cover no-repeat fixed;
+    }
+
+    .benefits-section.golf-course-benefits::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
     }
 
     .benefits-section.caddy-benefits {
@@ -352,8 +351,18 @@
     }
 
     .benefits-section.golfer-benefits {
-      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-      background-image: url('images/ゴルファー.jpg');
+      background: url('images/ゴルファー.jpg') center/cover no-repeat fixed;
+    }
+
+    .benefits-section.golfer-benefits::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
     }
 
     .benefits-header {
@@ -365,13 +374,16 @@
       font-size: 2.5rem;
       margin-bottom: 1rem;
       font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      color: #ffffff;
     }
 
     .benefits-header p {
       font-size: 1.2rem;
-      color: #666;
+      color: #f0f0f0;
       max-width: 600px;
       margin: 0 auto;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
     }
 
     .benefits-grid {
@@ -382,7 +394,7 @@
     }
 
     .benefit-card {
-      background: var(--secondary-color);
+      background: rgba(255, 255, 255, 0.95);
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.07);
