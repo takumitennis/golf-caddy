@@ -48,6 +48,20 @@
       mode  = mode === "login" ? "signup" : "login";
       title.textContent = mode === "login" ? "ログイン" : "新規登録";
       toggle.textContent = mode === "login" ? "新規登録はこちら" : "ログインはこちら";
+      
+      // パスワードフィールドの表示/非表示
+      const passwordField = document.getElementById("pass").parentElement;
+      const submitButton = document.querySelector("button[type='submit']");
+      
+      if (mode === "signup") {
+        passwordField.style.display = "none";
+        submitButton.textContent = "登録";
+        document.querySelector("label").textContent = "メールアドレス";
+      } else {
+        passwordField.style.display = "block";
+        submitButton.textContent = "ログイン";
+        document.querySelector("label").textContent = "ログインID";
+      }
     };
 
     form.onsubmit = async (e) => {
@@ -66,13 +80,16 @@
         document.getElementById("email").classList.add("error");
         hasError = true;
       }
-      if (!password) {
+      
+      // ログイン時のみパスワードをチェック
+      if (mode === "login" && !password) {
         document.getElementById("pass").classList.add("error");
         hasError = true;
       }
       
       if (hasError) {
-        alert("全ての項目を入力してください");
+        const message = mode === "login" ? "全ての項目を入力してください" : "メールアドレスを入力してください";
+        alert(message);
         return;
       }
 
@@ -87,9 +104,12 @@
           location.href = "dashboard.html";
         }
       } else {
+        // 新規登録時は一時パスワードを生成
+        const tempPassword = Math.random().toString(36).slice(-8) + "Tmp123!";
+        
         const res = await supabase.auth.signUp({ 
           email, 
-          password,
+          password: tempPassword,
           options: {
             data: { role: role }
           }
@@ -97,10 +117,9 @@
         if (res.error) {
           alert("登録に失敗しました: " + res.error.message);
           document.getElementById("email").classList.add("error");
-          document.getElementById("pass").classList.add("error");
         } else {
           if (!res.data.session) {
-            await supabase.auth.signInWithPassword({ email, password });
+            await supabase.auth.signInWithPassword({ email, password: tempPassword });
           }
           alert("登録が完了しました");
           location.href = "profile.html";
