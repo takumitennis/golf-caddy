@@ -229,12 +229,12 @@
     }
 
     .benefits-section.golf-course-benefits {
-      background: linear-gradient(135deg, #2d5a2d 0%, #4a8c4a 50%, #6bb76b 100%);
-      background-image: url('images/ゴルフ場.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
+      background: linear-gradient(135deg, #2d5a2d 0%, #4a8c4a 50%, #6bb76b 100%) !important;
+      background-image: url('images/ゴルフ場.jpg') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      background-attachment: fixed !important;
     }
 
     .benefits-section.golf-course-benefits::after {
@@ -244,17 +244,17 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.4) !important;
       z-index: 1;
     }
 
     .benefits-section.caddy-benefits {
-      background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%);
-      background-image: url('images/キャディ.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
+      background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%) !important;
+      background-image: url('images/キャディ.jpg') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      background-attachment: fixed !important;
     }
 
     .benefits-section.caddy-benefits::after {
@@ -264,17 +264,17 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.4) !important;
       z-index: 1;
     }
 
     .benefits-section.golfer-benefits {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
-      background-image: url('images/ゴルファー.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%) !important;
+      background-image: url('images/ゴルファー.jpg') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      background-attachment: fixed !important;
     }
 
     .benefits-section.golfer-benefits::after {
@@ -284,7 +284,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.4) !important;
       z-index: 1;
     }
 
@@ -620,7 +620,7 @@
         <div class="nav-main">
             <div class="nav-item">
                 <a href="#caddy-plus" class="nav-tab logo-tab">
-                    <img src="images/キャディタス.jpeg" alt="キャディタス" class="nav-logo">
+                    <img src="images/キャディタス.png" alt="キャディタス" class="nav-logo">
                 </a>
             </div>
             
@@ -653,10 +653,10 @@
 
         <!-- Login buttons aligned to right -->
         <div class="login-section">
-            <button onclick="location.href='login/?role=golf'" class="nav-login-btn golf-login-btn">
+            <button class="nav-login-btn golf-login-btn">
                 ゴルフ場でログイン
             </button>
-            <button onclick="location.href='login/?role=caddy'" class="nav-login-btn caddy-login-btn">
+            <button class="nav-login-btn caddy-login-btn">
                 キャディでログイン
             </button>
         </div>
@@ -799,6 +799,24 @@
     // 手動ログインのみ - 自動リダイレクトなし
     console.log("Golf Caddy Matching Service - Top Page Loaded");
 
-</script>
+    // ログインボタンのイベントリスナー
+    document.addEventListener('DOMContentLoaded', function() {
+        // ゴルフ場ログインボタン
+        const golfLoginBtn = document.querySelector('.golf-login-btn');
+        if (golfLoginBtn) {
+            golfLoginBtn.addEventListener('click', function() {
+                window.location.href = 'login/?role=golf';
+            });
+        }
+
+        // キャディログインボタン
+        const caddyLoginBtn = document.querySelector('.caddy-login-btn');
+        if (caddyLoginBtn) {
+            caddyLoginBtn.addEventListener('click', function() {
+                window.location.href = 'login/?role=caddy';
+            });
+        }
+    });
+  </script>
 </body>
 </html>
