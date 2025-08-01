@@ -90,48 +90,49 @@
           <button id='reqTrainingBtn'>研修を希望する</button>
         </div>`;
 
-      // 研修希望モーダルのHTMLを一度だけ追加
-      if (!document.getElementById('trainModal')) {
-        document.body.insertAdjacentHTML('beforeend',`
-          <div id='trainModal' style='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;'>
-            <div style='background:#fff;padding:24px;border-radius:8px;width:90%;max-width:500px;'>
-              <div id='step1'>
-                <h3>研修希望ゴルフ場選択</h3>
-                <select id='courseSelect' style='width:100%;margin-top:12px;padding:8px;font-size:1rem;'></select>
-                <div style='margin-top:20px;text-align:right;'>
-                  <button id='cancelModal' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>キャンセル</button>
-                  <button id='nextStep' style='margin-left:10px;padding:8px 16px;border:none;background:#3498db;color:#fff;border-radius:4px;cursor:pointer;'>次へ</button>
+      // Only set up modal events if profile exists
+      if (row && row.cid) {
+        // 研修希望モーダルのHTMLを一度だけ追加
+        if (!document.getElementById('trainModal')) {
+          document.body.insertAdjacentHTML('beforeend',`
+            <div id='trainModal' style='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;'>
+              <div style='background:#fff;padding:24px;border-radius:8px;width:90%;max-width:500px;'>
+                <div id='step1'>
+                  <h3>研修希望ゴルフ場選択</h3>
+                  <select id='courseSelect' style='width:100%;margin-top:12px;padding:8px;font-size:1rem;'></select>
+                  <div style='margin-top:20px;text-align:right;'>
+                    <button id='cancelModal' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>キャンセル</button>
+                    <button id='nextStep' style='margin-left:10px;padding:8px 16px;border:none;background:#3498db;color:#fff;border-radius:4px;cursor:pointer;'>次へ</button>
+                  </div>
+                </div>
+                <div id='step2' style='display:none;'>
+                  <h3>研修日選択</h3>
+                  <div style='display:flex;align-items:center;gap:10px;margin:12px 0;'>
+                    <button id='prevTrainingMonth2'>◀</button>
+                    <span id='trainingCalTitle2'></span>
+                    <button id='nextTrainingMonth2'>▶</button>
+                  </div>
+                  <table id='trainingCalTable2' style='width:100%;border-collapse:collapse;'></table>
+                  <div id='selectedDateDisplay' style='margin:12px 0;font-weight:bold;'></div>
+                  <div style='margin-top:20px;text-align:right;'>
+                    <button id='backStep' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>戻る</button>
+                    <button id='sendReq' style='margin-left:10px;padding:8px 16px;border:none;background:#2ecc71;color:#fff;border-radius:4px;cursor:pointer;' disabled>予約送信</button>
+                  </div>
                 </div>
               </div>
-              <div id='step2' style='display:none;'>
-                <h3>研修日選択</h3>
-                <div style='display:flex;align-items:center;gap:10px;margin:12px 0;'>
-                  <button id='prevTrainingMonth2'>◀</button>
-                  <span id='trainingCalTitle2'></span>
-                  <button id='nextTrainingMonth2'>▶</button>
-                </div>
-                <table id='trainingCalTable2' style='width:100%;border-collapse:collapse;'></table>
-                <div id='selectedDateDisplay' style='margin:12px 0;font-weight:bold;'></div>
-                <div style='margin-top:20px;text-align:right;'>
-                  <button id='backStep' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>戻る</button>
-                  <button id='sendReq' style='margin-left:10px;padding:8px 16px;border:none;background:#2ecc71;color:#fff;border-radius:4px;cursor:pointer;' disabled>予約送信</button>
-                </div>
-              </div>
-            </div>
-          </div>`);
-      }
+            </div>`);
+        }
+        const modal = document.getElementById('trainModal');
+        // イベントリスナーを（もし存在すれば）一度削除してから再設定
+        const oldReqBtn = document.getElementById('reqTrainingBtn');
+        const newReqBtn = oldReqBtn.cloneNode(true);
+        oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
 
-      const modal = document.getElementById('trainModal');
-      // イベントリスナーを（もし存在すれば）一度削除してから再設定
-      const oldReqBtn = document.getElementById('reqTrainingBtn');
-      const newReqBtn = oldReqBtn.cloneNode(true);
-      oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
-
-      // Modal state variables
-      let selectedGolfCourse = null;
-      let selectedTrainingDate = null;
-      let trainingCalMonth2 = new Date().getMonth();
-      let trainingCalYear2 = new Date().getFullYear();
+        // Modal state variables
+        let selectedGolfCourse = null;
+        let selectedTrainingDate = null;
+        let trainingCalMonth2 = new Date().getMonth();
+        let trainingCalYear2 = new Date().getFullYear();
 
       // Step 1: Golf course selection
       newReqBtn.onclick = async () => {
@@ -290,6 +291,7 @@
         switchMain('prof');
         initialShowProfile = false;
       }
+      } // Close the if (row && row.cid) block
     });
 
     document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};

@@ -281,6 +281,11 @@
 
     // Training calendar rendering
     async function renderTrainingCal(){
+      if (!gid) {
+        console.error('gid is not set yet');
+        return;
+      }
+      
       const first = new Date(trainingCalYear, trainingCalMonth, 1);
       const last = new Date(trainingCalYear, trainingCalMonth + 1, 0);
       document.getElementById('trainingCalTitle').textContent = `${trainingCalYear}年 ${trainingCalMonth + 1}月`;
@@ -326,20 +331,32 @@
         td.style.border = '1px solid #ccc';
         
         td.onclick = async () => {
-          if (isAvailable) {
-            // Remove availability
-            await supabase
-              .from('training_availability')
-              .delete()
-              .eq('gid', gid)
-              .eq('date', dateStr);
-          } else {
-            // Add availability
-            await supabase
-              .from('training_availability')
-              .insert({ gid, date: dateStr, max_slots: 1 });
+          if (!gid) {
+            alert('ゴルフ場情報が読み込まれていません。ページを再読み込みしてください。');
+            return;
           }
-          renderTrainingCal(); // Re-render
+          
+          try {
+            if (isAvailable) {
+              // Remove availability
+              const { error } = await supabase
+                .from('training_availability')
+                .delete()
+                .eq('gid', gid)
+                .eq('date', dateStr);
+              if (error) throw error;
+            } else {
+              // Add availability
+              const { error } = await supabase
+                .from('training_availability')
+                .insert({ gid, date: dateStr, max_slots: 1 });
+              if (error) throw error;
+            }
+            renderTrainingCal(); // Re-render
+          } catch (error) {
+            alert('エラーが発生しました: ' + error.message);
+            console.error('Training availability error:', error);
+          }
         };
         
         row.appendChild(td);
