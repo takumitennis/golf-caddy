@@ -24,53 +24,30 @@
     );
 
     // 現在のユーザー取得
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (data.user) {
-        const user = data.user;
-        const role = user.user_metadata?.role || "guest";
-        let table = role === "golf" ? "golf_courses" : "caddies";
-        let { data: rows, error } = await supabase
-          .from(table)
-          .select("*")
-          .eq("email", user.email)
-          .limit(1);
-        const prof = rows && rows[0];
-        if (user && prof) {
-          const name = prof.name || prof.contact_name || "Guest";
-          document.getElementById("welcome").textContent = 
-            (role === "golf" 
-              ? `ようこそ ${name} 様`
-              : `ようこそ ${name} さん`) || "プロフィール未登録です";
-          
-          if (prof) {
-            const details = Object.entries(prof)
-              .filter(([k,v]) => !["email","created_at"].includes(k))
-              .map(([k,v]) => `<div><strong>${k}</strong>: ${v ?? ""}</div>`)
-              .join("");
-            document.querySelector(".card").insertAdjacentHTML("beforeend", details);
-          }
-          
-          // リダイレクト前に少し待機して無限ループを防ぐ
-          setTimeout(() => {
-            if (role === "golf" && window.location.pathname !== "/golf_dashboard.html") {
-              window.location.href = "golf_dashboard.html";
-              return;
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user) {
+            const user = session.user;
+            const role = user.user_metadata?.role || "guest";
+            let table = role === "golf" ? "golf_courses" : "caddies";
+
+            let { data: prof, error } = await supabase
+                .from(table)
+                .select("email")
+                .eq("email", user.email)
+                .single();
+
+            if (prof) {
+                if (role === "golf") {
+                    window.location.href = "golf_dashboard.html";
+                } else if (role === "caddy") {
+                    window.location.href = "caddy_dashboard.html";
+                }
+            } else {
+                window.location.href = "profile.html";
             }
-            if (role === "caddy" && window.location.pathname !== "/caddy_dashboard.html") {
-              window.location.href = "caddy_dashboard.html";
-              return;
-            }
-          }, 100);
-        } else if (user) {
-          // ユーザーは存在するがプロフィールがない場合はプロフィール登録へ
-          window.location.href = "profile.html";
         } else {
-          // 未ログインの場合はトップページへ
-          window.location.href = "/";
+            window.location.href = "/";
         }
-      } else {
-        window.location.href = "/";
-      }
     });
 
     // ログアウト処理

@@ -105,16 +105,12 @@
           location.href = "dashboard.html";
         }
       } else {
-        // 新規登録時は一時パスワードを生成
         const tempPassword = Math.random().toString(36).slice(-8) + "Tmp123!";
-        
         try {
           const res = await supabase.auth.signUp({ 
             email, 
             password: tempPassword,
-            options: {
-              data: { role: role }
-            }
+            options: { data: { role: role } }
           });
           
           if (res.error) {
@@ -124,24 +120,8 @@
             return;
           }
           
-          // セッション確立を確認
-          if (res.data.user && !res.data.session) {
-            console.log("No session returned, attempting sign in...");
-            const signInRes = await supabase.auth.signInWithPassword({ 
-              email, 
-              password: tempPassword 
-            });
-            
-            if (signInRes.error) {
-              console.error("Auto sign-in failed:", signInRes.error);
-              alert("登録は完了しましたが、自動ログインに失敗しました。手動でログインしてください。");
-              return;
-            }
-          }
-          
-          alert("登録が完了しました");
-          console.log("Redirecting to profile.html");
-          location.href = "profile.html";
+          alert("登録が完了しました。最初の情報入力画面に遷移します。");
+          location.href = "dashboard.html"; // 登録後もdashboardへ
           
         } catch (error) {
           console.error("Registration error:", error);
