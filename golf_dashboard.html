@@ -257,26 +257,43 @@
       try {
         console.log('Inserting data:', { gid, date: currentEditingDate, max_slots: maxSlots });
         
-        // First try to insert, if fails due to conflict, then update
-        let { data, error } = await supabase
+        // Use a more robust approach with detailed error checking
+        console.log('Attempting to save training availability...');
+        
+        // First check if the record exists
+        const { data: existingData, error: checkError } = await supabase
           .from('training_availability')
-          .insert({ gid, date: currentEditingDate, max_slots: maxSlots });
+          .select('id')
+          .eq('gid', gid)
+          .eq('date', currentEditingDate)
+          .maybeSingle();
         
-        console.log('Insert response:', { data, error });
+        console.log('Existing record check:', { existingData, checkError });
         
-        // If insert fails due to duplicate key, try update instead
-        if (error && (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique'))) {
-          console.log('Duplicate found, trying update...');
-          const updateResult = await supabase
+        let result;
+        if (checkError) {
+          console.error('Error checking existing record:', checkError);
+          throw new Error(`データベース接続エラー: ${checkError.message || checkError.toString()}`);
+        }
+        
+        if (existingData) {
+          // Record exists, update it
+          console.log('Updating existing record...');
+          result = await supabase
             .from('training_availability')
             .update({ max_slots: maxSlots })
             .eq('gid', gid)
             .eq('date', currentEditingDate);
-          
-          data = updateResult.data;
-          error = updateResult.error;
-          console.log('Update response:', { data, error });
+        } else {
+          // Record doesn't exist, insert new one
+          console.log('Inserting new record...');
+          result = await supabase
+            .from('training_availability')
+            .insert({ gid, date: currentEditingDate, max_slots: maxSlots });
         }
+        
+        const { data, error } = result;
+        console.log('Final operation result:', { data, error });
         
         if (error) {
           console.error('Supabase error details:', {
@@ -287,16 +304,24 @@
             full: error
           });
           
-          // Specific error handling
+          // Specific error handling with more details
+          let errorMessage = 'Unknown database error';
+          
           if (error.code === '42P01') {
-            throw new Error('データベーステーブル "training_availability" が存在しません。管理者にお問い合わせください。');
+            errorMessage = 'データベーステーブル "training_availability" が存在しません。管理者にお問い合わせください。';
           } else if (error.code === '23505') {
-            throw new Error('この日付は既に設定されています。');
+            errorMessage = 'この日付は既に設定されています。';
           } else if (error.code === '23503') {
-            throw new Error('ゴルフ場IDが無効です。');
-          } else {
-            throw new Error(`データベースエラー: ${error.message || 'Unknown database error'}`);
+            errorMessage = 'ゴルフ場IDが無効です。';
+          } else if (error.code === '42501') {
+            errorMessage = 'データベースへのアクセス権限がありません。RLSポリシーを確認してください。';
+          } else if (error.message) {
+            errorMessage = `データベースエラー: ${error.message}`;
+          } else if (error.toString && typeof error.toString === 'function') {
+            errorMessage = `エラー: ${error.toString()}`;
           }
+          
+          throw new Error(errorMessage);
         }
         
         console.log('Successfully saved training availability');
