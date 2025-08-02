@@ -109,6 +109,20 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    /*
+    Required Supabase table:
+    
+    CREATE TABLE IF NOT EXISTS public.training_availability (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      gid TEXT NOT NULL,
+      date DATE NOT NULL,
+      max_slots INT DEFAULT 1,
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(gid, date)
+    );
+    
+    ALTER TABLE public.training_availability ENABLE ROW LEVEL SECURITY;
+    */
     const supabase = window.supabase.createClient(
       "https://vqjxajzaasuqfgvhvxci.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
@@ -243,17 +257,46 @@
       try {
         console.log('Inserting data:', { gid, date: currentEditingDate, max_slots: maxSlots });
         
-        const { data, error } = await supabase
+        // First try to insert, if fails due to conflict, then update
+        let { data, error } = await supabase
           .from('training_availability')
-          .upsert({ gid, date: currentEditingDate, max_slots: maxSlots }, { 
-            onConflict: 'gid,date' 
-          });
+          .insert({ gid, date: currentEditingDate, max_slots: maxSlots });
         
-        console.log('Supabase response:', { data, error });
+        console.log('Insert response:', { data, error });
+        
+        // If insert fails due to duplicate key, try update instead
+        if (error && (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique'))) {
+          console.log('Duplicate found, trying update...');
+          const updateResult = await supabase
+            .from('training_availability')
+            .update({ max_slots: maxSlots })
+            .eq('gid', gid)
+            .eq('date', currentEditingDate);
+          
+          data = updateResult.data;
+          error = updateResult.error;
+          console.log('Update response:', { data, error });
+        }
         
         if (error) {
-          console.error('Supabase error:', error);
-          throw error;
+          console.error('Supabase error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+            full: error
+          });
+          
+          // Specific error handling
+          if (error.code === '42P01') {
+            throw new Error('データベーステーブル "training_availability" が存在しません。管理者にお問い合わせください。');
+          } else if (error.code === '23505') {
+            throw new Error('この日付は既に設定されています。');
+          } else if (error.code === '23503') {
+            throw new Error('ゴルフ場IDが無効です。');
+          } else {
+            throw new Error(`データベースエラー: ${error.message || 'Unknown database error'}`);
+          }
         }
         
         console.log('Successfully saved training availability');
@@ -261,7 +304,8 @@
         renderTrainingCal();
       } catch (error) {
         console.error('Full error object:', error);
-        alert('保存エラー: ' + (error?.message || error?.toString() || 'Unknown error'));
+        const errorMessage = error.message || error.toString() || 'Unknown error';
+        alert('保存エラー: ' + errorMessage);
       }
     }
 
