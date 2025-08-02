@@ -210,22 +210,58 @@
     }
     
     async function saveTrainingAvailability() {
-      const maxSlots = parseInt(document.getElementById('slotsInput').value);
-      if (!currentEditingDate || !maxSlots || maxSlots < 1) {
-        alert('有効な人数を入力してください');
+      console.log('saveTrainingAvailability called');
+      console.log('gid:', gid);
+      console.log('currentEditingDate:', currentEditingDate);
+      
+      // DOM要素の存在確認
+      const slotsInputElement = document.getElementById('slotsInput');
+      if (!slotsInputElement) {
+        alert('エラー: 人数入力フィールドが見つかりません');
+        return;
+      }
+      
+      const maxSlots = parseInt(slotsInputElement.value);
+      console.log('maxSlots:', maxSlots);
+      
+      // データ検証
+      if (!gid) {
+        alert('エラー: ゴルフ場情報が設定されていません。ページを再読み込みしてください。');
+        return;
+      }
+      
+      if (!currentEditingDate) {
+        alert('エラー: 編集対象の日付が設定されていません');
+        return;
+      }
+      
+      if (!maxSlots || maxSlots < 1 || maxSlots > 10) {
+        alert('有効な人数（1-10）を入力してください');
         return;
       }
       
       try {
-        const { error } = await supabase
-          .from('training_availability')
-          .insert({ gid, date: currentEditingDate, max_slots: maxSlots });
-        if (error) throw error;
+        console.log('Inserting data:', { gid, date: currentEditingDate, max_slots: maxSlots });
         
+        const { data, error } = await supabase
+          .from('training_availability')
+          .upsert({ gid, date: currentEditingDate, max_slots: maxSlots }, { 
+            onConflict: 'gid,date' 
+          });
+        
+        console.log('Supabase response:', { data, error });
+        
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+        
+        console.log('Successfully saved training availability');
         document.getElementById('trainingSlotsModal').style.display = 'none';
         renderTrainingCal();
       } catch (error) {
-        alert('保存エラー: ' + error.message);
+        console.error('Full error object:', error);
+        alert('保存エラー: ' + (error?.message || error?.toString() || 'Unknown error'));
       }
     }
 
