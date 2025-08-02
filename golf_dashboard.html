@@ -84,7 +84,21 @@
       <button id="nextTrainingMonth">▶</button>
     </div>
     <table class="calendar" id="trainingCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small style="display:block;margin-top:8px;">クリックで研修可能日を設定/解除</small>
+    <small style="display:block;margin-top:8px;">青=設定済み, 白=未設定 | クリックで設定/解除</small>
+  </div>
+
+  <!-- Training slots modal -->
+  <div id="trainingSlotsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;z-index:100;">
+    <div style="background:#fff;padding:24px;border-radius:8px;width:90%;max-width:400px;">
+      <h3>研修可能人数設定</h3>
+      <p id="modalDateDisplay"></p>
+      <label for="slotsInput">同時可能人数:</label>
+      <input type="number" id="slotsInput" min="1" max="10" value="1" style="width:100%;padding:8px;margin:8px 0;font-size:1rem;">
+      <div style="margin-top:20px;text-align:right;">
+        <button id="cancelSlotsModal" style="padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;">キャンセル</button>
+        <button id="saveSlotsModal" style="margin-left:10px;padding:8px 16px;border:none;background:#3498db;color:#fff;border-radius:4px;cursor:pointer;">保存</button>
+      </div>
+    </div>
   </div>
 
   <!-- Tab 4: Training requests -->
@@ -171,6 +185,50 @@
       loadBookings();
     };
 
+    // Training slots modal functions
+    let currentEditingDate = null;
+    
+    function showTrainingSlotsModal(dateStr) {
+      currentEditingDate = dateStr;
+      document.getElementById('modalDateDisplay').textContent = `日付: ${dateStr}`;
+      document.getElementById('slotsInput').value = 1;
+      document.getElementById('trainingSlotsModal').style.display = 'flex';
+    }
+    
+    async function removeTrainingAvailability(dateStr) {
+      try {
+        const { error } = await supabase
+          .from('training_availability')
+          .delete()
+          .eq('gid', gid)
+          .eq('date', dateStr);
+        if (error) throw error;
+        renderTrainingCal();
+      } catch (error) {
+        alert('削除エラー: ' + error.message);
+      }
+    }
+    
+    async function saveTrainingAvailability() {
+      const maxSlots = parseInt(document.getElementById('slotsInput').value);
+      if (!currentEditingDate || !maxSlots || maxSlots < 1) {
+        alert('有効な人数を入力してください');
+        return;
+      }
+      
+      try {
+        const { error } = await supabase
+          .from('training_availability')
+          .insert({ gid, date: currentEditingDate, max_slots: maxSlots });
+        if (error) throw error;
+        
+        document.getElementById('trainingSlotsModal').style.display = 'none';
+        renderTrainingCal();
+      } catch (error) {
+        alert('保存エラー: ' + error.message);
+      }
+    }
+
     // Initialize all event listeners after gid is available
     function initializeEventListeners() {
       // --- Tabs logic ---
@@ -210,6 +268,12 @@
       
       // logout
       document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
+      
+      // Training slots modal events
+      document.getElementById('cancelSlotsModal').onclick = () => {
+        document.getElementById('trainingSlotsModal').style.display = 'none';
+      };
+      document.getElementById('saveSlotsModal').onclick = saveTrainingAvailability;
     }
 
     // --- Calendar variables (moved outside initializeEventListeners) ---
@@ -315,17 +379,17 @@
       const last = new Date(trainingCalYear, trainingCalMonth + 1, 0);
       document.getElementById('trainingCalTitle').textContent = `${trainingCalYear}年 ${trainingCalMonth + 1}月`;
       
-      // Fetch existing training availability
+      // Fetch existing training availability with slot counts
       const { data: availData, error } = await supabase
         .from('training_availability')
-        .select('date')
+        .select('date, max_slots')
         .eq('gid', gid)
         .gte('date', first.toISOString().slice(0,10))
         .lte('date', last.toISOString().slice(0,10));
       
-      const availableSet = new Set();
+      const availabilityMap = new Map();
       if (!error && availData) {
-        availData.forEach(r => availableSet.add(r.date));
+        availData.forEach(r => availabilityMap.set(r.date, r.max_slots || 1));
       }
       
       // Build calendar grid
@@ -348,39 +412,32 @@
       for(let day = 1; day <= last.getDate(); day++){
         const dateStr = `${trainingCalYear}-${String(trainingCalMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td = document.createElement('td');
-        const isAvailable = availableSet.has(dateStr);
+        const maxSlots = availabilityMap.get(dateStr);
+        const isAvailable = maxSlots !== undefined;
         
-        td.innerHTML = `<div style="padding:4px;">${day}</div>`;
+        td.innerHTML = `<div style="padding:8px;text-align:center;">
+          <div style="font-weight:bold;">${day}</div>
+          ${isAvailable ? `<small>${maxSlots}人</small>` : ''}
+        </div>`;
         td.style.cursor = 'pointer';
-        td.style.backgroundColor = isAvailable ? '#c8e6c9' : '#fff';
+        td.style.backgroundColor = isAvailable ? '#3498db' : '#fff';
+        td.style.color = isAvailable ? '#fff' : '#000';
         td.style.border = '1px solid #ccc';
         
-        td.onclick = async () => {
+        td.onclick = () => {
           if (!gid) {
             alert('ゴルフ場情報が読み込まれていません。ページを再読み込みしてください。');
             return;
           }
           
-          try {
-            if (isAvailable) {
-              // Remove availability
-              const { error } = await supabase
-                .from('training_availability')
-                .delete()
-                .eq('gid', gid)
-                .eq('date', dateStr);
-              if (error) throw error;
-            } else {
-              // Add availability
-              const { error } = await supabase
-                .from('training_availability')
-                .insert({ gid, date: dateStr, max_slots: 1 });
-              if (error) throw error;
+          if (isAvailable) {
+            // Show confirmation for removal
+            if (confirm(`${dateStr} の研修可能日設定を削除しますか？`)) {
+              removeTrainingAvailability(dateStr);
             }
-            renderTrainingCal(); // Re-render
-          } catch (error) {
-            alert('エラーが発生しました: ' + error.message);
-            console.error('Training availability error:', error);
+          } else {
+            // Show slots modal for adding
+            showTrainingSlotsModal(dateStr);
           }
         };
         
