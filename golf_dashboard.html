@@ -570,16 +570,55 @@
       }
       
       try {
-        const { data, error } = await supabase
+        // First get training requests
+        const { data: requests, error: requestsError } = await supabase
           .from('training_requests')
-          .select(`
-            id, cid, training_date, status, created_at,
-            caddies!inner(name, phone, email, university, golf_years, caddy_years, appeal)
-          `)
+          .select('id, cid, training_date, status, created_at')
           .eq('gid', gid)
           .order('created_at', { ascending: false });
         
-        console.log('Training requests query result:', { data, error });
+        console.log('Training requests query result:', { requests, requestsError });
+        
+        if (requestsError) {
+          console.error('Error loading training requests:', requestsError);
+          container.innerHTML = `<p>エラー: ${requestsError.message}</p>`;
+          return;
+        }
+        
+        if (!requests || requests.length === 0) {
+          console.log('No training requests found');
+          container.innerHTML = '<p>研修予約はありません。</p>';
+          return;
+        }
+        
+        // Then get caddy details for each request
+        const cidList = requests.map(r => r.cid);
+        const { data: caddies, error: caddiesError } = await supabase
+          .from('caddies')
+          .select('cid, name, phone, email, university, golf_years, caddy_years, appeal_message')
+          .in('cid', cidList);
+        
+        console.log('Caddies query result:', { caddies, caddiesError });
+        
+        if (caddiesError) {
+          console.error('Error loading caddies:', caddiesError);
+          container.innerHTML = `<p>エラー: ${caddiesError.message}</p>`;
+          return;
+        }
+        
+        // Create a map for quick lookup
+        const caddyMap = new Map();
+        if (caddies) {
+          caddies.forEach(c => caddyMap.set(c.cid, c));
+        }
+        
+        // Combine the data
+        const data = requests.map(request => ({
+          ...request,
+          caddies: caddyMap.get(request.cid) || {}
+        }));
+        
+        console.log('Combined training requests data:', data);
         
         const container = document.getElementById('trainingRequestsList');
         
@@ -621,7 +660,7 @@
             <p><strong>大学:</strong> ${caddy?.university || '不明'}</p>
             <p><strong>ゴルフ歴:</strong> ${caddy?.golf_years || '不明'}年</p>
             <p><strong>キャディ歴:</strong> ${caddy?.caddy_years || '不明'}年</p>
-            <p><strong>アピール:</strong> ${caddy?.appeal || 'なし'}</p>
+            <p><strong>アピール:</strong> ${caddy?.appeal_message || 'なし'}</p>
             ${request.status === 'pending' ? `
               <button onclick="updateTrainingStatus('${request.id}', 'confirmed')" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-right:8px;">承認</button>
               <button onclick="updateTrainingStatus('${request.id}', 'cancelled')" style="background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">拒否</button>
