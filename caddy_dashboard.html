@@ -188,19 +188,34 @@
           return;
         }
         
+        console.log('Sending training request:', {
+          cid,
+          gid: selectedGolfCourse.gid,
+          training_date: selectedTrainingDate,
+          status: 'pending'
+        });
+        
         try {
-          await supabase.from('training_requests').insert({ 
+          const { data, error } = await supabase.from('training_requests').insert({ 
             cid, 
             gid: selectedGolfCourse.gid, 
             training_date: selectedTrainingDate,
             status: 'pending'
           });
           
+          console.log('Training request insert result:', { data, error });
+          
+          if (error) {
+            console.error('Training request insert error:', error);
+            throw error;
+          }
+          
           window.open(`mailto:${selectedGolfCourse.email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${row.name || ''}%0A希望研修日:${selectedTrainingDate}%0A研修を希望しています。`);
           alert('研修希望を送信しました');
           modal.style.display = 'none';
         } catch (error) {
-          alert('送信エラー: ' + error.message);
+          console.error('Training request error:', error);
+          alert('送信エラー: ' + (error.message || error.toString()));
         }
       };
 
