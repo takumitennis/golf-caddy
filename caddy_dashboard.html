@@ -601,6 +601,175 @@
       color: #004085;
       border: 1px solid #b8daff;
     }
+
+    /* Profile Edit Form Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group input[type="number"],
+    .form-group input[type="tel"],
+    .form-group input[type="file"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e1e8ed;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="date"]:focus,
+    .form-group input[type="number"]:focus,
+    .form-group input[type="tel"]:focus,
+    .form-group input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e1e8ed;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
+    }
+
+    .avatar-upload {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .avatar-upload img {
+      border: 2px solid #e1e8ed;
+      border-radius: 50%;
+    }
+
+    .upload-btn {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+         .upload-btn:hover {
+       background: var(--primary-dark);
+       transform: translateY(-1px);
+       box-shadow: var(--shadow);
+     }
+
+     /* Profile Display Styles */
+     .profile-display {
+       display: flex;
+       flex-direction: column;
+       gap: 2rem;
+     }
+
+     .profile-header {
+       display: flex;
+       align-items: center;
+       gap: 1.5rem;
+       padding: 1.5rem;
+       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+       border-radius: var(--border-radius);
+       border: 1px solid #e1e8ed;
+     }
+
+     .profile-avatar {
+       width: 80px;
+       height: 80px;
+       border-radius: 50%;
+       object-fit: cover;
+       border: 3px solid var(--primary-color);
+       box-shadow: var(--shadow);
+     }
+
+     .profile-info {
+       flex: 1;
+     }
+
+     .profile-info h4 {
+       margin: 0 0 0.5rem 0;
+       color: var(--primary-color);
+       font-size: 1.5rem;
+     }
+
+     .profile-info p {
+       margin: 0;
+       color: var(--text-color);
+       opacity: 0.8;
+     }
+
+     .edit-btn {
+       padding: 0.75rem 1.5rem;
+       background: var(--primary-color);
+       color: white;
+       border: none;
+       border-radius: var(--border-radius);
+       cursor: pointer;
+       font-weight: 600;
+       transition: var(--transition);
+     }
+
+     .edit-btn:hover {
+       background: var(--primary-dark);
+       transform: translateY(-1px);
+       box-shadow: var(--shadow);
+     }
+
+     .profile-details {
+       display: grid;
+       gap: 1rem;
+     }
+
+     .detail-item {
+       display: flex;
+       padding: 1rem;
+       background: white;
+       border-radius: var(--border-radius);
+       border: 1px solid #e1e8ed;
+       transition: var(--transition);
+     }
+
+     .detail-item:hover {
+       box-shadow: var(--shadow);
+       transform: translateY(-1px);
+     }
+
+     .detail-label {
+       font-weight: 600;
+       color: var(--primary-color);
+       min-width: 120px;
+       margin-right: 1rem;
+     }
+
+     .detail-value {
+       color: var(--text-color);
+       flex: 1;
+     }
   </style>
 </head>
 <body>
@@ -620,6 +789,63 @@
     <div class="card loading">
       <h3>📋 プロフィール情報</h3>
       <div id="profileContent"></div>
+    </div>
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div id="profileEditModal" class="modal">
+    <div class="modal-content">
+      <h3>✏️ プロフィール編集</h3>
+      <form id="profileForm">
+        <div class="form-group">
+          <label>プロフィール画像</label>
+          <div class="avatar-upload">
+            <img id="avatarPreview" src="https://placehold.co/100x100" alt="アバター" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;">
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            <button type="button" id="uploadAvatarBtn" class="upload-btn">画像を選択</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>氏名 *</label>
+          <input type="text" id="profileName" required>
+        </div>
+        
+        <div class="form-group">
+          <label>生年月日</label>
+          <input type="date" id="profileBirth">
+        </div>
+        
+        <div class="form-group">
+          <label>電話番号</label>
+          <input type="tel" id="profilePhone">
+        </div>
+        
+        <div class="form-group">
+          <label>所属大学</label>
+          <input type="text" id="profileUniversity">
+        </div>
+        
+        <div class="form-group">
+          <label>ゴルフ歴 (年)</label>
+          <input type="number" id="profileGolfYears" min="0" value="0">
+        </div>
+        
+        <div class="form-group">
+          <label>キャディ歴 (年)</label>
+          <input type="number" id="profileCaddyYears" min="0" value="0">
+        </div>
+        
+        <div class="form-group">
+          <label>アピールポイント</label>
+          <textarea id="profileAppeal" rows="4" placeholder="自分の強みや特徴をアピールしてください..."></textarea>
+        </div>
+        
+        <div class="modal-buttons">
+          <button type="button" id="cancelProfileEdit" class="cancel">キャンセル</button>
+          <button type="submit" class="send">保存</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -778,6 +1004,49 @@
     document.getElementById('btnMainHist').addEventListener('click', () => switchTab('mainHistory'));
     document.getElementById('btnMainMsg').addEventListener('click', () => switchTab('mainMessages'));
 
+    // Profile edit modal event handlers
+    document.getElementById('uploadAvatarBtn').addEventListener('click', () => {
+      document.getElementById('avatarInput').click();
+    });
+
+    document.getElementById('avatarInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('avatarPreview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('cancelProfileEdit').addEventListener('click', () => {
+      document.getElementById('profileEditModal').style.display = 'none';
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('profileName').value,
+        birth_date: document.getElementById('profileBirth').value,
+        phone: document.getElementById('profilePhone').value,
+        university: document.getElementById('profileUniversity').value,
+        golf_years: document.getElementById('profileGolfYears').value,
+        caddy_years: document.getElementById('profileCaddyYears').value,
+        appeal: document.getElementById('profileAppeal').value
+      };
+
+      // Upload avatar if selected
+      const avatarFile = document.getElementById('avatarInput').files[0];
+      if (avatarFile) {
+        await uploadAvatar(avatarFile);
+      }
+
+      // Save profile data
+      await saveProfile(formData);
+    });
+
     function switchTab(tabName) {
       document.querySelectorAll('.tabs-main button').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('[id^="main"]').forEach(div => div.classList.add('hidden'));
@@ -804,16 +1073,196 @@
       if (data) {
         const profileContent = document.getElementById('profileContent');
         profileContent.innerHTML = `
-          <div style="display: grid; gap: 1rem;">
-            <div><strong>名前:</strong> ${data.name}</div>
-            <div><strong>メール:</strong> ${data.email}</div>
-            <div><strong>電話番号:</strong> ${data.phone || '未設定'}</div>
-            <div><strong>経験年数:</strong> ${data.experience_years || 0}年</div>
-            <div><strong>登録日:</strong> ${new Date(data.created_at).toLocaleDateString('ja-JP')}</div>
+          <div class="profile-display">
+            <div class="profile-header">
+              <img src="${data.avatar_url || 'https://placehold.co/100x100'}" alt="プロフィール画像" class="profile-avatar">
+              <div class="profile-info">
+                <h4>${data.name}</h4>
+                <p>${data.email}</p>
+              </div>
+              <button id="editProfileBtn" class="edit-btn">編集</button>
+            </div>
+            <div class="profile-details">
+              <div class="detail-item">
+                <span class="detail-label">電話番号:</span>
+                <span class="detail-value">${data.phone || '未設定'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">所属大学:</span>
+                <span class="detail-value">${data.university || '未設定'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">ゴルフ歴:</span>
+                <span class="detail-value">${data.golf_years || 0}年</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">キャディ歴:</span>
+                <span class="detail-value">${data.caddy_years || 0}年</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">アピールポイント:</span>
+                <span class="detail-value">${data.appeal || '未設定'}</span>
+              </div>
+            </div>
           </div>
         `;
+
+        // Add edit button event listener
+        document.getElementById('editProfileBtn').addEventListener('click', () => {
+          showProfileEditModal(data);
+        });
       }
     }
+
+    // Show profile edit modal
+    function showProfileEditModal(data) {
+      // Populate form with current data
+      document.getElementById('profileName').value = data.name || '';
+      document.getElementById('profileBirth').value = data.birth_date || '';
+      document.getElementById('profilePhone').value = data.phone || '';
+      document.getElementById('profileUniversity').value = data.university || '';
+      document.getElementById('profileGolfYears').value = data.golf_years || 0;
+      document.getElementById('profileCaddyYears').value = data.caddy_years || 0;
+      document.getElementById('profileAppeal').value = data.appeal || '';
+      
+      // Set avatar preview
+      const avatarPreview = document.getElementById('avatarPreview');
+      avatarPreview.src = data.avatar_url || 'https://placehold.co/100x100';
+      
+      // Show modal
+      document.getElementById('profileEditModal').style.display = 'flex';
+    }
+
+    // Save profile
+    async function saveProfile(formData) {
+      try {
+        const { error } = await supabase
+          .from('caddies')
+          .update({
+            name: formData.name,
+            birth_date: formData.birth_date || null,
+            phone: formData.phone,
+            university: formData.university,
+            golf_years: parseInt(formData.golf_years) || 0,
+            caddy_years: parseInt(formData.caddy_years) || 0,
+            appeal: formData.appeal
+          })
+          .eq('cid', cid);
+
+        if (error) throw error;
+
+        showMessage('プロフィールを更新しました！', 'success');
+        document.getElementById('profileEditModal').style.display = 'none';
+        loadProfile(); // Reload profile display
+      } catch (error) {
+        showMessage('エラーが発生しました: ' + error.message, 'error');
+      }
+    }
+
+    // Upload avatar
+    async function uploadAvatar(file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${cid}_${Date.now()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        // Update avatar_url in database
+        const { error: updateError } = await supabase
+          .from('caddies')
+          .update({ avatar_url: publicUrl })
+          .eq('cid', cid);
+
+        if (updateError) throw updateError;
+
+        showMessage('プロフィール画像を更新しました！', 'success');
+        return publicUrl;
+      } catch (error) {
+        showMessage('画像のアップロードに失敗しました: ' + error.message, 'error');
+        return null;
+      }
+    }
+
+    // Show message function
+    function showMessage(message, type = 'info') {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = message;
+      messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+        max-width: 300px;
+      `;
+
+      // Set background color based on type
+      switch (type) {
+        case 'success':
+          messageDiv.style.background = '#28a745';
+          break;
+        case 'error':
+          messageDiv.style.background = '#dc3545';
+          break;
+        case 'info':
+        default:
+          messageDiv.style.background = '#17a2b8';
+          break;
+      }
+
+      document.body.appendChild(messageDiv);
+
+      // Remove message after 3 seconds
+      setTimeout(() => {
+        messageDiv.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+          if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Add CSS animations for messages
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
 
     // Calendar management
     function loadCalendar() {
