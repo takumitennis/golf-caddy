@@ -529,30 +529,6 @@
       };
       
       document.getElementById('saveProfileEditBtn').onclick = saveProfileEdit;
-      
-      // Message related event listeners
-      document.getElementById('btnInbox').onclick = () => {
-        document.getElementById('btnInbox').classList.add('active');
-        document.getElementById('btnSent').classList.remove('active');
-        loadMessages('inbox');
-      };
-      
-      document.getElementById('btnSent').onclick = () => {
-        document.getElementById('btnSent').classList.add('active');
-        document.getElementById('btnInbox').classList.remove('active');
-        loadMessages('sent');
-      };
-      
-      document.getElementById('btnNewMessage').onclick = () => {
-        loadCaddiesForMessage();
-        document.getElementById('newMessageModal').style.display = 'flex';
-      };
-      
-      document.getElementById('cancelMessage').onclick = () => {
-        document.getElementById('newMessageModal').style.display = 'none';
-      };
-      
-      document.getElementById('sendMessage').onclick = sendNewMessage;
     }
 
     // --- Calendar variables (moved outside initializeEventListeners) ---
@@ -658,6 +634,48 @@
         mainStatusDiv.classList.add('hidden');
         btnMainMsg.classList.add('active');btnMainProf.classList.remove('active');btnMainStat.classList.remove('active');
         loadMessages('inbox');
+        
+        // Initialize message event listeners when messages tab is shown
+        setTimeout(() => {
+          const btnInbox = document.getElementById('btnInbox');
+          const btnSent = document.getElementById('btnSent');
+          const btnNewMessage = document.getElementById('btnNewMessage');
+          const cancelMessage = document.getElementById('cancelMessage');
+          const sendMessage = document.getElementById('sendMessage');
+          
+          if (btnInbox && !btnInbox.onclick) {
+            btnInbox.onclick = () => {
+              btnInbox.classList.add('active');
+              btnSent.classList.remove('active');
+              loadMessages('inbox');
+            };
+          }
+          
+          if (btnSent && !btnSent.onclick) {
+            btnSent.onclick = () => {
+              btnSent.classList.add('active');
+              btnInbox.classList.remove('active');
+              loadMessages('sent');
+            };
+          }
+          
+          if (btnNewMessage && !btnNewMessage.onclick) {
+            btnNewMessage.onclick = () => {
+              loadCaddiesForMessage();
+              document.getElementById('newMessageModal').style.display = 'flex';
+            };
+          }
+          
+          if (cancelMessage && !cancelMessage.onclick) {
+            cancelMessage.onclick = () => {
+              document.getElementById('newMessageModal').style.display = 'none';
+            };
+          }
+          
+          if (sendMessage && !sendMessage.onclick) {
+            sendMessage.onclick = sendNewMessage;
+          }
+        }, 100);
       }else{
         mainStatusDiv.classList.remove('hidden');
         mainProfileDiv.classList.add('hidden');
@@ -962,7 +980,13 @@
 
     // Load messages
     async function loadMessages(type = 'inbox') {
+      console.log('Loading messages for type:', type, 'gid:', gid);
       const messagesList = document.getElementById('messagesList');
+      
+      if (!messagesList) {
+        console.error('messagesList element not found');
+        return;
+      }
       
       try {
         let query;
