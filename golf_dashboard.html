@@ -104,6 +104,7 @@
   <!-- Tab 4: Training requests -->
   <div id="tab4" class="hidden" style="margin-top:20px;">
     <h3>研修予約者一覧</h3>
+    <button id="debugTrainingRequests" style="background:#f39c12;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin-bottom:10px;">デバッグ: 全データ確認</button>
     <div id="trainingRequestsList"></div>
   </div>
 
@@ -489,6 +490,12 @@
       };
       
       document.getElementById('saveProfileEditBtn').onclick = saveProfileEdit;
+      
+      // Debug training requests button
+      const debugTrainingRequestsBtn = document.getElementById('debugTrainingRequests');
+      if (debugTrainingRequestsBtn) {
+        debugTrainingRequestsBtn.onclick = debugTrainingRequests;
+      }
     }
 
     // --- Calendar variables (moved outside initializeEventListeners) ---
@@ -694,6 +701,16 @@
       
       try {
         // First get training requests
+        console.log('Querying training_requests for gid:', gid);
+        
+        // まず、training_requestsテーブルが存在するか確認
+        const { data: tableCheck, error: tableError } = await supabase
+          .from('training_requests')
+          .select('id')
+          .limit(1);
+        
+        console.log('Table check result:', { tableCheck, tableError });
+        
         const { data: requests, error: requestsError } = await supabase
           .from('training_requests')
           .select('id, cid, training_date, status, created_at')
@@ -744,13 +761,20 @@
         console.log('Combined training requests data:', data);
         
         if (!data || data.length === 0) {
-          console.log('No training requests found');
+          console.log('No training requests found for this golf course');
           // Also try to load all requests to see if any exist
           const { data: allData, error: allError } = await supabase
             .from('training_requests')
             .select('id, gid, cid, training_date, status, created_at');
           
           console.log('All training requests in database:', { allData, allError });
+          
+          // デバッグ用：現在のgidと一致するリクエストを確認
+          if (allData && allData.length > 0) {
+            const matchingRequests = allData.filter(req => req.gid === gid);
+            console.log('Matching requests for current gid:', matchingRequests);
+          }
+          
           container.innerHTML = '<p>研修予約はありません。</p>';
           return;
         }
@@ -789,6 +813,34 @@
         console.error('Error in loadTrainingRequests:', error);
         const errorMessage = error.message || '不明なエラーが発生しました';
         document.getElementById('trainingRequestsList').innerHTML = `<p>読み込みエラー: ${errorMessage}</p>`;
+      }
+    }
+
+    // Debug function to check all training requests
+    async function debugTrainingRequests() {
+      console.log('=== DEBUG: Checking all training requests ===');
+      console.log('Current gid:', gid);
+      
+      try {
+        // Check all training requests
+        const { data: allRequests, error: allError } = await supabase
+          .from('training_requests')
+          .select('*');
+        
+        console.log('All training requests:', { allRequests, allError });
+        
+        if (allRequests && allRequests.length > 0) {
+          const matchingRequests = allRequests.filter(req => req.gid === gid);
+          console.log('Matching requests for current gid:', matchingRequests);
+          
+          // Show in alert for easy viewing
+          alert(`全研修リクエスト数: ${allRequests.length}\n現在のゴルフ場(gid: ${gid})へのリクエスト数: ${matchingRequests.length}`);
+        } else {
+          alert('研修リクエストがありません');
+        }
+      } catch (error) {
+        console.error('Debug error:', error);
+        alert('デバッグエラー: ' + error.message);
       }
     }
 

@@ -196,6 +196,14 @@
         });
         
         try {
+          // まず、training_requestsテーブルが存在するか確認
+          const { data: tableCheck, error: tableError } = await supabase
+            .from('training_requests')
+            .select('id')
+            .limit(1);
+          
+          console.log('Table check result:', { tableCheck, tableError });
+          
           const { data, error } = await supabase.from('training_requests').insert({ 
             cid, 
             gid: selectedGolfCourse.gid, 
