@@ -48,16 +48,11 @@
           return;
         }
 
-        if (profile) {
-          // プロフィールあり: 各ダッシュボードへ
-          if (role === "golf") {
-            window.location.href = "/golf_dashboard.html";
-          } else {
-            window.location.href = "/caddy_dashboard.html";
-          }
+        // プロフィールの有無に関係なく、各ダッシュボードへ直接アクセス
+        if (role === "golf") {
+          window.location.href = "/golf_dashboard.html";
         } else {
-          // プロフィールなし: 各情報入力画面へ
-          window.location.href = `/profile.html?role=${role}`;
+          window.location.href = "/caddy_dashboard.html";
         }
       } else {
         // 未ログイン: ホームページへ
