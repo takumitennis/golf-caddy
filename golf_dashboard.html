@@ -238,6 +238,11 @@
       // Initialize all event listeners after gid is set
       initializeEventListeners();
       isInitialized = true;
+      
+      // If currently on training requests tab, load the data
+      if (document.getElementById('tab4').classList.contains('hidden') === false) {
+        loadTrainingRequests();
+      }
     });
 
     // 2. load bookings
@@ -557,7 +562,18 @@
       } else if(idx===4){
         tab4.classList.remove('hidden');
         btnTab4.classList.add('active');
-        loadTrainingRequests();
+        if (gid) {
+          loadTrainingRequests();
+        } else {
+          document.getElementById('trainingRequestsList').innerHTML = '<p>読み込み中...</p>';
+          // Wait for gid to be initialized
+          const checkGid = setInterval(() => {
+            if (gid) {
+              clearInterval(checkGid);
+              loadTrainingRequests();
+            }
+          }, 100);
+        }
       }
     }
 
@@ -668,9 +684,11 @@
     async function loadTrainingRequests(){
       console.log('Loading training requests for gid:', gid);
       
+      const container = document.getElementById('trainingRequestsList');
+      
       if (!gid) {
         console.error('gid is not set when loading training requests');
-        document.getElementById('trainingRequestsList').innerHTML = '<p>ゴルフ場情報が読み込まれていません。</p>';
+        container.innerHTML = '<p>ゴルフ場情報が読み込まれていません。ページを再読み込みしてください。</p>';
         return;
       }
       
@@ -725,14 +743,6 @@
         
         console.log('Combined training requests data:', data);
         
-        const container = document.getElementById('trainingRequestsList');
-        
-        if (error) {
-          console.error('Error loading training requests:', error);
-          container.innerHTML = `<p>エラー: ${error.message}</p>`;
-          return;
-        }
-        
         if (!data || data.length === 0) {
           console.log('No training requests found');
           // Also try to load all requests to see if any exist
@@ -777,7 +787,8 @@
       container.innerHTML = html;
       } catch (error) {
         console.error('Error in loadTrainingRequests:', error);
-        document.getElementById('trainingRequestsList').innerHTML = `<p>読み込みエラー: ${error.message}</p>`;
+        const errorMessage = error.message || '不明なエラーが発生しました';
+        document.getElementById('trainingRequestsList').innerHTML = `<p>読み込みエラー: ${errorMessage}</p>`;
       }
     }
 
