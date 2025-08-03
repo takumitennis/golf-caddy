@@ -32,6 +32,7 @@
   <div class="tabs-main">
     <button id="btnMainProf">プロフィール</button>
     <button id="btnMainStat" class="active">ステータス</button>
+    <button id="btnMainMsg">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
   <div id="welcome" style="margin-top:10px;"></div>
@@ -39,6 +40,43 @@
   <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
   <!-- Status Tab (existing content) -->
   <div id="mainStatus">
+  <!-- Messages Tab -->
+  <div id="mainMessages" class="hidden" style="margin-top:15px;">
+    <div class="card">
+      <h3>メッセージ</h3>
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button id="btnInbox" class="active" style="padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">受信ボックス</button>
+        <button id="btnSent" style="padding:8px 16px; border:none; background:#ecf0f1; color:#2c3e50; border-radius:4px; cursor:pointer;">送信済み</button>
+        <button id="btnNewMessage" style="padding:8px 16px; border:none; background:#27ae60; color:#fff; border-radius:4px; cursor:pointer;">新規メッセージ</button>
+      </div>
+      <div id="messagesList"></div>
+    </div>
+  </div>
+  
+  <!-- New Message Modal -->
+  <div id="newMessageModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:#fff; padding:24px; border-radius:8px; width:90%; max-width:500px;">
+      <h3>新規メッセージ</h3>
+      <div style="margin-bottom:15px;">
+        <label>送信先:</label>
+        <select id="messageReceiver" style="width:100%; padding:8px; margin-top:5px;">
+          <option value="">送信先を選択</option>
+        </select>
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>件名:</label>
+        <input type="text" id="messageSubject" style="width:100%; padding:8px; margin-top:5px;">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>内容:</label>
+        <textarea id="messageContent" rows="5" style="width:100%; padding:8px; margin-top:5px;"></textarea>
+      </div>
+      <div style="text-align:right;">
+        <button id="cancelMessage" style="padding:8px 16px; border:1px solid #ccc; background:#f0f0f0; border-radius:4px; cursor:pointer;">キャンセル</button>
+        <button id="sendMessage" style="margin-left:10px; padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">送信</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Tabs -->
   <div class="tabs">
@@ -104,7 +142,6 @@
   <!-- Tab 4: Training requests -->
   <div id="tab4" class="hidden" style="margin-top:20px;">
     <h3>研修予約者一覧</h3>
-    <button id="debugTrainingRequests" style="background:#f39c12;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin-bottom:10px;">デバッグ: 全データ確認</button>
     <div id="trainingRequestsList"></div>
   </div>
 
@@ -443,8 +480,10 @@
       // ---- main tabs ----
       const mainProfileDiv=document.getElementById('mainProfile');
       const mainStatusDiv=document.getElementById('mainStatus');
+      const mainMessagesDiv=document.getElementById('mainMessages');
       document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
       document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
+      document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
       
       // logout
       document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
@@ -491,11 +530,29 @@
       
       document.getElementById('saveProfileEditBtn').onclick = saveProfileEdit;
       
-      // Debug training requests button
-      const debugTrainingRequestsBtn = document.getElementById('debugTrainingRequests');
-      if (debugTrainingRequestsBtn) {
-        debugTrainingRequestsBtn.onclick = debugTrainingRequests;
-      }
+      // Message related event listeners
+      document.getElementById('btnInbox').onclick = () => {
+        document.getElementById('btnInbox').classList.add('active');
+        document.getElementById('btnSent').classList.remove('active');
+        loadMessages('inbox');
+      };
+      
+      document.getElementById('btnSent').onclick = () => {
+        document.getElementById('btnSent').classList.add('active');
+        document.getElementById('btnInbox').classList.remove('active');
+        loadMessages('sent');
+      };
+      
+      document.getElementById('btnNewMessage').onclick = () => {
+        loadCaddiesForMessage();
+        document.getElementById('newMessageModal').style.display = 'flex';
+      };
+      
+      document.getElementById('cancelMessage').onclick = () => {
+        document.getElementById('newMessageModal').style.display = 'none';
+      };
+      
+      document.getElementById('sendMessage').onclick = sendNewMessage;
     }
 
     // --- Calendar variables (moved outside initializeEventListeners) ---
@@ -593,11 +650,19 @@
       if(mode==='prof'){
         mainProfileDiv.classList.remove('hidden');
         mainStatusDiv.classList.add('hidden');
-        btnMainProf.classList.add('active');btnMainStat.classList.remove('active');
+        mainMessagesDiv.classList.add('hidden');
+        btnMainProf.classList.add('active');btnMainStat.classList.remove('active');btnMainMsg.classList.remove('active');
+      }else if(mode==='msg'){
+        mainMessagesDiv.classList.remove('hidden');
+        mainProfileDiv.classList.add('hidden');
+        mainStatusDiv.classList.add('hidden');
+        btnMainMsg.classList.add('active');btnMainProf.classList.remove('active');btnMainStat.classList.remove('active');
+        loadMessages('inbox');
       }else{
         mainStatusDiv.classList.remove('hidden');
         mainProfileDiv.classList.add('hidden');
-        btnMainStat.classList.add('active');btnMainProf.classList.remove('active');
+        mainMessagesDiv.classList.add('hidden');
+        btnMainStat.classList.add('active');btnMainProf.classList.remove('active');btnMainMsg.classList.remove('active');
       }
     }
 
@@ -780,30 +845,42 @@
         }
         
         let html = '';
-        data.forEach(request => {
+        data.forEach((request, index) => {
         const caddy = request.caddies;
         const statusText = request.status === 'pending' ? '申込中' : 
                           request.status === 'confirmed' ? '確定' : 
                           request.status === 'completed' ? '完了' : '取消';
+        const statusColor = request.status === 'pending' ? '#f39c12' : 
+                           request.status === 'confirmed' ? '#27ae60' : 
+                           request.status === 'completed' ? '#3498db' : '#e74c3c';
         
         html += `
-          <div style="border:1px solid #ddd; margin-bottom:12px; padding:16px; border-radius:6px; background:#fff;">
-            <h4>研修申込 (${statusText})</h4>
-            <p><strong>申込日:</strong> ${request.created_at?.slice(0,10) || '不明'}</p>
-            <p><strong>希望研修日:</strong> ${request.training_date || '日付未選択'}</p>
-            <hr>
-            <h5>キャディ情報</h5>
-            <p><strong>名前:</strong> ${caddy?.name || '不明'}</p>
-            <p><strong>電話:</strong> ${caddy?.phone || '不明'}</p>
-            <p><strong>メール:</strong> ${caddy?.email || '不明'}</p>
-            <p><strong>大学:</strong> ${caddy?.university || '不明'}</p>
-            <p><strong>ゴルフ歴:</strong> ${caddy?.golf_years || '不明'}年</p>
-            <p><strong>キャディ歴:</strong> ${caddy?.caddy_years || '不明'}年</p>
-            <p><strong>アピール:</strong> ${caddy?.appeal || 'なし'}</p>
-            ${request.status === 'pending' ? `
-              <button onclick="updateTrainingStatus('${request.id}', 'confirmed')" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-right:8px;">承認</button>
-              <button onclick="updateTrainingStatus('${request.id}', 'cancelled')" style="background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">拒否</button>
-            ` : ''}
+          <div class="training-request-item" style="border:1px solid #ddd; margin-bottom:8px; padding:12px; border-radius:6px; background:#fff; cursor:pointer;" onclick="toggleRequestDetail('${request.id}')">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong>${caddy?.name || '不明'}</strong>
+                <span style="color:#666; margin-left:10px;">希望研修日: ${request.training_date || '日付未選択'}</span>
+              </div>
+              <span style="background:${statusColor}; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.9em;">${statusText}</span>
+            </div>
+            
+            <div id="detail-${request.id}" class="request-detail" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid #eee;">
+              <h5>キャディ詳細情報</h5>
+              <p><strong>申込日:</strong> ${request.created_at?.slice(0,10) || '不明'}</p>
+              <p><strong>電話:</strong> ${caddy?.phone || '不明'}</p>
+              <p><strong>メール:</strong> ${caddy?.email || '不明'}</p>
+              <p><strong>大学:</strong> ${caddy?.university || '不明'}</p>
+              <p><strong>ゴルフ歴:</strong> ${caddy?.golf_years || '不明'}年</p>
+              <p><strong>キャディ歴:</strong> ${caddy?.caddy_years || '不明'}年</p>
+              <p><strong>アピール:</strong> ${caddy?.appeal || 'なし'}</p>
+              
+              ${request.status === 'pending' ? `
+                <div style="margin-top:12px;">
+                  <button onclick="event.stopPropagation(); updateTrainingStatus('${request.id}', 'confirmed')" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-right:8px;">承認</button>
+                  <button onclick="event.stopPropagation(); updateTrainingStatus('${request.id}', 'cancelled')" style="background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">拒否</button>
+                </div>
+              ` : ''}
+            </div>
           </div>
         `;
       });
@@ -816,31 +893,11 @@
       }
     }
 
-    // Debug function to check all training requests
-    async function debugTrainingRequests() {
-      console.log('=== DEBUG: Checking all training requests ===');
-      console.log('Current gid:', gid);
-      
-      try {
-        // Check all training requests
-        const { data: allRequests, error: allError } = await supabase
-          .from('training_requests')
-          .select('*');
-        
-        console.log('All training requests:', { allRequests, allError });
-        
-        if (allRequests && allRequests.length > 0) {
-          const matchingRequests = allRequests.filter(req => req.gid === gid);
-          console.log('Matching requests for current gid:', matchingRequests);
-          
-          // Show in alert for easy viewing
-          alert(`全研修リクエスト数: ${allRequests.length}\n現在のゴルフ場(gid: ${gid})へのリクエスト数: ${matchingRequests.length}`);
-        } else {
-          alert('研修リクエストがありません');
-        }
-      } catch (error) {
-        console.error('Debug error:', error);
-        alert('デバッグエラー: ' + error.message);
+    // Toggle training request detail display
+    window.toggleRequestDetail = function(requestId) {
+      const detailElement = document.getElementById(`detail-${requestId}`);
+      if (detailElement) {
+        detailElement.style.display = detailElement.style.display === 'none' ? 'block' : 'none';
       }
     }
 
@@ -855,9 +912,173 @@
         alert('ステータス更新に失敗しました: ' + error.message);
       } else {
         alert('ステータスを更新しました');
+        
+        // 承認の場合、キャディにメッセージを送信
+        if (status === 'confirmed') {
+          const request = await supabase
+            .from('training_requests')
+            .select('cid, training_date')
+            .eq('id', requestId)
+            .single();
+          
+          if (request.data) {
+            const caddy = await supabase
+              .from('caddies')
+              .select('name')
+              .eq('cid', request.data.cid)
+              .single();
+            
+            if (caddy.data) {
+              await sendMessageToCaddy(request.data.cid, caddy.data.name, request.data.training_date);
+            }
+          }
+        }
+        
         loadTrainingRequests(); // Reload the list
       }
     };
+
+    // Send message to caddy when training is confirmed
+    async function sendMessageToCaddy(cid, caddyName, trainingDate) {
+      try {
+        const { error } = await supabase
+          .from('messages')
+          .insert({
+            sender_type: 'golf_course',
+            sender_id: gid,
+            receiver_type: 'caddy',
+            receiver_id: cid,
+            subject: '研修承認のお知らせ',
+            content: `${caddyName}様\n\n研修申込が承認されました。\n研修日: ${trainingDate}\n\n詳細については、お電話またはメールでご連絡いたします。\n\nよろしくお願いいたします。`
+          });
+        
+        if (error) {
+          console.error('Message send error:', error);
+        }
+      } catch (error) {
+        console.error('Message send error:', error);
+      }
+    }
+
+    // Load messages
+    async function loadMessages(type = 'inbox') {
+      const messagesList = document.getElementById('messagesList');
+      
+      try {
+        let query;
+        if (type === 'inbox') {
+          query = supabase
+            .from('messages')
+            .select('*')
+            .eq('receiver_type', 'golf_course')
+            .eq('receiver_id', gid)
+            .order('created_at', { ascending: false });
+        } else {
+          query = supabase
+            .from('messages')
+            .select('*')
+            .eq('sender_type', 'golf_course')
+            .eq('sender_id', gid)
+            .order('created_at', { ascending: false });
+        }
+        
+        const { data: messages, error } = await query;
+        
+        if (error) {
+          messagesList.innerHTML = `<p>エラー: ${error.message}</p>`;
+          return;
+        }
+        
+        if (!messages || messages.length === 0) {
+          messagesList.innerHTML = '<p>メッセージはありません。</p>';
+          return;
+        }
+        
+        let html = '';
+        messages.forEach(message => {
+          const isUnread = type === 'inbox' && !message.is_read;
+          html += `
+            <div style="border:1px solid #ddd; margin-bottom:8px; padding:12px; border-radius:6px; background:${isUnread ? '#f8f9fa' : '#fff'};">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>${message.subject}</strong>
+                  ${isUnread ? '<span style="background:#e74c3c; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.8em; margin-left:8px;">未読</span>' : ''}
+                </div>
+                <small style="color:#666;">${message.created_at?.slice(0,16).replace('T', ' ')}</small>
+              </div>
+              <p style="margin:8px 0; color:#666;">${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}</p>
+            </div>
+          `;
+        });
+        
+        messagesList.innerHTML = html;
+      } catch (error) {
+        messagesList.innerHTML = `<p>エラー: ${error.message}</p>`;
+      }
+    }
+
+    // Load caddies for message receiver selection
+    async function loadCaddiesForMessage() {
+      try {
+        const { data: caddies, error } = await supabase
+          .from('caddies')
+          .select('cid, name, university')
+          .order('name');
+        
+        if (error) {
+          console.error('Error loading caddies:', error);
+          return;
+        }
+        
+        const select = document.getElementById('messageReceiver');
+        select.innerHTML = '<option value="">送信先を選択</option>';
+        
+        if (caddies) {
+          caddies.forEach(caddy => {
+            select.innerHTML += `<option value="${caddy.cid}">${caddy.name} (${caddy.university})</option>`;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading caddies:', error);
+      }
+    }
+
+    // Send new message
+    async function sendNewMessage() {
+      const receiverId = document.getElementById('messageReceiver').value;
+      const subject = document.getElementById('messageSubject').value.trim();
+      const content = document.getElementById('messageContent').value.trim();
+      
+      if (!receiverId || !subject || !content) {
+        alert('すべての項目を入力してください。');
+        return;
+      }
+      
+      try {
+        const { error } = await supabase
+          .from('messages')
+          .insert({
+            sender_type: 'golf_course',
+            sender_id: gid,
+            receiver_type: 'caddy',
+            receiver_id: receiverId,
+            subject: subject,
+            content: content
+          });
+        
+        if (error) {
+          alert('メッセージ送信に失敗しました: ' + error.message);
+        } else {
+          alert('メッセージを送信しました');
+          document.getElementById('newMessageModal').style.display = 'none';
+          document.getElementById('messageSubject').value = '';
+          document.getElementById('messageContent').value = '';
+          loadMessages('sent');
+        }
+      } catch (error) {
+        alert('メッセージ送信に失敗しました: ' + error.message);
+      }
+    }
 
     // Profile image upload handler
     async function handleImageUpload(event) {

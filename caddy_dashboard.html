@@ -27,6 +27,7 @@
     <button id="btnMainShift">シフト</button>
     <button id="btnMainStat">ステータス</button>
     <button id="btnMainHist">履歴</button>
+    <button id="btnMainMsg">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
   <div id="welcome" style="margin-top:10px;"></div>
@@ -44,6 +45,42 @@
   </div>
   <div id="mainStatus" class="hidden" style="margin-top:15px;"></div>
   <div id="mainHistory" class="hidden" style="margin-top:15px;"></div>
+  <div id="mainMessages" class="hidden" style="margin-top:15px;">
+    <div class="card">
+      <h3>メッセージ</h3>
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button id="btnInbox" class="active" style="padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">受信ボックス</button>
+        <button id="btnSent" style="padding:8px 16px; border:none; background:#ecf0f1; color:#2c3e50; border-radius:4px; cursor:pointer;">送信済み</button>
+        <button id="btnNewMessage" style="padding:8px 16px; border:none; background:#27ae60; color:#fff; border-radius:4px; cursor:pointer;">新規メッセージ</button>
+      </div>
+      <div id="messagesList"></div>
+    </div>
+  </div>
+  
+  <!-- New Message Modal -->
+  <div id="newMessageModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:#fff; padding:24px; border-radius:8px; width:90%; max-width:500px;">
+      <h3>新規メッセージ</h3>
+      <div style="margin-bottom:15px;">
+        <label>送信先:</label>
+        <select id="messageReceiver" style="width:100%; padding:8px; margin-top:5px;">
+          <option value="">送信先を選択</option>
+        </select>
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>件名:</label>
+        <input type="text" id="messageSubject" style="width:100%; padding:8px; margin-top:5px;">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>内容:</label>
+        <textarea id="messageContent" rows="5" style="width:100%; padding:8px; margin-top:5px;"></textarea>
+      </div>
+      <div style="text-align:right;">
+        <button id="cancelMessage" style="padding:8px 16px; border:1px solid #ccc; background:#f0f0f0; border-radius:4px; cursor:pointer;">キャンセル</button>
+        <button id="sendMessage" style="margin-left:10px; padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">送信</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -385,15 +422,17 @@
     const mainShift=document.getElementById('mainShift');
     const mainStat=document.getElementById('mainStatus');
     const mainHist=document.getElementById('mainHistory');
+    const mainMsg=document.getElementById('mainMessages');
     document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
     document.getElementById('btnMainShift').onclick=()=>switchMain('shift');
     document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
     document.getElementById('btnMainHist').onclick=()=>switchMain('hist');
+    document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
     function switchMain(k){
-      const map={prof:mainProf,shift:mainShift,stat:mainStat,hist:mainHist};
+      const map={prof:mainProf,shift:mainShift,stat:mainStat,hist:mainHist,msg:mainMsg};
       // hide all
       Object.values(map).forEach(el=>{el.style.display='none';});
-      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainStat.classList.remove('active');btnMainHist.classList.remove('active');
+      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainStat.classList.remove('active');btnMainHist.classList.remove('active');btnMainMsg.classList.remove('active');
 
       // show selected
       if(map[k]){map[k].style.display='block';}
@@ -401,6 +440,7 @@
       if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
       if(k==='stat') btnMainStat.classList.add('active');
       if(k==='hist'){btnMainHist.classList.add('active');loadHistory();}
+      if(k==='msg'){btnMainMsg.classList.add('active');loadMessages('inbox');}
     }
 
     // 初期表示
@@ -479,6 +519,150 @@
     document.getElementById('confirmShiftBtn').onclick=async()=>{
       alert('シフトを確定しました');
     };
+
+    // Load messages for caddy
+    async function loadMessages(type = 'inbox') {
+      const messagesList = document.getElementById('messagesList');
+      
+      try {
+        let query;
+        if (type === 'inbox') {
+          query = supabase
+            .from('messages')
+            .select('*')
+            .eq('receiver_type', 'caddy')
+            .eq('receiver_id', cid)
+            .order('created_at', { ascending: false });
+        } else {
+          query = supabase
+            .from('messages')
+            .select('*')
+            .eq('sender_type', 'caddy')
+            .eq('sender_id', cid)
+            .order('created_at', { ascending: false });
+        }
+        
+        const { data: messages, error } = await query;
+        
+        if (error) {
+          messagesList.innerHTML = `<p>エラー: ${error.message}</p>`;
+          return;
+        }
+        
+        if (!messages || messages.length === 0) {
+          messagesList.innerHTML = '<p>メッセージはありません。</p>';
+          return;
+        }
+        
+        let html = '';
+        messages.forEach(message => {
+          const isUnread = type === 'inbox' && !message.is_read;
+          html += `
+            <div style="border:1px solid #ddd; margin-bottom:8px; padding:12px; border-radius:6px; background:${isUnread ? '#f8f9fa' : '#fff'};">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>${message.subject}</strong>
+                  ${isUnread ? '<span style="background:#e74c3c; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.8em; margin-left:8px;">未読</span>' : ''}
+                </div>
+                <small style="color:#666;">${message.created_at?.slice(0,16).replace('T', ' ')}</small>
+              </div>
+              <p style="margin:8px 0; color:#666;">${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}</p>
+            </div>
+          `;
+        });
+        
+        messagesList.innerHTML = html;
+      } catch (error) {
+        messagesList.innerHTML = `<p>エラー: ${error.message}</p>`;
+      }
+    }
+
+    // Load golf courses for message receiver selection
+    async function loadGolfCoursesForMessage() {
+      try {
+        const { data: golfCourses, error } = await supabase
+          .from('golf_courses')
+          .select('gid, name')
+          .order('name');
+        
+        if (error) {
+          console.error('Error loading golf courses:', error);
+          return;
+        }
+        
+        const select = document.getElementById('messageReceiver');
+        select.innerHTML = '<option value="">送信先を選択</option>';
+        
+        if (golfCourses) {
+          golfCourses.forEach(course => {
+            select.innerHTML += `<option value="${course.gid}">${course.name}</option>`;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading golf courses:', error);
+      }
+    }
+
+    // Send new message from caddy
+    async function sendNewMessage() {
+      const receiverId = document.getElementById('messageReceiver').value;
+      const subject = document.getElementById('messageSubject').value.trim();
+      const content = document.getElementById('messageContent').value.trim();
+      
+      if (!receiverId || !subject || !content) {
+        alert('すべての項目を入力してください。');
+        return;
+      }
+      
+      try {
+        const { error } = await supabase
+          .from('messages')
+          .insert({
+            sender_type: 'caddy',
+            sender_id: cid,
+            receiver_type: 'golf_course',
+            receiver_id: receiverId,
+            subject: subject,
+            content: content
+          });
+        
+        if (error) {
+          alert('メッセージ送信に失敗しました: ' + error.message);
+        } else {
+          alert('メッセージを送信しました');
+          document.getElementById('newMessageModal').style.display = 'none';
+          document.getElementById('messageSubject').value = '';
+          document.getElementById('messageContent').value = '';
+          loadMessages('sent');
+        }
+      } catch (error) {
+        alert('メッセージ送信に失敗しました: ' + error.message);
+      }
+    }
+
+    // Message related event listeners
+    document.getElementById('btnInbox').onclick = () => {
+      document.getElementById('btnInbox').classList.add('active');
+      document.getElementById('btnSent').classList.remove('active');
+      loadMessages('inbox');
+    };
+    
+    document.getElementById('btnSent').onclick = () => {
+      document.getElementById('btnSent').classList.add('active');
+      document.getElementById('btnInbox').classList.remove('active');
+      loadMessages('sent');
+    };
+    
+    document.getElementById('btnNewMessage').onclick = () => {
+      loadGolfCoursesForMessage();
+      document.getElementById('newMessageModal').style.display = 'flex';
+    };
+    
+    document.getElementById('cancelMessage').onclick = () => {
+      document.getElementById('newMessageModal').style.display = 'none';
+    };
+    
+    document.getElementById('sendMessage').onclick = sendNewMessage;
   </script>
 </body>
 </html> 
