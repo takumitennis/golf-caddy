@@ -10,7 +10,7 @@
     .container{padding:24px}
     .tabs-main{display:flex;gap:8px;padding:0 24px;background:#ecf0f1}
     .tabs-main button{background:#ecf0f1;border:none;padding:12px 16px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
-    .tabs-main button.active{border-color:#3498db;background:#fff;border-radius:4px 4px 0 0}
+    .tabs-main button.active{border-color:#3498db;background:#fff;border-radius:4px 4px 0 0;color:#3498db;font-weight:bold}
     table{background:#fff;border-radius:6px;overflow:hidden}
     .tabs button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#eaeaea;cursor:pointer}
     .tabs button.active{border-bottom-color:#0077cc;background:#fff}
@@ -38,6 +38,7 @@
   <div id="welcome" style="margin-top:10px;"></div>
   <!-- Profile Tab -->
   <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
+  
   <!-- Status Tab (existing content) -->
   <div id="mainStatus">
     <!-- Tabs -->
@@ -48,43 +49,63 @@
       <button id="btnTab4">研修予約者一覧</button>
     </div>
 
-  <!-- Tab 1: bookings -->
-  <div id="tab1">
-    <form id="createForm" style="margin-top:20px;">
-      <label>日付: <input type="date" id="bDate" required></label>
-      <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
-      <button type="submit">募集作成</button>
-    </form>
+    <!-- Tab 1: bookings -->
+    <div id="tab1">
+      <form id="createForm" style="margin-top:20px;">
+        <label>日付: <input type="date" id="bDate" required></label>
+        <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
+        <button type="submit">募集作成</button>
+      </form>
 
-    <table>
-      <thead>
-        <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
-      </thead>
-      <tbody id="bookBody"></tbody>
-    </table>
+      <table>
+        <thead>
+          <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
+        </thead>
+        <tbody id="bookBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Tab 2: availability calendar -->
+    <div id="tab2" class="hidden" style="margin-top:20px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="prevMonth">◀</button>
+        <span id="calTitle"></span>
+        <button id="nextMonth">▶</button>
+      </div>
+      <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+      <small style="display:block;margin-top:8px;">緑=3名以上, 黄=1-2名, 赤=0名</small>
+    </div>
+
+    <!-- Tab 3: Training availability -->
+    <div id="tab3" class="hidden" style="margin-top:20px;">
+      <h3>研修可能日設定</h3>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="prevTrainingMonth">◀</button>
+        <span id="trainingCalTitle"></span>
+        <button id="nextTrainingMonth">▶</button>
+      </div>
+      <table class="calendar" id="trainingCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+      <small style="display:block;margin-top:8px;">青=設定済み, 白=未設定 | クリックで設定/解除</small>
+    </div>
+
+    <!-- Tab 4: Training requests -->
+    <div id="tab4" class="hidden" style="margin-top:20px;">
+      <h3>研修予約者一覧</h3>
+      <div id="trainingRequestsList"></div>
+    </div>
   </div>
 
-  <!-- Tab 2: availability calendar -->
-  <div id="tab2" class="hidden" style="margin-top:20px;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="prevMonth">◀</button>
-      <span id="calTitle"></span>
-      <button id="nextMonth">▶</button>
+  <!-- Messages Tab -->
+  <div id="mainMessages" class="hidden" style="margin-top:15px;">
+    <div class="card">
+      <h3>メッセージ</h3>
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button id="btnInbox" class="active" style="padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">受信ボックス</button>
+        <button id="btnSent" style="padding:8px 16px; border:none; background:#ecf0f1; color:#2c3e50; border-radius:4px; cursor:pointer;">送信済み</button>
+        <button id="btnNewMessage" style="padding:8px 16px; border:none; background:#27ae60; color:#fff; border-radius:4px; cursor:pointer;">新規メッセージ</button>
+      </div>
+      <div id="messagesList"></div>
     </div>
-    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small style="display:block;margin-top:8px;">緑=3名以上, 黄=1-2名, 赤=0名</small>
-  </div>
-
-  <!-- Tab 3: Training availability -->
-  <div id="tab3" class="hidden" style="margin-top:20px;">
-    <h3>研修可能日設定</h3>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="prevTrainingMonth">◀</button>
-      <span id="trainingCalTitle"></span>
-      <button id="nextTrainingMonth">▶</button>
-    </div>
-    <table class="calendar" id="trainingCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small style="display:block;margin-top:8px;">青=設定済み, 白=未設定 | クリックで設定/解除</small>
   </div>
 
   <!-- Training slots modal -->
@@ -101,10 +122,29 @@
     </div>
   </div>
 
-  <!-- Tab 4: Training requests -->
-  <div id="tab4" class="hidden" style="margin-top:20px;">
-    <h3>研修予約者一覧</h3>
-    <div id="trainingRequestsList"></div>
+  <!-- New Message Modal -->
+  <div id="newMessageModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:#fff; padding:24px; border-radius:8px; width:90%; max-width:500px;">
+      <h3>新規メッセージ</h3>
+      <div style="margin-bottom:15px;">
+        <label>送信先:</label>
+        <select id="messageReceiver" style="width:100%; padding:8px; margin-top:5px;">
+          <option value="">送信先を選択</option>
+        </select>
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>件名:</label>
+        <input type="text" id="messageSubject" style="width:100%; padding:8px; margin-top:5px;">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>内容:</label>
+        <textarea id="messageContent" rows="5" style="width:100%; padding:8px; margin-top:5px;"></textarea>
+      </div>
+      <div style="text-align:right;">
+        <button id="cancelMessage" style="padding:8px 16px; border:1px solid #ccc; background:#f0f0f0; border-radius:4px; cursor:pointer;">キャンセル</button>
+        <button id="sendMessage" style="margin-left:10px; padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">送信</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -585,16 +625,27 @@
     document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
     document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
     function switchMain(mode){
+      const mainProfileDiv = document.getElementById('mainProfile');
+      const mainStatusDiv = document.getElementById('mainStatus');
+      const mainMessagesDiv = document.getElementById('mainMessages');
+      const btnMainProf = document.getElementById('btnMainProf');
+      const btnMainStat = document.getElementById('btnMainStat');
+      const btnMainMsg = document.getElementById('btnMainMsg');
+      
       if(mode==='prof'){
         mainProfileDiv.classList.remove('hidden');
         mainStatusDiv.classList.add('hidden');
         mainMessagesDiv.classList.add('hidden');
-        btnMainProf.classList.add('active');btnMainStat.classList.remove('active');btnMainMsg.classList.remove('active');
+        btnMainProf.classList.add('active');
+        btnMainStat.classList.remove('active');
+        btnMainMsg.classList.remove('active');
       }else if(mode==='msg'){
         mainMessagesDiv.classList.remove('hidden');
         mainProfileDiv.classList.add('hidden');
         mainStatusDiv.classList.add('hidden');
-        btnMainMsg.classList.add('active');btnMainProf.classList.remove('active');btnMainStat.classList.remove('active');
+        btnMainMsg.classList.add('active');
+        btnMainProf.classList.remove('active');
+        btnMainStat.classList.remove('active');
         loadMessages('inbox');
         
         // Initialize message event listeners when messages tab is shown
@@ -642,7 +693,9 @@
         mainStatusDiv.classList.remove('hidden');
         mainProfileDiv.classList.add('hidden');
         mainMessagesDiv.classList.add('hidden');
-        btnMainStat.classList.add('active');btnMainProf.classList.remove('active');btnMainMsg.classList.remove('active');
+        btnMainStat.classList.add('active');
+        btnMainProf.classList.remove('active');
+        btnMainMsg.classList.remove('active');
       }
     }
 
