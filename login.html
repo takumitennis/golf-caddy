@@ -74,7 +74,7 @@
       
       const email = document.getElementById("email").value;
       const password = document.getElementById("pass").value;
-      
+
       // バリデーション
       let hasError = false;
       if (!email) {
@@ -110,7 +110,7 @@
         const tempPassword = Math.random().toString(36).slice(-8) + "Tmp123!";
         try {
           const { data, error } = await supabase.auth.signUp({ 
-            email, 
+    email,
             password: tempPassword,
             options: { data: { role: role } }
           });

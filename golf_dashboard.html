@@ -735,7 +735,7 @@
         const cidList = requests.map(r => r.cid);
         const { data: caddies, error: caddiesError } = await supabase
           .from('caddies')
-          .select('cid, name, phone, email, university, golf_years, caddy_years, appeal_message')
+          .select('cid, name, phone, email, university, golf_years, caddy_years, appeal')
           .in('cid', cidList);
         
         console.log('Caddies query result:', { caddies, caddiesError });
@@ -799,7 +799,7 @@
             <p><strong>大学:</strong> ${caddy?.university || '不明'}</p>
             <p><strong>ゴルフ歴:</strong> ${caddy?.golf_years || '不明'}年</p>
             <p><strong>キャディ歴:</strong> ${caddy?.caddy_years || '不明'}年</p>
-            <p><strong>アピール:</strong> ${caddy?.appeal_message || 'なし'}</p>
+            <p><strong>アピール:</strong> ${caddy?.appeal || 'なし'}</p>
             ${request.status === 'pending' ? `
               <button onclick="updateTrainingStatus('${request.id}', 'confirmed')" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-right:8px;">承認</button>
               <button onclick="updateTrainingStatus('${request.id}', 'cancelled')" style="background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">拒否</button>
