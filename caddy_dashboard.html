@@ -5,952 +5,79 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Caddy Dashboard</title>
   <style>
-    :root {
-      --primary-color: #2f8f2f;
-      --primary-dark: #1e5f1e;
-      --primary-light: #4caf50;
-      --secondary-color: #ffffff;
-      --accent-color: #ff6b35;
-      --text-color: #333333;
-      --text-light: #666666;
-      --bg-light: #f8f9fa;
-      --bg-dark: #2c3e50;
-      --border-radius: 12px;
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
-      background: var(--bg-light);
-      color: var(--text-color);
-      line-height: 1.6;
-    }
-
-    /* Header */
-    h1 {
-      margin: 0;
-      padding: 1.5rem 2rem;
-      background: linear-gradient(135deg, var(--bg-dark), #34495e);
-      color: #fff;
-      font-size: 1.6rem;
-      font-weight: 600;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    h1::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-    }
-
-    /* Main Navigation */
-    .tabs-main {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0 2rem;
-      background: #ecf0f1;
-      border-bottom: 1px solid #ddd;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .tabs-main button {
-      background: #ecf0f1;
-      border: none;
-      padding: 1rem 1.5rem;
-      font-weight: 600;
-      border-bottom: 3px solid transparent;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 0.95rem;
-      color: var(--text-light);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .tabs-main button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-
-    .tabs-main button:hover::before {
-      left: 100%;
-    }
-
-    .tabs-main button.active {
-      border-color: var(--primary-color);
-      background: #fff;
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
-      color: var(--primary-color);
-      font-weight: bold;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-    }
-
-    .tabs-main button:hover {
-      background: #fff;
-      transform: translateY(-1px);
-    }
-
-    #logoutBtn {
-      margin-left: auto;
-      background: #e74c3c;
-      color: white;
-      border-radius: var(--border-radius);
-      padding: 0.75rem 1.5rem;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    #logoutBtn:hover {
-      background: #c0392b;
-      transform: translateY(-1px);
-      box-shadow: var(--shadow);
-    }
-
-    /* Container */
-    .container {
-      padding: 2rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* Welcome Message */
-    #welcome {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      color: white;
-      padding: 1.5rem 2rem;
-      border-radius: var(--border-radius);
-      margin: 1rem 2rem;
-      box-shadow: var(--shadow);
-      text-align: center;
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
-
-    /* Tab Content */
-    .hidden {
-      display: none;
-    }
-
-    /* Cards */
-    .card {
-      background: #fff;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      border: 1px solid rgba(0,0,0,0.05);
-      transition: var(--transition);
-    }
-
-    .card:hover {
-      box-shadow: var(--shadow-hover);
-      transform: translateY(-2px);
-    }
-
-    .card h3 {
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
-      font-weight: 600;
-    }
-
-    /* Shift Management */
-    #mainShift {
-      padding: 2rem;
-    }
-
-    #lockInfo {
-      background: #f8d7da;
-      color: #721c24;
-      padding: 1rem;
-      border-radius: var(--border-radius);
-      margin-bottom: 1rem;
-      border: 1px solid #f5c6cb;
-      font-weight: 500;
-    }
-
-    .calendar-nav {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      background: #fff;
-      padding: 1rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-    }
-
-    .calendar-nav button {
-      padding: 0.5rem 1rem;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: var(--transition);
-      font-weight: 600;
-    }
-
-    .calendar-nav button:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
-    }
-
-    .calendar-nav span {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text-color);
-    }
-
-    /* Calendar */
-    .calendar {
-      background: #fff;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .calendar th, .calendar td {
-      width: 14%;
-      padding: 1rem 0.5rem;
-      text-align: center;
-      border: 1px solid #e1e8ed;
-      transition: var(--transition);
-    }
-
-    .calendar th {
-      background: var(--primary-color);
-      color: white;
-      font-weight: 600;
-    }
-
-    .cal-ok {
-      background: #ffffff;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cal-ok::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--primary-color);
-      border-radius: 50%;
-      transition: var(--transition);
-    }
-
-    .cal-ok:hover {
-      background: #f8f9fa;
-      transform: scale(1.05);
-    }
-
-    .cal-ng {
-      background: #eeeeee;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .cal-ng::before {
-      content: '❌';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 14px;
-      color: #dc3545;
-    }
-
-    .cal-ng:hover {
-      background: #f8f9fa;
-      transform: scale(1.05);
-    }
-
-    .locked {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .locked:hover {
-      transform: none !important;
-    }
-
-    /* Confirm Button */
-    #confirmShiftBtn {
-      margin-top: 1rem;
-      padding: 1rem 2rem;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-      font-size: 1rem;
-    }
-
-    #confirmShiftBtn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-
-    #confirmShiftBtn:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Messages */
-    .message-item {
-      background: #f8f9fa;
-      border-radius: var(--border-radius);
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-left: 4px solid var(--primary-color);
-      transition: var(--transition);
-    }
-
-    .message-item:hover {
-      background: #e9ecef;
-      transform: translateX(5px);
-    }
-
-    .message-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .message-sender {
-      font-weight: 600;
-      color: var(--primary-color);
-    }
-
-    .message-date {
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-
-    .message-content {
-      color: var(--text-color);
-      line-height: 1.5;
-    }
-
-    /* Message Buttons */
-    .message-buttons {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .message-buttons button {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    .message-buttons button.active {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .message-buttons button:not(.active) {
-      background: #ecf0f1;
-      color: var(--text-color);
-    }
-
-    .message-buttons button:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow);
-    }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
-
-    .modal-content {
-      background: #fff;
-      padding: 2rem;
-      border-radius: var(--border-radius);
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-hover);
-    }
-
-    .modal h3 {
-      color: var(--primary-color);
-      margin-bottom: 1.5rem;
-      font-size: 1.3rem;
-    }
-
-    .modal label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: var(--text-color);
-    }
-
-    .modal select,
-    .modal input,
-    .modal textarea {
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: 2px solid #e1e8ed;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      transition: var(--transition);
-    }
-
-    .modal select:focus,
-    .modal input:focus,
-    .modal textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
-    }
-
-         .modal-buttons {
-       display: flex;
-       gap: 1rem;
-       justify-content: flex-end;
-       margin-top: 1.5rem;
-       padding-top: 1rem;
-       border-top: 1px solid #e1e8ed;
-       position: sticky;
-       bottom: 0;
-       background: #fff;
-     }
-
-    .modal-buttons button {
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    .modal-buttons button.cancel {
-      background: #f0f0f0;
-      color: var(--text-color);
-      border: 1px solid #ccc;
-    }
-
-    .modal-buttons button.send {
-      background: var(--primary-color);
-      color: white;
-      border: none;
-    }
-
-    .modal-buttons button:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow);
-    }
-
-    /* Status and History */
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .status-card {
-      background: #fff;
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      text-align: center;
-      transition: var(--transition);
-    }
-
-    .status-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .status-number {
-      font-size: 2rem;
-      font-weight: bold;
-      color: var(--primary-color);
-      margin-bottom: 0.5rem;
-    }
-
-    .status-label {
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .tabs-main {
-        flex-direction: column;
-        padding: 1rem;
-      }
-
-      .tabs-main button {
-        width: 100%;
-        text-align: center;
-        border-radius: var(--border-radius);
-        margin-bottom: 0.5rem;
-      }
-
-      .tabs-main button.active {
-        border-radius: var(--border-radius);
-      }
-
-      #mainShift {
-        padding: 1rem;
-      }
-
-      .calendar-nav {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .calendar th, .calendar td {
-        padding: 0.5rem 0.25rem;
-        font-size: 0.9rem;
-      }
-
-      .message-buttons {
-        flex-direction: column;
-      }
-
-      .modal-content {
-        width: 95%;
-        padding: 1.5rem;
-      }
-
-      .modal-buttons {
-        flex-direction: column;
-      }
-
-      .status-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Loading Animation */
-    .loading {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: var(--transition);
-    }
-
-    .loading.loaded {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Success/Error Messages */
-    .message {
-      padding: 1rem 1.5rem;
-      border-radius: var(--border-radius);
-      margin-bottom: 1rem;
-      font-weight: 500;
-    }
-
-    .message.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .message.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .message.info {
-      background: #cce5ff;
-      color: #004085;
-      border: 1px solid #b8daff;
-    }
-
-    /* Profile Edit Form Styles */
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: var(--text-color);
-    }
-
-    .form-group input[type="text"],
-    .form-group input[type="date"],
-    .form-group input[type="number"],
-    .form-group input[type="tel"],
-    .form-group input[type="file"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e1e8ed;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      transition: var(--transition);
-    }
-
-    .form-group input[type="text"]:focus,
-    .form-group input[type="date"]:focus,
-    .form-group input[type="number"]:focus,
-    .form-group input[type="tel"]:focus,
-    .form-group input[type="file"]:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
-    }
-
-    .form-group textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e1e8ed;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      transition: var(--transition);
-    }
-
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
-    }
-
-         .avatar-upload {
-       display: flex;
-       flex-direction: column;
-       align-items: center;
-       gap: 1rem;
-       margin-bottom: 1.5rem;
-       padding: 1rem;
-       border: 2px dashed #e1e8ed;
-       border-radius: var(--border-radius);
-       background: #f8f9fa;
-     }
-
-     .avatar-upload img {
-       border: 2px solid #e1e8ed;
-       border-radius: 50%;
-       box-shadow: var(--shadow);
-     }
-
-    .upload-btn {
-      padding: 0.75rem 1.5rem;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-         .upload-btn:hover {
-       background: var(--primary-dark);
-       transform: translateY(-1px);
-       box-shadow: var(--shadow);
-     }
-
-     /* Profile Display Styles */
-     .profile-display {
-       display: flex;
-       flex-direction: column;
-       gap: 2rem;
-     }
-
-     .profile-header {
-       display: flex;
-       align-items: center;
-       gap: 1.5rem;
-       padding: 1.5rem;
-       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-       border-radius: var(--border-radius);
-       border: 1px solid #e1e8ed;
-     }
-
-     .profile-avatar {
-       width: 80px;
-       height: 80px;
-       border-radius: 50%;
-       object-fit: cover;
-       border: 3px solid var(--primary-color);
-       box-shadow: var(--shadow);
-     }
-
-     .profile-info {
-       flex: 1;
-     }
-
-     .profile-info h4 {
-       margin: 0 0 0.5rem 0;
-       color: var(--primary-color);
-       font-size: 1.5rem;
-     }
-
-     .profile-info p {
-       margin: 0;
-       color: var(--text-color);
-       opacity: 0.8;
-     }
-
-     .edit-btn {
-       padding: 0.75rem 1.5rem;
-       background: var(--primary-color);
-       color: white;
-       border: none;
-       border-radius: var(--border-radius);
-       cursor: pointer;
-       font-weight: 600;
-       transition: var(--transition);
-     }
-
-     .edit-btn:hover {
-       background: var(--primary-dark);
-       transform: translateY(-1px);
-       box-shadow: var(--shadow);
-     }
-
-     .profile-details {
-       display: grid;
-       gap: 1rem;
-     }
-
-     .detail-item {
-       display: flex;
-       padding: 1rem;
-       background: white;
-       border-radius: var(--border-radius);
-       border: 1px solid #e1e8ed;
-       transition: var(--transition);
-     }
-
-     .detail-item:hover {
-       box-shadow: var(--shadow);
-       transform: translateY(-1px);
-     }
-
-     .detail-label {
-       font-weight: 600;
-       color: var(--primary-color);
-       min-width: 120px;
-       margin-right: 1rem;
-     }
-
-     .detail-value {
-       color: var(--text-color);
-       flex: 1;
-     }
+    body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa}
+    h1{margin:0;padding:20px 24px;background:#34495e;color:#fff;font-size:1.4rem}
+    .container{padding:24px}
+    .card{background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.08);padding:20px;margin-bottom:24px}
+    .tabs-main{display:flex;gap:8px;padding:0 24px;background:#ecf0f1}
+    .tabs-main button{background:#ecf0f1;border:none;padding:12px 16px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
+    .tabs-main button.active{border-color:#2ecc71;background:#fff;border-radius:4px 4px 0 0}
+    table.calendar{background:#fff;border-radius:6px;overflow:hidden}
+    .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}
+    .cal-ok{background:#ffffff;cursor:pointer}
+    .ok-circle{display:inline-block;width:16px;height:16px;border:2px solid #4caf50;border-radius:50%}
+    .cal-ng{background:#eeeeee;cursor:pointer}
+    .locked{opacity:0.5;cursor:not-allowed}
   </style>
 </head>
 <body>
-  <h1>🏌️ キャディマイページ</h1>
+  <h1>キャディマイページ</h1>
   <div class="tabs-main">
-    <button id="btnMainProf" class="active">プロフィール</button>
+    <button id="btnMainProf"   class="active">プロフィール</button>
     <button id="btnMainShift">シフト</button>
     <button id="btnMainStat">ステータス</button>
     <button id="btnMainHist">履歴</button>
     <button id="btnMainMsg">メッセージ</button>
-    <button id="logoutBtn">ログアウト</button>
+    <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
-  <div id="welcome" class="loading"></div>
-  
-  <!-- Profile Tab -->
-  <div id="mainProfile" class="container">
-    <div class="card loading">
-      <h3>📋 プロフィール情報</h3>
-      <div id="profileContent"></div>
-    </div>
-  </div>
-
-  <!-- Profile Edit Modal -->
-  <div id="profileEditModal" class="modal">
-    <div class="modal-content">
-      <h3>✏️ プロフィール編集</h3>
-      <form id="profileForm">
-                 <div class="form-group">
-           <label>プロフィール画像</label>
-           <div class="avatar-upload">
-             <img id="avatarPreview" src="https://placehold.co/100x100" alt="アバター" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
-             <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-             <button type="button" id="uploadAvatarBtn" class="upload-btn">画像を選択</button>
-             <small style="color: #6c757d; font-size: 0.875rem;">JPG, PNG形式、5MB以下</small>
-           </div>
-         </div>
-        
-        <div class="form-group">
-          <label>氏名 *</label>
-          <input type="text" id="profileName" required>
-        </div>
-        
-        <div class="form-group">
-          <label>生年月日</label>
-          <input type="date" id="profileBirth">
-        </div>
-        
-        <div class="form-group">
-          <label>電話番号</label>
-          <input type="tel" id="profilePhone">
-        </div>
-        
-        <div class="form-group">
-          <label>所属大学</label>
-          <input type="text" id="profileUniversity">
-        </div>
-        
-        <div class="form-group">
-          <label>ゴルフ歴 (年)</label>
-          <input type="number" id="profileGolfYears" min="0" value="0">
-        </div>
-        
-        <div class="form-group">
-          <label>キャディ歴 (年)</label>
-          <input type="number" id="profileCaddyYears" min="0" value="0">
-        </div>
-        
-                 <div class="form-group">
-           <label>アピールポイント</label>
-           <textarea id="profileAppeal" rows="4" placeholder="自分の強みや特徴をアピールしてください..." style="resize: vertical; min-height: 100px;"></textarea>
-           <small style="color: #6c757d; font-size: 0.875rem;">自分の経験や強みを具体的に書いてください</small>
-         </div>
-        
-        <div class="modal-buttons">
-          <button type="button" id="cancelProfileEdit" class="cancel">キャンセル</button>
-          <button type="submit" class="send">保存</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Shift Tab -->
-  <div id="mainShift" class="hidden">
-    <div id="lockInfo" class="loading"></div>
-    <div class="calendar-nav">
-      <button id="prevMonth">◀ 前月</button>
+  <div id="welcome" style="margin-top:10px;"></div>
+  <div id="mainProfile" style="margin-top:15px;"></div>
+  <div id="mainShift" class="hidden" style="margin-top:15px;">
+    <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="prevMonth">◀</button>
       <span id="calTitle"></span>
-      <button id="nextMonth">次月 ▶</button>
+      <button id="nextMonth">▶</button>
     </div>
-    <div class="card loading">
-      <h3>📅 シフト管理</h3>
-      <table class="calendar" id="calTable"></table>
-      <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: var(--border-radius);">
-        <small><strong>凡例:</strong> ○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small>
-      </div>
-      <button id="confirmShiftBtn">シフトを確定する</button>
-    </div>
+    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+    <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
+    <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
   </div>
-
-  <!-- Status Tab -->
-  <div id="mainStatus" class="hidden container">
-    <div class="card loading">
-      <h3>📊 ステータス</h3>
-      <div class="status-grid">
-        <div class="status-card">
-          <div class="status-number" id="totalShifts">0</div>
-          <div class="status-label">今月の勤務回数</div>
-        </div>
-        <div class="status-card">
-          <div class="status-number" id="totalHours">0</div>
-          <div class="status-label">今月の勤務時間</div>
-        </div>
-        <div class="status-card">
-          <div class="status-number" id="avgRating">0.0</div>
-          <div class="status-label">平均評価</div>
-        </div>
-        <div class="status-card">
-          <div class="status-number" id="activeBookings">0</div>
-          <div class="status-label">アクティブな予約</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- History Tab -->
-  <div id="mainHistory" class="hidden container">
-    <div class="card loading">
-      <h3>📈 勤務履歴</h3>
-      <div id="historyContent">
-        <p style="text-align: center; color: var(--text-light);">履歴データは開発中です</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Messages Tab -->
-  <div id="mainMessages" class="hidden container">
-    <div class="card loading">
-      <h3>💬 メッセージ</h3>
-      <div class="message-buttons">
-        <button id="btnInbox" class="active">受信ボックス</button>
-        <button id="btnSent">送信済み</button>
-        <button id="btnNewMessage">新規メッセージ</button>
+  <div id="mainStatus" class="hidden" style="margin-top:15px;"></div>
+  <div id="mainHistory" class="hidden" style="margin-top:15px;"></div>
+  <div id="mainMessages" class="hidden" style="margin-top:15px;">
+    <div class="card">
+      <h3>メッセージ</h3>
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button id="btnInbox" class="active" style="padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">受信ボックス</button>
+        <button id="btnSent" style="padding:8px 16px; border:none; background:#ecf0f1; color:#2c3e50; border-radius:4px; cursor:pointer;">送信済み</button>
+        <button id="btnNewMessage" style="padding:8px 16px; border:none; background:#27ae60; color:#fff; border-radius:4px; cursor:pointer;">新規メッセージ</button>
       </div>
       <div id="messagesList"></div>
     </div>
   </div>
   
   <!-- New Message Modal -->
-  <div id="newMessageModal" class="modal">
-    <div class="modal-content">
-      <h3>✉️ 新規メッセージ</h3>
-      <div>
+  <div id="newMessageModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:#fff; padding:24px; border-radius:8px; width:90%; max-width:500px;">
+      <h3>新規メッセージ</h3>
+      <div style="margin-bottom:15px;">
         <label>送信先:</label>
-        <select id="messageReceiver">
+        <select id="messageReceiver" style="width:100%; padding:8px; margin-top:5px;">
           <option value="">送信先を選択</option>
         </select>
       </div>
-      <div>
+      <div style="margin-bottom:15px;">
         <label>件名:</label>
-        <input type="text" id="messageSubject">
+        <input type="text" id="messageSubject" style="width:100%; padding:8px; margin-top:5px;">
       </div>
-      <div>
+      <div style="margin-bottom:15px;">
         <label>内容:</label>
-        <textarea id="messageContent" rows="5"></textarea>
+        <textarea id="messageContent" rows="5" style="width:100%; padding:8px; margin-top:5px;"></textarea>
       </div>
-      <div class="modal-buttons">
-        <button id="cancelMessage" class="cancel">キャンセル</button>
-        <button id="sendMessage" class="send">送信</button>
+      <div style="text-align:right;">
+        <button id="cancelMessage" style="padding:8px 16px; border:1px solid #ccc; background:#f0f0f0; border-radius:4px; cursor:pointer;">キャンセル</button>
+        <button id="sendMessage" style="margin-left:10px; padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">送信</button>
       </div>
     </div>
   </div>
@@ -963,568 +90,579 @@
     );
 
     let cid;
-    let calMonth = new Date().getMonth(), calYear = new Date().getFullYear();
-    const calTable = document.getElementById('calTable');
-    const lockInfo = document.getElementById('lockInfo');
+    let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
+    const calTable=document.getElementById('calTable');
+    const lockInfo=document.getElementById('lockInfo');
 
-    // Loading animation
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('loaded');
+    supabase.auth.getUser().then(async ({ data })=>{
+      if(!data.user){location.href="/";return;}
+      const role=data.user.user_metadata?.role;
+      if(role!=="caddy"){location.href="dashboard.html";return;}
+      const { data: row } = await supabase.from('caddies').select('cid,name,avatar_url,birth_date,phone,university,golf_years,caddy_years,appeal,rating,rate,trained_courses').eq('email',data.user.email).single();
+      if(!row){
+        renderProfileForm();
+      } else {
+        cid=row.cid;
+        renderProfileDisplay(row);
+      }
+      // 派遣回数を取得（rowが存在する場合のみ）
+      let dispatchCount = 0;
+      if (row && row.cid) {
+        const { count, error: countError } = await supabase
+          .from('booking_caddies')
+          .select('*', { count: 'exact', head: true })
+          .eq('cID', row.cid);
+        
+        if (!countError && count !== null) {
+          dispatchCount = count;
         }
-      });
-    }, observerOptions);
-
-    // Observe all loading elements
-    document.querySelectorAll('.loading').forEach(el => {
-      observer.observe(el);
-    });
-
-    // Authentication check
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) {
-        location.href = "/";
-        return;
-      }
-      const role = data.user.user_metadata?.role;
-      if (role !== "caddy") {
-        location.href = "dashboard.html";
-        return;
       }
 
-      // Get caddy ID
-      const { data: caddy } = await supabase
-        .from('caddies')
-        .select('cid, name')
-        .eq('email', data.user.email)
-        .single();
+      // ステータスタブのHTMLを生成（プロフィールが存在する場合のみ）
+      if (row && row.cid) {
+        document.getElementById('mainStatus').innerHTML = `
+          <div class="card">
+            <h3>ステータス</h3>
+            <p><strong>今までのキャディ派遣回数:</strong> ${dispatchCount} 回</p>
+            <p><strong>研修済ゴルフ場:</strong> ${(row.trained_courses && row.trained_courses.length > 0 ? row.trained_courses.join(', ') : 'なし')}</p>
+            <button id='reqTrainingBtn'>研修を希望する</button>
+          </div>`;
+        // 研修希望モーダルのHTMLを一度だけ追加
+        if (!document.getElementById('trainModal')) {
+          document.body.insertAdjacentHTML('beforeend',`
+            <div id='trainModal' style='display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;z-index:100;'>
+              <div style='background:#fff;padding:24px;border-radius:8px;width:90%;max-width:500px;'>
+                <div id='step1'>
+                  <h3>研修希望ゴルフ場選択</h3>
+                  <select id='courseSelect' style='width:100%;margin-top:12px;padding:8px;font-size:1rem;'></select>
+                  <div style='margin-top:20px;text-align:right;'>
+                    <button id='cancelModal' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>キャンセル</button>
+                    <button id='nextStep' style='margin-left:10px;padding:8px 16px;border:none;background:#3498db;color:#fff;border-radius:4px;cursor:pointer;'>次へ</button>
+                  </div>
+                </div>
+                <div id='step2' style='display:none;'>
+                  <h3>研修日選択</h3>
+                  <div style='display:flex;align-items:center;gap:10px;margin:12px 0;'>
+                    <button id='prevTrainingMonth2'>◀</button>
+                    <span id='trainingCalTitle2'></span>
+                    <button id='nextTrainingMonth2'>▶</button>
+                  </div>
+                  <table id='trainingCalTable2' style='width:100%;border-collapse:collapse;'></table>
+                  <div id='selectedDateDisplay' style='margin:12px 0;font-weight:bold;'></div>
+                  <div style='margin-top:20px;text-align:right;'>
+                    <button id='backStep' style='padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;'>戻る</button>
+                    <button id='sendReq' style='margin-left:10px;padding:8px 16px;border:none;background:#2ecc71;color:#fff;border-radius:4px;cursor:pointer;' disabled>予約送信</button>
+                  </div>
+                </div>
+              </div>
+            </div>`);
+        }
+        const modal = document.getElementById('trainModal');
+        // イベントリスナーを（もし存在すれば）一度削除してから再設定
+        const oldReqBtn = document.getElementById('reqTrainingBtn');
+        const newReqBtn = oldReqBtn.cloneNode(true);
+        oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
 
-      if (caddy) {
-        cid = caddy.cid;
-        document.getElementById('welcome').textContent = `ようこそ、${caddy.name}様！`;
-        loadData();
-      }
-    });
+        // Modal state variables
+        let selectedGolfCourse = null;
+        let selectedTrainingDate = null;
+        let trainingCalMonth2 = new Date().getMonth();
+        let trainingCalYear2 = new Date().getFullYear();
 
-    // Tab switching
-    document.getElementById('btnMainProf').addEventListener('click', () => switchTab('mainProfile'));
-    document.getElementById('btnMainShift').addEventListener('click', () => switchTab('mainShift'));
-    document.getElementById('btnMainStat').addEventListener('click', () => switchTab('mainStatus'));
-    document.getElementById('btnMainHist').addEventListener('click', () => switchTab('mainHistory'));
-    document.getElementById('btnMainMsg').addEventListener('click', () => switchTab('mainMessages'));
-
-    // Profile edit modal event handlers
-    document.getElementById('uploadAvatarBtn').addEventListener('click', () => {
-      document.getElementById('avatarInput').click();
-    });
-
-    document.getElementById('avatarInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          document.getElementById('avatarPreview').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    document.getElementById('cancelProfileEdit').addEventListener('click', () => {
-      document.getElementById('profileEditModal').style.display = 'none';
-    });
-
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const formData = {
-        name: document.getElementById('profileName').value,
-        birth_date: document.getElementById('profileBirth').value,
-        phone: document.getElementById('profilePhone').value,
-        university: document.getElementById('profileUniversity').value,
-        golf_years: document.getElementById('profileGolfYears').value,
-        caddy_years: document.getElementById('profileCaddyYears').value,
-        appeal: document.getElementById('profileAppeal').value
+      // Step 1: Golf course selection
+      newReqBtn.onclick = async () => {
+        const { data: courses } = await supabase.from('golf_courses').select('gid,name,email');
+        const sel = document.getElementById('courseSelect');
+        sel.innerHTML = courses.map(c => `<option value='${c.gid}' data-email='${c.email}' data-name='${c.name}'>${c.name}</option>`).join('');
+        
+        // Reset modal state
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        selectedGolfCourse = null;
+        selectedTrainingDate = null;
+        
+        modal.style.display = 'flex';
       };
 
-      // Upload avatar if selected
-      const avatarFile = document.getElementById('avatarInput').files[0];
-      if (avatarFile) {
-        console.log('画像ファイル情報:', {
-          name: avatarFile.name,
-          size: avatarFile.size,
-          type: avatarFile.type
-        });
-        await uploadAvatar(avatarFile);
-      }
+      // Cancel modal
+      document.getElementById('cancelModal').onclick = () => modal.style.display = 'none';
 
-      // Save profile data
-      await saveProfile(formData);
-    });
+      // Next step: Show calendar
+      document.getElementById('nextStep').onclick = async () => {
+        const sel = document.getElementById('courseSelect');
+        selectedGolfCourse = {
+          gid: sel.value,
+          name: sel.options[sel.selectedIndex].dataset.name,
+          email: sel.options[sel.selectedIndex].dataset.email
+        };
+        
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        
+        await renderTrainingCalendar2();
+      };
 
-    // デバッグ用: ストレージバケットの確認
-    async function checkStorageBuckets() {
-      try {
-        const { data: buckets, error } = await supabase.storage.listBuckets();
-        if (error) {
-          console.error('バケット一覧取得エラー:', error);
+      // Back step
+      document.getElementById('backStep').onclick = () => {
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step1').style.display = 'block';
+      };
+
+      // Calendar navigation
+      document.getElementById('prevTrainingMonth2').onclick = () => {
+        if(--trainingCalMonth2 < 0) { trainingCalMonth2 = 11; trainingCalYear2--; }
+        renderTrainingCalendar2();
+      };
+      document.getElementById('nextTrainingMonth2').onclick = () => {
+        if(++trainingCalMonth2 > 11) { trainingCalMonth2 = 0; trainingCalYear2++; }
+        renderTrainingCalendar2();
+      };
+
+      // Send training request
+      document.getElementById('sendReq').onclick = async () => {
+        if (!selectedGolfCourse || !selectedTrainingDate) {
+          alert('ゴルフ場と日付を選択してください');
           return;
         }
-        console.log('利用可能なストレージバケット:', buckets);
         
-        const avatarsBucket = buckets.find(bucket => bucket.name === 'avatars');
-        if (avatarsBucket) {
-          console.log('avatarsバケットが見つかりました:', avatarsBucket);
-        } else {
-          console.warn('avatarsバケットが見つかりません。バケットを作成してください。');
-        }
-      } catch (error) {
-        console.error('ストレージ確認エラー:', error);
-      }
-    }
-
-    // ページ読み込み時にストレージバケットを確認
-    checkStorageBuckets();
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tabs-main button').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('[id^="main"]').forEach(div => div.classList.add('hidden'));
-      
-      event.target.classList.add('active');
-      document.getElementById(tabName).classList.remove('hidden');
-    }
-
-    // Load initial data
-    function loadData() {
-      loadProfile();
-      loadCalendar();
-      loadStatus();
-    }
-
-    // Profile management
-    async function loadProfile() {
-      const { data } = await supabase
-        .from('caddies')
-        .select('*')
-        .eq('cid', cid)
-        .single();
-
-      if (data) {
-        const profileContent = document.getElementById('profileContent');
-        profileContent.innerHTML = `
-          <div class="profile-display">
-            <div class="profile-header">
-              <img src="${data.avatar_url || 'https://placehold.co/100x100'}" alt="プロフィール画像" class="profile-avatar">
-              <div class="profile-info">
-                <h4>${data.name}</h4>
-                <p>${data.email}</p>
-              </div>
-              <button id="editProfileBtn" class="edit-btn">編集</button>
-            </div>
-            <div class="profile-details">
-              <div class="detail-item">
-                <span class="detail-label">電話番号:</span>
-                <span class="detail-value">${data.phone || '未設定'}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">所属大学:</span>
-                <span class="detail-value">${data.university || '未設定'}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">ゴルフ歴:</span>
-                <span class="detail-value">${data.golf_years || 0}年</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">キャディ歴:</span>
-                <span class="detail-value">${data.caddy_years || 0}年</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">アピールポイント:</span>
-                <span class="detail-value">${data.appeal || '未設定'}</span>
-              </div>
-            </div>
-          </div>
-        `;
-
-        // Add edit button event listener
-        document.getElementById('editProfileBtn').addEventListener('click', () => {
-          showProfileEditModal(data);
+        console.log('Sending training request:', {
+          cid,
+          gid: selectedGolfCourse.gid,
+          training_date: selectedTrainingDate,
+          status: 'pending'
         });
-      }
-    }
-
-    // Show profile edit modal
-    function showProfileEditModal(data) {
-      // Populate form with current data
-      document.getElementById('profileName').value = data.name || '';
-      document.getElementById('profileBirth').value = data.birth_date || '';
-      document.getElementById('profilePhone').value = data.phone || '';
-      document.getElementById('profileUniversity').value = data.university || '';
-      document.getElementById('profileGolfYears').value = data.golf_years || 0;
-      document.getElementById('profileCaddyYears').value = data.caddy_years || 0;
-      document.getElementById('profileAppeal').value = data.appeal || '';
-      
-      // Set avatar preview
-      const avatarPreview = document.getElementById('avatarPreview');
-      avatarPreview.src = data.avatar_url || 'https://placehold.co/100x100';
-      
-      // Show modal
-      document.getElementById('profileEditModal').style.display = 'flex';
-    }
-
-    // Save profile
-    async function saveProfile(formData) {
-      try {
-        const { error } = await supabase
-          .from('caddies')
-          .update({
-            name: formData.name,
-            birth_date: formData.birth_date || null,
-            phone: formData.phone,
-            university: formData.university,
-            golf_years: parseInt(formData.golf_years) || 0,
-            caddy_years: parseInt(formData.caddy_years) || 0,
-            appeal: formData.appeal
-          })
-          .eq('cid', cid);
-
-        if (error) throw error;
-
-        showMessage('プロフィールを更新しました！', 'success');
-        document.getElementById('profileEditModal').style.display = 'none';
-        loadProfile(); // Reload profile display
-      } catch (error) {
-        showMessage('エラーが発生しました: ' + error.message, 'error');
-      }
-    }
-
-    // Upload avatar
-    async function uploadAvatar(file) {
-      try {
-        // ファイルサイズチェック（5MB制限）
-        if (file.size > 5 * 1024 * 1024) {
-          throw new Error('ファイルサイズは5MB以下にしてください');
-        }
-
-        // ファイル形式チェック
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        if (!allowedTypes.includes(file.type)) {
-          throw new Error('JPG、PNG、GIF形式の画像のみアップロード可能です');
-        }
-
-        const fileExt = file.name.split('.').pop().toLowerCase();
-        const fileName = `${cid}_${Date.now()}.${fileExt}`;
-        const filePath = `avatars/${fileName}`;
-
-        // まずバケットの存在を確認
-        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-        if (bucketsError) {
-          console.error('バケット一覧取得エラー:', bucketsError);
-          throw new Error('ストレージの設定を確認してください');
-        }
-
-        const avatarsBucket = buckets.find(bucket => bucket.name === 'avatars');
-        if (!avatarsBucket) {
-          throw new Error('「avatars」ストレージバケットが存在しません。Supabaseダッシュボードでバケットを作成してください。');
-        }
-
-        // ファイルをアップロード
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
+        
+        try {
+          // まず、training_requestsテーブルが存在するか確認
+          const { data: tableCheck, error: tableError } = await supabase
+            .from('training_requests')
+            .select('id')
+            .limit(1);
+          
+          console.log('Table check result:', { tableCheck, tableError });
+          
+          const { data, error } = await supabase.from('training_requests').insert({ 
+            cid, 
+            gid: selectedGolfCourse.gid, 
+            training_date: selectedTrainingDate,
+            status: 'pending'
           });
-
-        if (uploadError) {
-          console.error('アップロードエラー:', uploadError);
-          if (uploadError.message.includes('Bucket not found')) {
-            throw new Error('「avatars」ストレージバケットが見つかりません。Supabaseダッシュボードでバケットを作成してください。');
+          
+          console.log('Training request insert result:', { data, error });
+          
+          if (error) {
+            console.error('Training request insert error:', error);
+            throw error;
           }
-          throw uploadError;
-        }
-
-        // 公開URLを取得
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-
-        // データベースにavatar_urlを更新
-        const { error: updateError } = await supabase
-          .from('caddies')
-          .update({ avatar_url: publicUrl })
-          .eq('cid', cid);
-
-        if (updateError) {
-          console.error('データベース更新エラー:', updateError);
-          throw new Error('プロフィール情報の更新に失敗しました');
-        }
-
-        showMessage('プロフィール画像を更新しました！', 'success');
-        return publicUrl;
-      } catch (error) {
-        console.error('画像アップロードエラー:', error);
-        showMessage('画像のアップロードに失敗しました: ' + error.message, 'error');
-        return null;
-      }
-    }
-
-    // Show message function
-    function showMessage(message, type = 'info') {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type}`;
-      messageDiv.textContent = message;
-      messageDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: var(--border-radius);
-        color: white;
-        font-weight: 600;
-        z-index: 1000;
-        animation: slideIn 0.3s ease-out;
-        max-width: 300px;
-      `;
-
-      // Set background color based on type
-      switch (type) {
-        case 'success':
-          messageDiv.style.background = '#28a745';
-          break;
-        case 'error':
-          messageDiv.style.background = '#dc3545';
-          break;
-        case 'info':
-        default:
-          messageDiv.style.background = '#17a2b8';
-          break;
-      }
-
-      document.body.appendChild(messageDiv);
-
-      // Remove message after 3 seconds
-      setTimeout(() => {
-        messageDiv.style.animation = 'slideOut 0.3s ease-in';
-        setTimeout(() => {
-          if (messageDiv.parentNode) {
-            messageDiv.parentNode.removeChild(messageDiv);
-          }
-        }, 300);
-      }, 3000);
-    }
-
-    // Add CSS animations for messages
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      
-      @keyframes slideOut {
-        from {
-          transform: translateX(0);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Calendar management
-    function loadCalendar() {
-      const calTitle = document.getElementById('calTitle');
-      calTitle.textContent = `${calYear}年${calMonth + 1}月`;
-      
-      // Check if editing is locked
-      const today = new Date();
-      const lockDate = new Date(calYear, calMonth - 1, 15);
-      const isLocked = today > lockDate;
-      
-      if (isLocked) {
-        lockInfo.textContent = `⚠️ ${calYear}年${calMonth}月のシフト編集は締め切られています`;
-        lockInfo.style.display = 'block';
-      } else {
-        lockInfo.style.display = 'none';
-      }
-
-      // Generate calendar
-      generateCalendar();
-    }
-
-    function generateCalendar() {
-      const firstDay = new Date(calYear, calMonth, 1);
-      const lastDay = new Date(calYear, calMonth + 1, 0);
-      const startDate = new Date(firstDay);
-      startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-      let html = `
-        <thead>
-          <tr><th>日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th></tr>
-        </thead>
-        <tbody>
-      `;
-
-      for (let week = 0; week < 6; week++) {
-        html += '<tr>';
-        for (let day = 0; day < 7; day++) {
-          const currentDate = new Date(startDate);
-          currentDate.setDate(startDate.getDate() + week * 7 + day);
           
-          const isCurrentMonth = currentDate.getMonth() === calMonth;
-          const dayNumber = currentDate.getDate();
-          const isToday = currentDate.toDateString() === new Date().toDateString();
+          window.open(`mailto:${selectedGolfCourse.email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${row.name || ''}%0A希望研修日:${selectedTrainingDate}%0A研修を希望しています。`);
+          alert('研修希望を送信しました');
+          modal.style.display = 'none';
+        } catch (error) {
+          console.error('Training request error:', error);
+          alert('送信エラー: ' + (error.message || error.toString()));
+        }
+      };
+
+      // Render training calendar function
+      async function renderTrainingCalendar2() {
+        const first = new Date(trainingCalYear2, trainingCalMonth2, 1);
+        const last = new Date(trainingCalYear2, trainingCalMonth2 + 1, 0);
+        document.getElementById('trainingCalTitle2').textContent = `${trainingCalYear2}年 ${trainingCalMonth2 + 1}月`;
+        
+        // Fetch available training dates for selected golf course
+        const { data: availData, error } = await supabase
+          .from('training_availability')
+          .select('date')
+          .eq('gid', selectedGolfCourse.gid)
+          .gte('date', first.toISOString().slice(0,10))
+          .lte('date', last.toISOString().slice(0,10));
+        
+        const availableSet = new Set();
+        if (!error && availData) {
+          availData.forEach(r => availableSet.add(r.date));
+        }
+        
+        // Build calendar
+        const table = document.getElementById('trainingCalTable2');
+        table.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        ['日','月','火','水','木','金','土'].forEach(d => {
+          const th = document.createElement('th');
+          th.textContent = d;
+          th.style.border = '1px solid #ccc';
+          th.style.padding = '4px';
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+        
+        let row = document.createElement('tr');
+        const startWeekDay = first.getDay();
+        for(let i = 0; i < startWeekDay; i++){
+          row.appendChild(document.createElement('td'));
+        }
+        
+        for(let day = 1; day <= last.getDate(); day++){
+          const dateStr = `${trainingCalYear2}-${String(trainingCalMonth2 + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+          const td = document.createElement('td');
+          const isAvailable = availableSet.has(dateStr);
+          const isSelected = selectedTrainingDate === dateStr;
           
-          let cellClass = '';
-          let cellContent = dayNumber;
+          td.innerHTML = `<div style="padding:8px;">${day}</div>`;
+          td.style.border = '1px solid #ccc';
+          td.style.textAlign = 'center';
           
-          if (!isCurrentMonth) {
-            cellClass = 'locked';
-            cellContent = '';
-          } else if (isToday) {
-            cellClass = 'cal-ok';
-            cellContent = `<strong>${dayNumber}</strong>`;
+          if (isSelected) {
+            td.style.backgroundColor = '#3498db';
+            td.style.color = '#fff';
+          } else if (isAvailable) {
+            td.style.backgroundColor = '#c8e6c9';
+            td.style.cursor = 'pointer';
           } else {
-            cellClass = 'cal-ok';
+            td.style.backgroundColor = '#ffcdd2';
+            td.style.color = '#666';
           }
           
-          html += `<td class="${cellClass}" onclick="toggleAvailability(${dayNumber})">${cellContent}</td>`;
+          if (isAvailable) {
+            td.onclick = () => {
+              selectedTrainingDate = dateStr;
+              document.getElementById('selectedDateDisplay').textContent = `選択日: ${dateStr}`;
+              document.getElementById('sendReq').disabled = false;
+              renderTrainingCalendar2(); // Re-render to show selection
+            };
+          }
+          
+          row.appendChild(td);
+          if((startWeekDay + day) % 7 === 0){
+            table.appendChild(row);
+            row = document.createElement('tr');
+          }
         }
-        html += '</tr>';
+        
+        if(row.children.length) {
+          while(row.children.length < 7) row.appendChild(document.createElement('td'));
+          table.appendChild(row);
+        }
       }
-      
-      html += '</tbody>';
-      calTable.innerHTML = html;
-    }
 
-    function toggleAvailability(day) {
-      // Toggle availability logic here
-      console.log(`Toggle availability for day ${day}`);
-    }
-
-    document.getElementById('prevMonth').addEventListener('click', () => {
-      calMonth--;
-      if (calMonth < 0) {
-        calMonth = 11;
-        calYear--;
+      if(initialShowProfile) {
+        switchMain('prof');
+        initialShowProfile = false;
+              }
+      } else {
+        // プロフィールが存在しない場合のステータス表示
+        document.getElementById('mainStatus').innerHTML = `
+          <div class="card">
+            <h3>ステータス</h3>
+            <p>プロフィール登録後にステータス情報が表示されます。</p>
+          </div>`;
       }
-      loadCalendar();
     });
 
-    document.getElementById('nextMonth').addEventListener('click', () => {
-      calMonth++;
-      if (calMonth > 11) {
-        calMonth = 0;
-        calYear++;
+    document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
+    document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+
+    async function renderCal(){
+      const first=new Date(calYear,calMonth,1);
+      const last=new Date(calYear,calMonth+1,0);
+      document.getElementById('calTitle').textContent=`${calYear}年 ${calMonth+1}月`;
+
+      // fetch own availability
+      const { data, error } = await supabase.from('caddy_availability')
+         .select('date')
+         .eq('cid', cid)
+         .gte('date', first.toISOString().slice(0,10))
+         .lte('date', last.toISOString().slice(0,10));
+      const availSet=new Set();
+      if(!error){ data.forEach(r=>availSet.add(r.date)); }
+
+      // determine lock flag (editing allowed?)
+      const deadline=new Date(calYear, calMonth-1, 15); // 前月15日
+      const today=new Date();
+      const locked = today > deadline;
+      lockInfo.textContent= locked? `${calMonth+1}月分の編集締切（前月15日）を過ぎています` : '';
+
+      calTable.innerHTML='';
+      const headerRow=document.createElement('tr');
+      ['日','月','火','水','木','金','土'].forEach(d=>{const th=document.createElement('th');th.textContent=d;headerRow.appendChild(th);});
+      calTable.appendChild(headerRow);
+      let row=document.createElement('tr');
+      const startWD=first.getDay();
+      for(let i=0;i<startWD;i++)row.appendChild(document.createElement('td'));
+      for(let day=1;day<=last.getDate();day++){
+        const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td=document.createElement('td');
+        const isAvail=availSet.has(dateStr);
+        td.className=isAvail?'cal-ok':'cal-ng';
+        td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
+        if(!locked){
+          td.onclick=()=>toggle(dateStr,isAvail);
+        } else {
+          td.classList.add('locked');
+        }
+        row.appendChild(td);
+        if((startWD+day)%7===0){calTable.appendChild(row);row=document.createElement('tr');}
       }
-      loadCalendar();
-    });
-
-    document.getElementById('confirmShiftBtn').addEventListener('click', () => {
-      showMessage('シフトを確定しました！', 'success');
-    });
-
-    // Status management
-    async function loadStatus() {
-      // Load status data
-      document.getElementById('totalShifts').textContent = '12';
-      document.getElementById('totalHours').textContent = '96';
-      document.getElementById('avgRating').textContent = '4.8';
-      document.getElementById('activeBookings').textContent = '3';
+      if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
     }
 
-    // Messages
-    document.getElementById('btnInbox').addEventListener('click', () => loadMessages('inbox'));
-    document.getElementById('btnSent').addEventListener('click', () => loadMessages('sent'));
-    document.getElementById('btnNewMessage').addEventListener('click', () => showNewMessageModal());
+    async function toggle(dateStr,isAvail){
+      if(isAvail){ // delete row
+        const { error } = await supabase.from('caddy_availability').delete().eq('cid',cid).eq('date',dateStr);
+        if(error){alert(error.message);return;}
+      } else {
+        const { error } = await supabase.from('caddy_availability').insert({ cid, date: dateStr });
+        if(error){alert(error.message);return;}
+      }
+      renderCal();
+    }
 
-    function loadMessages(type) {
+    // main tabs
+    const mainProf=document.getElementById('mainProfile');
+    const mainShift=document.getElementById('mainShift');
+    const mainStat=document.getElementById('mainStatus');
+    const mainHist=document.getElementById('mainHistory');
+    const mainMsg=document.getElementById('mainMessages');
+    document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
+    document.getElementById('btnMainShift').onclick=()=>switchMain('shift');
+    document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
+    document.getElementById('btnMainHist').onclick=()=>switchMain('hist');
+    document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
+    function switchMain(k){
+      const map={prof:mainProf,shift:mainShift,stat:mainStat,hist:mainHist,msg:mainMsg};
+      // hide all
+      Object.values(map).forEach(el=>{el.style.display='none';});
+      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainStat.classList.remove('active');btnMainHist.classList.remove('active');btnMainMsg.classList.remove('active');
+
+      // show selected
+      if(map[k]){map[k].style.display='block';}
+      if(k==='prof') btnMainProf.classList.add('active');
+      if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
+      if(k==='stat') btnMainStat.classList.add('active');
+      if(k==='hist'){btnMainHist.classList.add('active');loadHistory();}
+      if(k==='msg'){btnMainMsg.classList.add('active');loadMessages('inbox');}
+    }
+
+    // 初期表示
+    switchMain('prof');
+
+    async function loadHistory(){
+      const { data, error } = await supabase.from('bookings')
+        .select('date,gid,slots,caddy_rate')
+        .eq('status','done')
+        .contains('caddies', [cid]); // assumes bookings.caddies array
+      if(error){console.error(error);return;}
+      mainHist.innerHTML='<table style="border-collapse:collapse;width:100%"><thead><tr><th>日付</th><th>ゴルフ場</th><th>単価</th></tr></thead><tbody>'+
+        data.map(r=>`<tr><td>${r.date}</td><td>${r.gid}</td><td>${r.caddy_rate??'-'}</td></tr>`).join('')+ '</tbody></table>';
+    }
+    document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
+
+    function renderProfileDisplay(row){
+       document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
+       document.getElementById('mainProfile').innerHTML=`
+        <div style='display:flex;gap:16px;align-items:center'>
+          <img src='${row.avatar_url??"https://placehold.co/100x100"}' style='width:100px;height:100px;border-radius:50%;object-fit:cover;'>
+          <h2>${row.name}</h2>
+          <button id='editProfBtn'>編集</button>
+        </div>`;
+       document.getElementById('editProfBtn').onclick=renderProfileForm.bind(null,row);
+    }
+
+    function renderProfileForm(row={}){
+      document.getElementById('mainProfile').innerHTML=`
+        <form id='profForm' style='max-width:480px'>
+          <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
+          <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
+          <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
+          <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
+          <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
+          <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
+          <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
+          <label>アピール<textarea id='pAppeal'>${row.appeal??""}</textarea></label><br>
+          <button type='submit'>保存</button>
+        </form>`;
+      document.getElementById('profForm').onsubmit=saveProfile.bind(null,row);
+    }
+
+    async function saveProfile(row,e){
+      e.preventDefault();
+      const payload={
+        name:document.getElementById('pName').value,
+        birth_date:document.getElementById('pBirth').value||null,
+        phone:document.getElementById('pPhone').value,
+        university:document.getElementById('pUni').value,
+        golf_years:parseInt(document.getElementById('pGolf').value)||0,
+        caddy_years:parseInt(document.getElementById('pCaddy').value)||0,
+        appeal:document.getElementById('pAppeal').value
+      };
+      if(row.cid){
+        const { error } = await supabase.from('caddies').update(payload).eq('cid',row.cid);
+        if(error){alert(error.message);return;}
+        renderProfileDisplay({...row,...payload});
+      } else {
+        const { data:userData } = await supabase.auth.getUser();
+        const newCid='c'+userData.user.id.slice(0,6);
+        const { error } = await supabase.from('caddies').insert({...payload,cid:newCid,email:userData.user.email});
+        if(error){alert(error.message);return;}
+        cid=newCid;
+        renderProfileDisplay({...payload,cid:newCid});
+      }
+      const file=document.getElementById('pAvatar').files[0];
+      if(file){
+        const path=`avatars/${cid||'tmp_'+Date.now()}`;
+        await supabase.storage.from('avatars').upload(path,file,{upsert:true});
+        const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+        payload.avatar_url=urlData.publicUrl;
+      }
+    }
+
+    document.getElementById('confirmShiftBtn').onclick=async()=>{
+      alert('シフトを確定しました');
+    };
+
+    // Load messages for caddy
+    async function loadMessages(type = 'inbox') {
       const messagesList = document.getElementById('messagesList');
       
-      if (type === 'inbox') {
-        messagesList.innerHTML = `
-          <div class="message-item">
-            <div class="message-header">
-              <span class="message-sender">ABCゴルフ場</span>
-              <span class="message-date">2024/01/15</span>
+      try {
+        let query;
+        if (type === 'inbox') {
+          query = supabase
+            .from('messages')
+            .select('*')
+            .eq('receiver_type', 'caddy')
+            .eq('receiver_id', cid)
+            .order('created_at', { ascending: false });
+        } else {
+          query = supabase
+            .from('messages')
+            .select('*')
+            .eq('sender_type', 'caddy')
+            .eq('sender_id', cid)
+            .order('created_at', { ascending: false });
+        }
+        
+        const { data: messages, error } = await query;
+        
+        if (error) {
+          messagesList.innerHTML = `<p>エラー: ${error.message}</p>`;
+          return;
+        }
+        
+        if (!messages || messages.length === 0) {
+          messagesList.innerHTML = '<p>メッセージはありません。</p>';
+          return;
+        }
+        
+        let html = '';
+        messages.forEach(message => {
+          const isUnread = type === 'inbox' && !message.is_read;
+          html += `
+            <div style="border:1px solid #ddd; margin-bottom:8px; padding:12px; border-radius:6px; background:${isUnread ? '#f8f9fa' : '#fff'};">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>${message.subject}</strong>
+                  ${isUnread ? '<span style="background:#e74c3c; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.8em; margin-left:8px;">未読</span>' : ''}
+                </div>
+                <small style="color:#666;">${message.created_at?.slice(0,16).replace('T', ' ')}</small>
+              </div>
+              <p style="margin:8px 0; color:#666;">${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}</p>
             </div>
-            <div class="message-content">
-              来週のシフトについて確認させていただきたいのですが、ご都合はいかがでしょうか？
-            </div>
-          </div>
-          <div class="message-item">
-            <div class="message-header">
-              <span class="message-sender">XYZゴルフクラブ</span>
-              <span class="message-date">2024/01/14</span>
-            </div>
-            <div class="message-content">
-              研修プログラムの詳細をお送りします。ご確認ください。
-            </div>
-          </div>
-        `;
-      } else {
-        messagesList.innerHTML = '<p style="text-align: center; color: var(--text-light);">送信済みメッセージはありません</p>';
+          `;
+        });
+        
+        messagesList.innerHTML = html;
+      } catch (error) {
+        messagesList.innerHTML = `<p>エラー: ${error.message}</p>`;
       }
     }
 
-    function showNewMessageModal() {
-      document.getElementById('newMessageModal').style.display = 'flex';
+    // Load golf courses for message receiver selection
+    async function loadGolfCoursesForMessage() {
+      try {
+        const { data: golfCourses, error } = await supabase
+          .from('golf_courses')
+          .select('gid, name')
+          .order('name');
+        
+        if (error) {
+          console.error('Error loading golf courses:', error);
+          return;
+        }
+        
+        const select = document.getElementById('messageReceiver');
+        select.innerHTML = '<option value="">送信先を選択</option>';
+        
+        if (golfCourses) {
+          golfCourses.forEach(course => {
+            select.innerHTML += `<option value="${course.gid}">${course.name}</option>`;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading golf courses:', error);
+      }
     }
 
-    document.getElementById('cancelMessage').addEventListener('click', () => {
-      document.getElementById('newMessageModal').style.display = 'none';
-    });
-
-    document.getElementById('sendMessage').addEventListener('click', () => {
-      const receiver = document.getElementById('messageReceiver').value;
-      const subject = document.getElementById('messageSubject').value;
-      const content = document.getElementById('messageContent').value;
+    // Send new message from caddy
+    async function sendNewMessage() {
+      const receiverId = document.getElementById('messageReceiver').value;
+      const subject = document.getElementById('messageSubject').value.trim();
+      const content = document.getElementById('messageContent').value.trim();
       
-      if (!receiver || !subject || !content) {
-        showMessage('全ての項目を入力してください', 'error');
+      if (!receiverId || !subject || !content) {
+        alert('すべての項目を入力してください。');
         return;
       }
       
-      showMessage('メッセージを送信しました！', 'success');
-      document.getElementById('newMessageModal').style.display = 'none';
-      document.getElementById('messageReceiver').value = '';
-      document.getElementById('messageSubject').value = '';
-      document.getElementById('messageContent').value = '';
-    });
-
-    // Utility functions
-    function showMessage(message, type = 'info') {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type}`;
-      messageDiv.textContent = message;
-      
-      document.body.insertBefore(messageDiv, document.body.firstChild);
-      
-      setTimeout(() => {
-        messageDiv.remove();
-      }, 5000);
+      try {
+        const { error } = await supabase
+          .from('messages')
+          .insert({
+            sender_type: 'caddy',
+            sender_id: cid,
+            receiver_type: 'golf_course',
+            receiver_id: receiverId,
+            subject: subject,
+            content: content
+          });
+        
+        if (error) {
+          alert('メッセージ送信に失敗しました: ' + error.message);
+        } else {
+          alert('メッセージを送信しました');
+          document.getElementById('newMessageModal').style.display = 'none';
+          document.getElementById('messageSubject').value = '';
+          document.getElementById('messageContent').value = '';
+          loadMessages('sent');
+        }
+      } catch (error) {
+        alert('メッセージ送信に失敗しました: ' + error.message);
+      }
     }
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      location.href = '/';
-    });
+    // Message related event listeners
+    document.getElementById('btnInbox').onclick = () => {
+      document.getElementById('btnInbox').classList.add('active');
+      document.getElementById('btnSent').classList.remove('active');
+      loadMessages('inbox');
+    };
+    
+    document.getElementById('btnSent').onclick = () => {
+      document.getElementById('btnSent').classList.add('active');
+      document.getElementById('btnInbox').classList.remove('active');
+      loadMessages('sent');
+    };
+    
+    document.getElementById('btnNewMessage').onclick = () => {
+      loadGolfCoursesForMessage();
+      document.getElementById('newMessageModal').style.display = 'flex';
+    };
+    
+    document.getElementById('cancelMessage').onclick = () => {
+      document.getElementById('newMessageModal').style.display = 'none';
+    };
+    
+    document.getElementById('sendMessage').onclick = sendNewMessage;
   </script>
 </body>
 </html> 
