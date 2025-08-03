@@ -25,6 +25,106 @@
     .cal-red{background:#ffcdd2}
     .tabs-main button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#e0e0e0;cursor:pointer}
     .tabs-main button.active{border-bottom-color:#0077cc;background:#fff}
+    /* --- LINE風チャットUI --- */
+    #mainMessages {
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+      max-height: 600px;
+      background: #f7f7f7;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+    #messagesList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 16px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #f7f7f7;
+    }
+    .chat-bubble {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 1rem;
+      line-height: 1.5;
+      position: relative;
+      word-break: break-word;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      margin-bottom: 2px;
+    }
+    .chat-bubble.sent {
+      background: #d1f5d3;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble.received {
+      background: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
+    .chat-meta {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 2px;
+      text-align: right;
+    }
+    .chat-meta.received {
+      text-align: left;
+    }
+    #chatInputArea {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+    }
+    #chatInput {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      outline: none;
+    }
+    #sendChatBtn {
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 0 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #sendChatBtn:hover {
+      background: #219150;
+    }
+    /* 既読未読バッジ */
+    .chat-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      color: #fff;
+      background: #aaa;
+      border-radius: 8px;
+      padding: 1px 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .chat-badge.unread {
+      background: #e74c3c;
+    }
+    .chat-badge.read {
+      background: #27ae60;
+    }
   </style>
 </head>
 <body>
@@ -96,15 +196,11 @@
   </div>
 
   <!-- Messages Tab -->
-  <div id="mainMessages" class="hidden" style="margin-top:15px;">
-    <div class="card">
-      <h3>メッセージ</h3>
-      <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button id="btnInbox" class="active" style="padding:8px 16px; border:none; background:#3498db; color:#fff; border-radius:4px; cursor:pointer;">受信ボックス</button>
-        <button id="btnSent" style="padding:8px 16px; border:none; background:#ecf0f1; color:#2c3e50; border-radius:4px; cursor:pointer;">送信済み</button>
-        <button id="btnNewMessage" style="padding:8px 16px; border:none; background:#27ae60; color:#fff; border-radius:4px; cursor:pointer;">新規メッセージ</button>
-      </div>
-      <div id="messagesList"></div>
+  <div id="mainMessages" class="hidden">
+    <div id="messagesList"></div>
+    <div id="chatInputArea">
+      <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" />
+      <button id="sendChatBtn">送信</button>
     </div>
   </div>
 
@@ -1226,6 +1322,77 @@
         alert('プロフィールの更新に失敗しました: ' + error.message);
       }
     }
+
+    /* --- LINE風チャットUI --- */
+    // チャットUI用メッセージ取得・表示
+    let chatPartnerId = null; // チャット相手ID
+    let chatPartnerName = '';
+
+    async function loadChatMessages(partnerId, partnerName) {
+      chatPartnerId = partnerId;
+      chatPartnerName = partnerName;
+      const messagesList = document.getElementById('messagesList');
+      messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">読み込み中...</div>';
+      // 送信・受信両方のメッセージを取得
+      const { data: messages, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`(sender_id.eq.${gid},receiver_id.eq.${partnerId}),(sender_id.eq.${partnerId},receiver_id.eq.${gid})`)
+        .order('created_at', { ascending: true });
+      if (error) {
+        messagesList.innerHTML = `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
+        return;
+      }
+      if (!messages || messages.length === 0) {
+        messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">メッセージはありません</div>';
+        return;
+      }
+      messagesList.innerHTML = '';
+      messages.forEach(msg => {
+        const isSent = msg.sender_id === gid;
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble ' + (isSent ? 'sent' : 'received');
+        bubble.innerHTML = `${msg.content}<div class='chat-meta${isSent ? '' : ' received'}'>${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${msg.is_read ? "<span class='chat-badge read'>既読</span>" : (!isSent ? "<span class='chat-badge unread'>未読</span>" : '')}</div>`;
+        messagesList.appendChild(bubble);
+      });
+      // スクロール最下部へ
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    // メッセージ送信
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const content = input.value.trim();
+      if (!content || !chatPartnerId) return;
+      const { error } = await supabase.from('messages').insert({
+        sender_type: 'golf_course', sender_id: gid,
+        receiver_type: 'caddy', receiver_id: chatPartnerId,
+        content,
+        is_read: false
+      });
+      if (error) {
+        alert('送信エラー: ' + error.message);
+        return;
+      }
+      input.value = '';
+      loadChatMessages(chatPartnerId, chatPartnerName);
+    }
+
+    document.getElementById('sendChatBtn').onclick = sendChatMessage;
+    document.getElementById('chatInput').onkeydown = e => { if (e.key === 'Enter') sendChatMessage(); };
+
+    // チャット相手選択UI（例: キャディ一覧から選択）
+    // ここではダミーで1人だけ選択肢を表示
+    async function showChatWithCaddy() {
+      // 本来はキャディ一覧を取得してリスト化
+      // ここでは最初の1件を仮で取得
+      const { data: caddies } = await supabase.from('caddies').select('cid,name').limit(1);
+      if (caddies && caddies.length > 0) {
+        loadChatMessages(caddies[0].cid, caddies[0].name);
+      }
+    }
+    // メッセージタブを開いたらチャット相手選択（本番はリスト化）
+    document.getElementById('btnMainMsg').onclick = showChatWithCaddy;
 
   </script>
 </body>
