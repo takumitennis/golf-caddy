@@ -412,6 +412,8 @@
       border-radius: var(--border-radius);
       width: 90%;
       max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: var(--shadow-hover);
     }
 
@@ -448,12 +450,17 @@
       box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
     }
 
-    .modal-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-      margin-top: 1.5rem;
-    }
+         .modal-buttons {
+       display: flex;
+       gap: 1rem;
+       justify-content: flex-end;
+       margin-top: 1.5rem;
+       padding-top: 1rem;
+       border-top: 1px solid #e1e8ed;
+       position: sticky;
+       bottom: 0;
+       background: #fff;
+     }
 
     .modal-buttons button {
       padding: 0.75rem 1.5rem;
@@ -652,17 +659,23 @@
       box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
     }
 
-    .avatar-upload {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
+         .avatar-upload {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 1rem;
+       margin-bottom: 1.5rem;
+       padding: 1rem;
+       border: 2px dashed #e1e8ed;
+       border-radius: var(--border-radius);
+       background: #f8f9fa;
+     }
 
-    .avatar-upload img {
-      border: 2px solid #e1e8ed;
-      border-radius: 50%;
-    }
+     .avatar-upload img {
+       border: 2px solid #e1e8ed;
+       border-radius: 50%;
+       box-shadow: var(--shadow);
+     }
 
     .upload-btn {
       padding: 0.75rem 1.5rem;
@@ -797,14 +810,15 @@
     <div class="modal-content">
       <h3>✏️ プロフィール編集</h3>
       <form id="profileForm">
-        <div class="form-group">
-          <label>プロフィール画像</label>
-          <div class="avatar-upload">
-            <img id="avatarPreview" src="https://placehold.co/100x100" alt="アバター" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem;">
-            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-            <button type="button" id="uploadAvatarBtn" class="upload-btn">画像を選択</button>
-          </div>
-        </div>
+                 <div class="form-group">
+           <label>プロフィール画像</label>
+           <div class="avatar-upload">
+             <img id="avatarPreview" src="https://placehold.co/100x100" alt="アバター" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+             <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+             <button type="button" id="uploadAvatarBtn" class="upload-btn">画像を選択</button>
+             <small style="color: #6c757d; font-size: 0.875rem;">JPG, PNG形式、5MB以下</small>
+           </div>
+         </div>
         
         <div class="form-group">
           <label>氏名 *</label>
@@ -836,10 +850,11 @@
           <input type="number" id="profileCaddyYears" min="0" value="0">
         </div>
         
-        <div class="form-group">
-          <label>アピールポイント</label>
-          <textarea id="profileAppeal" rows="4" placeholder="自分の強みや特徴をアピールしてください..."></textarea>
-        </div>
+                 <div class="form-group">
+           <label>アピールポイント</label>
+           <textarea id="profileAppeal" rows="4" placeholder="自分の強みや特徴をアピールしてください..." style="resize: vertical; min-height: 100px;"></textarea>
+           <small style="color: #6c757d; font-size: 0.875rem;">自分の経験や強みを具体的に書いてください</small>
+         </div>
         
         <div class="modal-buttons">
           <button type="button" id="cancelProfileEdit" class="cancel">キャンセル</button>
