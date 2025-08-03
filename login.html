@@ -5,30 +5,388 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Login / Sign-up</title>
   <style>
-    body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa;display:flex;justify-content:center;align-items:flex-start;padding-top:60px}
-    .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;width:90%;max-width:380px;padding:32px 32px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
-    h2{margin:0 0 24px;font-size:1.25rem;color:#004b8d;border-left:4px solid #004b8d;padding-left:8px}
-    label{display:block;margin-top:18px;font-weight:600}
-    input{width:calc(100% - 20px);padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:4px;font-size:1rem}
-    input.error{border-color:#e53935;background:#ffebee}
-    .err{color:#e53935;font-size:.85rem;margin-top:4px;display:none}
-    button{width:100%;margin-top:26px;padding:12px;border:none;border-radius:4px;background:#ff7043;color:#fff;font-size:1rem;cursor:pointer}
-    small{display:block;margin-top:14px;color:#004b8d;text-align:right;font-size:.85rem}
+    :root {
+      --primary-color: #2f8f2f;
+      --primary-dark: #1e5f1e;
+      --primary-light: #4caf50;
+      --secondary-color: #ffffff;
+      --accent-color: #ff6b35;
+      --text-color: #333333;
+      --text-light: #666666;
+      --bg-light: #f8f9fa;
+      --bg-dark: #2c3e50;
+      --border-radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      background-image: 
+          url("https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--border-radius);
+      padding: 3rem 2.5rem;
+      box-shadow: var(--shadow-hover);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+
+    .logo {
+      margin-bottom: 2rem;
+    }
+
+    .logo h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo p {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
+    h2 {
+      margin: 0 0 2rem;
+      font-size: 1.5rem;
+      color: var(--text-color);
+      font-weight: 600;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 2px solid #e1e8ed;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
+      background: white;
+    }
+
+    input.error {
+      border-color: #e74c3c;
+      background: #fff5f5;
+    }
+
+    .err {
+      color: #e74c3c;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+      font-weight: 500;
+    }
+
+    .err.show {
+      display: block;
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    button {
+      width: 100%;
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .toggle {
+      display: block;
+      margin-top: 2rem;
+      color: var(--primary-color);
+      text-align: center;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .toggle:hover {
+      color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .role-selector {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+    }
+
+    .role-option {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: calc(var(--border-radius) - 4px);
+      background: transparent;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .role-option.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .role-option:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      border: 1px solid #c3e6cb;
+      font-weight: 500;
+    }
+
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      border: 1px solid #f5c6cb;
+      font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      .logo h1 {
+        font-size: 1.75rem;
+      }
+
+      .role-selector {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .role-option {
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 1.5rem 1rem;
+      }
+
+      .logo h1 {
+        font-size: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.25rem;
+      }
+
+      input {
+        padding: 0.875rem 1rem;
+      }
+
+      button {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <form id="authForm" class="card" novalidate>
-    <h2 id="title">ログイン</h2>
-    <label id="emailLabel">ログインID
-      <input id="email"  type="email" required />
-      <span class="err" id="errEmail">ログインIDを入力してください。</span>
-    </label>
-    <label id="passwordLabel">パスワード
-      <input id="pass"   type="password" required />
-    </label>
-    <button type="submit">ログイン</button>
-    <small id="toggle" style="cursor:pointer">新規登録はこちら</small>
-  </form>
+  <div class="login-container">
+    <form id="authForm" class="card" novalidate>
+      <div class="logo">
+        <h1>🏌️ Golf-Caddy</h1>
+        <p>マッチングサービス</p>
+      </div>
+      
+      <h2 id="title">ログイン</h2>
+      
+      <div class="role-selector">
+        <button type="button" class="role-option" data-role="golf">ゴルフ場</button>
+        <button type="button" class="role-option active" data-role="caddy">キャディ</button>
+      </div>
+
+      <div class="form-group">
+        <label id="emailLabel">ログインID</label>
+        <input id="email" type="email" required placeholder="メールアドレスを入力" />
+        <span class="err" id="errEmail">ログインIDを入力してください。</span>
+      </div>
+      
+      <div class="form-group" id="passwordGroup">
+        <label id="passwordLabel">パスワード</label>
+        <input id="pass" type="password" required placeholder="パスワードを入力" />
+        <span class="err" id="errPassword">パスワードを入力してください。</span>
+      </div>
+      
+      <button type="submit" id="submitBtn">
+        <span id="submitText">ログイン</span>
+      </button>
+      
+      <a href="#" class="toggle" id="toggle">新規登録はこちら</a>
+    </form>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -36,100 +394,218 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // role=golf / role=caddy を URL クエリ ?role=golf で受け取る
-    const role = new URLSearchParams(location.search).get("role") || "guest";
+    // URL クエリからロールを取得
+    const urlParams = new URLSearchParams(location.search);
+    let role = urlParams.get("role") || "caddy";
+    let mode = "login";
 
-    let mode = "login";                    // login or signup
-    const form   = document.getElementById("authForm");
+    const form = document.getElementById("authForm");
     const toggle = document.getElementById("toggle");
-    const title  = document.getElementById("title");
+    const title = document.getElementById("title");
+    const submitBtn = document.getElementById("submitBtn");
+    const submitText = document.getElementById("submitText");
+    const passwordGroup = document.getElementById("passwordGroup");
+    const emailLabel = document.getElementById("emailLabel");
+    const roleOptions = document.querySelectorAll('.role-option');
 
-    toggle.onclick = () => {
-      mode  = mode === "login" ? "signup" : "login";
-      title.textContent = mode === "login" ? "ログイン" : "新規登録";
-      toggle.textContent = mode === "login" ? "新規登録はこちら" : "ログインはこちら";
-      
-      // パスワードフィールドの表示/非表示
-      const passwordField = document.getElementById("pass").parentElement;
-      const submitButton = document.querySelector("button[type='submit']");
-      const emailLabel = document.getElementById("emailLabel");
-      
+    // ロール選択の初期化
+    function updateRoleSelection() {
+      roleOptions.forEach(option => {
+        option.classList.remove('active');
+        if (option.dataset.role === role) {
+          option.classList.add('active');
+        }
+      });
+    }
+
+    // ロール選択のイベントリスナー
+    roleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        role = option.dataset.role;
+        updateRoleSelection();
+        updateFormDisplay();
+      });
+    });
+
+    // フォーム表示の更新
+    function updateFormDisplay() {
       if (mode === "signup") {
-        passwordField.style.display = "none";
-        submitButton.textContent = "登録";
-        emailLabel.firstChild.textContent = "メールアドレス";
+        title.textContent = "新規登録";
+        submitText.textContent = "登録";
+        emailLabel.textContent = "メールアドレス";
+        passwordGroup.style.display = "none";
+        toggle.textContent = "ログインはこちら";
       } else {
-        passwordField.style.display = "block";
-        submitButton.textContent = "ログイン";
-        emailLabel.firstChild.textContent = "ログインID";
+        title.textContent = "ログイン";
+        submitText.textContent = "ログイン";
+        emailLabel.textContent = "ログインID";
+        passwordGroup.style.display = "block";
+        toggle.textContent = "新規登録はこちら";
       }
-    };
+    }
 
-    form.onsubmit = async (e) => {
+    // 初期表示の設定
+    updateRoleSelection();
+    updateFormDisplay();
+
+    // モード切り替え
+    toggle.addEventListener('click', (e) => {
       e.preventDefault();
+      mode = mode === "login" ? "signup" : "login";
+      updateFormDisplay();
       
-      // エラークラスをリセット
+      // エラーメッセージをクリア
+      clearErrors();
+    });
+
+    // エラー表示のクリア
+    function clearErrors() {
       document.getElementById("email").classList.remove("error");
       document.getElementById("pass").classList.remove("error");
+      document.querySelectorAll('.err').forEach(err => {
+        err.classList.remove('show');
+      });
+    }
+
+    // エラーメッセージの表示
+    function showError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      const errorSpan = document.getElementById(`err${fieldId.charAt(0).toUpperCase() + fieldId.slice(1)}`);
       
-      const email = document.getElementById("email").value;
+      field.classList.add("error");
+      if (errorSpan) {
+        errorSpan.textContent = message;
+        errorSpan.classList.add('show');
+      }
+    }
+
+    // 成功メッセージの表示
+    function showMessage(message, type = 'success') {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+      messageDiv.textContent = message;
+      
+      form.insertBefore(messageDiv, form.firstChild);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 5000);
+    }
+
+    // ローディング状態の管理
+    function setLoading(loading) {
+      const submitBtn = document.getElementById("submitBtn");
+      const submitText = document.getElementById("submitText");
+      
+      if (loading) {
+        submitBtn.disabled = true;
+        submitText.innerHTML = '<span class="loading"></span>処理中...';
+      } else {
+        submitBtn.disabled = false;
+        submitText.textContent = mode === "login" ? "ログイン" : "登録";
+      }
+    }
+
+    // フォーム送信
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      clearErrors();
+      setLoading(true);
+      
+      const email = document.getElementById("email").value.trim();
       const password = document.getElementById("pass").value;
 
       // バリデーション
       let hasError = false;
+      
       if (!email) {
-        document.getElementById("email").classList.add("error");
+        showError("email", "メールアドレスを入力してください");
+        hasError = true;
+      } else if (!email.includes('@')) {
+        showError("email", "有効なメールアドレスを入力してください");
         hasError = true;
       }
       
-      // ログイン時のみパスワードをチェック
       if (mode === "login" && !password) {
-        document.getElementById("pass").classList.add("error");
+        showError("pass", "パスワードを入力してください");
         hasError = true;
       }
       
       if (hasError) {
-        const message = mode === "login" ? "全ての項目を入力してください" : "メールアドレスを入力してください";
-        alert(message);
+        setLoading(false);
         return;
       }
 
-      if (mode === "login") {
-        const res = await supabase.auth.signInWithPassword({ email, password });
-        if (res.error) {
-          alert("ログインに失敗しました: " + res.error.message);
-          document.getElementById("email").classList.add("error");
-          document.getElementById("pass").classList.add("error");
-        } else {
-          alert("ログインしました");
-          // 絶対パスでダッシュボードハブへ
-          window.location.href = "/dashboard.html";
-        }
-      } else {
-        // 新規登録フロー
-        const tempPassword = Math.random().toString(36).slice(-8) + "Tmp123!";
-        try {
-          const { data, error } = await supabase.auth.signUp({ 
-    email,
-            password: tempPassword,
-            options: { data: { role: role } }
+      try {
+        if (mode === "login") {
+          // ログイン処理
+          const { data, error } = await supabase.auth.signInWithPassword({ 
+            email, 
+            password 
           });
           
           if (error) {
-            throw error;
+            showMessage("ログインに失敗しました: " + error.message, 'error');
+          } else {
+            showMessage("ログインに成功しました！", 'success');
+            
+            // ロールに応じてリダイレクト
+            setTimeout(() => {
+              if (role === "golf") {
+                location.href = "golf_dashboard.html";
+              } else {
+                location.href = "caddy_dashboard.html";
+              }
+            }, 1000);
           }
+        } else {
+          // 新規登録処理（パスワードレス認証）
+          const { data, error } = await supabase.auth.signInWithOtp({
+            email: email,
+            options: {
+              data: {
+                role: role
+              }
+            }
+          });
           
-          alert("登録が完了しました。プロフィール情報入力画面に遷移します。");
-          // 絶対パスで直接プロフィール画面へ
-          window.location.href = `/profile.html?role=${role}`;
-          
-        } catch (error) {
-          console.error("Registration error:", error);
-          alert("登録処理中にエラーが発生しました: " + error.message);
-          document.getElementById("email").classList.add("error");
+          if (error) {
+            showMessage("登録に失敗しました: " + error.message, 'error');
+          } else {
+            showMessage("確認メールを送信しました。メールをご確認ください。", 'success');
+          }
         }
+      } catch (error) {
+        showMessage("エラーが発生しました: " + error.message, 'error');
+      } finally {
+        setLoading(false);
       }
-    };
+    });
+
+    // 入力フィールドのフォーカス時のエラークリア
+    document.getElementById("email").addEventListener('focus', () => {
+      document.getElementById("email").classList.remove("error");
+      document.getElementById("errEmail").classList.remove("show");
+    });
+
+    document.getElementById("pass").addEventListener('focus', () => {
+      document.getElementById("pass").classList.remove("error");
+      document.getElementById("errPassword").classList.remove("show");
+    });
+
+    // ページ読み込み時のアニメーション
+    document.addEventListener('DOMContentLoaded', () => {
+      const card = document.querySelector('.card');
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      
+      setTimeout(() => {
+        card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 100);
+    });
   </script>
 </body>
 </html>

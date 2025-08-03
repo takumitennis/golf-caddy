@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>評価システム</title>
+  <style>
+    :root {
+      --primary-color: #2f8f2f;
+      --primary-dark: #1e5f1e;
+      --primary-light: #4caf50;
+      --secondary-color: #ffffff;
+      --accent-color: #ff6b35;
+      --text-color: #333333;
+      --text-light: #666666;
+      --bg-light: #f8f9fa;
+      --bg-dark: #2c3e50;
+      --border-radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background: var(--bg-light);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--bg-dark), #34495e);
+      color: white;
+      padding: 1.5rem 2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-tab {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: calc(var(--border-radius) - 4px);
+      background: transparent;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .nav-tab.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .nav-tab:hover:not(.active) {
+      background: var(--bg-light);
+    }
+
+    /* Rating Cards */
+    .rating-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .rating-card {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .rating-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .rating-score {
+      font-size: 3rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .rating-stars {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .star {
+      font-size: 1.5rem;
+      color: #ffd700;
+    }
+
+    .star.empty {
+      color: #e0e0e0;
+    }
+
+    .rating-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .rating-count {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    /* Rating Form */
+    .rating-form {
+      background: white;
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .rating-form h3 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .form-group select,
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e1e8ed;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    .form-group select:focus,
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(47, 143, 47, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Rating Criteria */
+    .rating-criteria {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .criteria-item {
+      background: var(--bg-light);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+    }
+
+    .criteria-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-color);
+    }
+
+    .criteria-stars {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .criteria-star {
+      font-size: 1.2rem;
+      color: #e0e0e0;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .criteria-star.active {
+      color: #ffd700;
+    }
+
+    .criteria-star:hover {
+      color: #ffd700;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .submit-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Reviews List */
+    .reviews-section {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .reviews-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 1.5rem;
+    }
+
+    .reviews-header h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .reviews-filters {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--border-radius);
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .filter-btn.active {
+      background: white;
+      color: var(--primary-color);
+    }
+
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .reviews-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .review-item {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e1e8ed;
+      transition: var(--transition);
+    }
+
+    .review-item:hover {
+      background: #f8f9fa;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .reviewer-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .reviewer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .reviewer-details h4 {
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 0.25rem;
+    }
+
+    .review-date {
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+
+    .review-rating {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .review-star {
+      font-size: 1rem;
+      color: #ffd700;
+    }
+
+    .review-content {
+      color: var(--text-color);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .review-criteria {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .criteria-badge {
+      background: var(--bg-light);
+      color: var(--text-color);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 0.25rem 0.75rem;
+      border: none;
+      border-radius: calc(var(--border-radius) - 4px);
+      background: var(--bg-light);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.8rem;
+    }
+
+    .action-btn:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* Analytics */
+    .analytics-section {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .analytics-header {
+      margin-bottom: 2rem;
+    }
+
+    .analytics-header h3 {
+      color: var(--primary-color);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .analytics-card {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--bg-light);
+      border-radius: var(--border-radius);
+    }
+
+    .analytics-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .analytics-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Chart Container */
+    .chart-container {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-header h3 {
+      color: var(--primary-color);
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .chart-placeholder {
+      height: 300px;
+      background: var(--bg-light);
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .nav-tabs {
+        flex-direction: column;
+      }
+
+      .rating-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .rating-criteria {
+        grid-template-columns: 1fr;
+      }
+
+      .reviews-filters {
+        flex-direction: column;
+      }
+
+      .filter-btn {
+        text-align: center;
+      }
+
+      .analytics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .review-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .review-criteria {
+        flex-direction: column;
+      }
+    }
+
+    /* Loading Animation */
+    .loading {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+    }
+
+    .loading.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Success/Error Messages */
+    .message {
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>⭐ 評価システム</h1>
+    <p>キャディとゴルフ場の評価・レビュー管理</p>
+  </div>
+
+  <div class="container">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="overview">評価概要</button>
+      <button class="nav-tab" data-tab="rate">評価する</button>
+      <button class="nav-tab" data-tab="reviews">レビュー</button>
+      <button class="nav-tab" data-tab="analytics">分析</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview" class="tab-content">
+      <div class="rating-overview">
+        <div class="rating-card loading">
+          <div class="rating-score">4.8</div>
+          <div class="rating-stars">
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star empty">★</span>
+          </div>
+          <div class="rating-label">総合評価</div>
+          <div class="rating-count">127件の評価</div>
+        </div>
+        
+        <div class="rating-card loading">
+          <div class="rating-score">4.9</div>
+          <div class="rating-stars">
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+          </div>
+          <div class="rating-label">サービス品質</div>
+          <div class="rating-count">125件の評価</div>
+        </div>
+        
+        <div class="rating-card loading">
+          <div class="rating-score">4.7</div>
+          <div class="rating-stars">
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star empty">★</span>
+          </div>
+          <div class="rating-label">コミュニケーション</div>
+          <div class="rating-count">120件の評価</div>
+        </div>
+        
+        <div class="rating-card loading">
+          <div class="rating-score">4.6</div>
+          <div class="rating-stars">
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star empty">★</span>
+          </div>
+          <div class="rating-label">時間厳守</div>
+          <div class="rating-count">118件の評価</div>
+        </div>
+      </div>
+
+      <div class="chart-container loading">
+        <div class="chart-header">
+          <h3>評価分布</h3>
+        </div>
+        <div class="chart-placeholder">
+          評価分布チャート（実装予定）
+        </div>
+      </div>
+    </div>
+
+    <!-- Rate Tab -->
+    <div id="rate" class="tab-content" style="display: none;">
+      <div class="rating-form loading">
+        <h3>📝 新しい評価を投稿</h3>
+        
+        <div class="form-group">
+          <label>評価対象</label>
+          <select id="rateTarget">
+            <option value="">評価対象を選択</option>
+            <option value="caddy">キャディ</option>
+            <option value="golf_course">ゴルフ場</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>対象者/施設</label>
+          <select id="rateSubject">
+            <option value="">対象を選択</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>評価基準</label>
+          <div class="rating-criteria">
+            <div class="criteria-item">
+              <div class="criteria-label">サービス品質</div>
+              <div class="criteria-stars" data-criteria="service">
+                <span class="criteria-star" data-rating="1">★</span>
+                <span class="criteria-star" data-rating="2">★</span>
+                <span class="criteria-star" data-rating="3">★</span>
+                <span class="criteria-star" data-rating="4">★</span>
+                <span class="criteria-star" data-rating="5">★</span>
+              </div>
+            </div>
+            
+            <div class="criteria-item">
+              <div class="criteria-label">コミュニケーション</div>
+              <div class="criteria-stars" data-criteria="communication">
+                <span class="criteria-star" data-rating="1">★</span>
+                <span class="criteria-star" data-rating="2">★</span>
+                <span class="criteria-star" data-rating="3">★</span>
+                <span class="criteria-star" data-rating="4">★</span>
+                <span class="criteria-star" data-rating="5">★</span>
+              </div>
+            </div>
+            
+            <div class="criteria-item">
+              <div class="criteria-label">時間厳守</div>
+              <div class="criteria-stars" data-criteria="punctuality">
+                <span class="criteria-star" data-rating="1">★</span>
+                <span class="criteria-star" data-rating="2">★</span>
+                <span class="criteria-star" data-rating="3">★</span>
+                <span class="criteria-star" data-rating="4">★</span>
+                <span class="criteria-star" data-rating="5">★</span>
+              </div>
+            </div>
+            
+            <div class="criteria-item">
+              <div class="criteria-label">専門知識</div>
+              <div class="criteria-stars" data-criteria="knowledge">
+                <span class="criteria-star" data-rating="1">★</span>
+                <span class="criteria-star" data-rating="2">★</span>
+                <span class="criteria-star" data-rating="3">★</span>
+                <span class="criteria-star" data-rating="4">★</span>
+                <span class="criteria-star" data-rating="5">★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>レビュー内容</label>
+          <textarea id="reviewContent" placeholder="サービスの詳細な感想をお聞かせください..."></textarea>
+        </div>
+
+        <button class="submit-btn" id="submitRating">評価を投稿</button>
+      </div>
+    </div>
+
+    <!-- Reviews Tab -->
+    <div id="reviews" class="tab-content" style="display: none;">
+      <div class="reviews-section loading">
+        <div class="reviews-header">
+          <h3>📋 レビュー一覧</h3>
+          <div class="reviews-filters">
+            <button class="filter-btn active" data-filter="all">全て</button>
+            <button class="filter-btn" data-filter="caddy">キャディ</button>
+            <button class="filter-btn" data-filter="golf_course">ゴルフ場</button>
+            <button class="filter-btn" data-filter="recent">最新</button>
+            <button class="filter-btn" data-filter="rating">高評価</button>
+          </div>
+        </div>
+        <div class="reviews-list" id="reviewsList">
+          <!-- Reviews will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content" style="display: none;">
+      <div class="analytics-section loading">
+        <div class="analytics-header">
+          <h3>📊 評価分析</h3>
+        </div>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <div class="analytics-number">127</div>
+            <div class="analytics-label">総評価数</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-number">4.8</div>
+            <div class="analytics-label">平均評価</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-number">89%</div>
+            <div class="analytics-label">満足度</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-number">23</div>
+            <div class="analytics-label">今月の評価</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container loading">
+        <div class="chart-header">
+          <h3>評価推移</h3>
+        </div>
+        <div class="chart-placeholder">
+          評価推移チャート（実装予定）
+        </div>
+      </div>
+
+      <div class="chart-container loading">
+        <div class="chart-header">
+          <h3>評価分布</h3>
+        </div>
+        <div class="chart-placeholder">
+          評価分布チャート（実装予定）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
+
+    let currentUser = null;
+    let currentTab = 'overview';
+    let currentFilter = 'all';
+    let ratings = {};
+    let reviews = [];
+
+    // Loading animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('loaded');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.loading').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Initialize
+    async function initialize() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      currentUser = user;
+      await loadData();
+      setupEventListeners();
+    }
+
+    // Load data
+    async function loadData() {
+      await loadReviews();
+      await loadAnalytics();
+    }
+
+    // Load reviews
+    async function loadReviews() {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+
+        reviews = data || [];
+        renderReviews();
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        // Use mock data for demo
+        reviews = getMockReviews();
+        renderReviews();
+      }
+    }
+
+    // Mock reviews for demo
+    function getMockReviews() {
+      return [
+        {
+          id: 1,
+          reviewer_name: '田中太郎',
+          target_type: 'caddy',
+          target_name: '山田キャディ',
+          service_rating: 5,
+          communication_rating: 4,
+          punctuality_rating: 5,
+          knowledge_rating: 5,
+          content: '非常に丁寧で親切なサービスでした。ゴルフの技術的なアドバイスも的確で、とても充実したラウンドができました。',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          reviewer_name: '佐藤花子',
+          target_type: 'golf_course',
+          target_name: 'ABCゴルフ場',
+          service_rating: 4,
+          communication_rating: 5,
+          punctuality_rating: 4,
+          knowledge_rating: 4,
+          content: 'コースの状態が良く、スタッフの方々も親切でした。また利用したいと思います。',
+          created_at: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          id: 3,
+          reviewer_name: '鈴木一郎',
+          target_type: 'caddy',
+          target_name: '佐々木キャディ',
+          service_rating: 5,
+          communication_rating: 5,
+          punctuality_rating: 5,
+          knowledge_rating: 4,
+          content: '経験豊富で、コースの特徴をよく理解していました。プレーのアドバイスも参考になりました。',
+          created_at: new Date(Date.now() - 172800000).toISOString()
+        }
+      ];
+    }
+
+    // Render reviews
+    function renderReviews() {
+      const list = document.getElementById('reviewsList');
+      const filteredReviews = filterReviews(reviews, currentFilter);
+      
+      list.innerHTML = filteredReviews.length === 0 
+        ? '<div style="padding: 2rem; text-align: center; color: var(--text-light);">レビューがありません</div>'
+        : filteredReviews.map(review => `
+            <div class="review-item">
+              <div class="review-header">
+                <div class="reviewer-info">
+                  <div class="reviewer-avatar">${review.reviewer_name.charAt(0)}</div>
+                  <div class="reviewer-details">
+                    <h4>${review.reviewer_name}</h4>
+                    <div class="review-date">${formatTime(review.created_at)}</div>
+                  </div>
+                </div>
+                <div class="review-rating">
+                  ${generateStars(calculateAverageRating(review))}
+                </div>
+              </div>
+              <div class="review-content">${review.content}</div>
+              <div class="review-criteria">
+                <span class="criteria-badge">サービス: ${review.service_rating}/5</span>
+                <span class="criteria-badge">コミュニケーション: ${review.communication_rating}/5</span>
+                <span class="criteria-badge">時間厳守: ${review.punctuality_rating}/5</span>
+                <span class="criteria-badge">専門知識: ${review.knowledge_rating}/5</span>
+              </div>
+              <div class="review-actions">
+                <button class="action-btn">👍 役立った</button>
+                <button class="action-btn">💬 返信</button>
+                <button class="action-btn">📋 詳細</button>
+              </div>
+            </div>
+          `).join('');
+    }
+
+    // Filter reviews
+    function filterReviews(reviews, filter) {
+      switch (filter) {
+        case 'caddy':
+          return reviews.filter(r => r.target_type === 'caddy');
+        case 'golf_course':
+          return reviews.filter(r => r.target_type === 'golf_course');
+        case 'recent':
+          return reviews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        case 'rating':
+          return reviews.sort((a, b) => calculateAverageRating(b) - calculateAverageRating(a));
+        default:
+          return reviews;
+      }
+    }
+
+    // Calculate average rating
+    function calculateAverageRating(review) {
+      return (review.service_rating + review.communication_rating + 
+              review.punctuality_rating + review.knowledge_rating) / 4;
+    }
+
+    // Generate stars
+    function generateStars(rating) {
+      const fullStars = Math.floor(rating);
+      const hasHalfStar = rating % 1 >= 0.5;
+      let stars = '';
+      
+      for (let i = 0; i < 5; i++) {
+        if (i < fullStars) {
+          stars += '<span class="review-star">★</span>';
+        } else if (i === fullStars && hasHalfStar) {
+          stars += '<span class="review-star">★</span>';
+        } else {
+          stars += '<span class="review-star" style="color: #e0e0e0;">★</span>';
+        }
+      }
+      
+      return stars;
+    }
+
+    // Load analytics
+    async function loadAnalytics() {
+      // Analytics data would be loaded here
+      // For demo, we're using static data
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Tab switching
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.dataset.tab;
+          switchTab(tabName);
+        });
+      });
+
+      // Filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          renderReviews();
+        });
+      });
+
+      // Rating stars
+      document.querySelectorAll('.criteria-star').forEach(star => {
+        star.addEventListener('click', () => {
+          const criteria = star.parentElement.dataset.criteria;
+          const rating = parseInt(star.dataset.rating);
+          setRating(criteria, rating);
+        });
+      });
+
+      // Submit rating
+      document.getElementById('submitRating').addEventListener('click', submitRating);
+
+      // Target type change
+      document.getElementById('rateTarget').addEventListener('change', (e) => {
+        loadTargets(e.target.value);
+      });
+    }
+
+    // Switch tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+      
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName).style.display = 'block';
+      
+      currentTab = tabName;
+    }
+
+    // Set rating
+    function setRating(criteria, rating) {
+      ratings[criteria] = rating;
+      
+      const stars = document.querySelectorAll(`[data-criteria="${criteria}"] .criteria-star`);
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    // Load targets
+    async function loadTargets(type) {
+      const select = document.getElementById('rateSubject');
+      select.innerHTML = '<option value="">対象を選択</option>';
+      
+      if (!type) return;
+      
+      try {
+        let data = [];
+        if (type === 'caddy') {
+          const { data: caddies } = await supabase.from('caddies').select('cid, name');
+          data = caddies || [];
+        } else if (type === 'golf_course') {
+          const { data: courses } = await supabase.from('golf_courses').select('gid, name');
+          data = courses || [];
+        }
+        
+        data.forEach(item => {
+          const option = document.createElement('option');
+          option.value = type === 'caddy' ? item.cid : item.gid;
+          option.textContent = item.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading targets:', error);
+        // Add mock data
+        const mockData = type === 'caddy' 
+          ? [{ id: 'c1', name: '山田キャディ' }, { id: 'c2', name: '佐々木キャディ' }]
+          : [{ id: 'g1', name: 'ABCゴルフ場' }, { id: 'g2', name: 'XYZゴルフクラブ' }];
+        
+        mockData.forEach(item => {
+          const option = document.createElement('option');
+          option.value = item.id;
+          option.textContent = item.name;
+          select.appendChild(option);
+        });
+      }
+    }
+
+    // Submit rating
+    async function submitRating() {
+      const targetType = document.getElementById('rateTarget').value;
+      const targetSubject = document.getElementById('rateSubject').value;
+      const content = document.getElementById('reviewContent').value;
+      
+      if (!targetType || !targetSubject || !content) {
+        showMessage('全ての項目を入力してください', 'error');
+        return;
+      }
+      
+      if (Object.keys(ratings).length < 4) {
+        showMessage('全ての評価基準を設定してください', 'error');
+        return;
+      }
+      
+      try {
+        const review = {
+          reviewer_id: currentUser.id,
+          target_type: targetType,
+          target_id: targetSubject,
+          service_rating: ratings.service || 0,
+          communication_rating: ratings.communication || 0,
+          punctuality_rating: ratings.punctuality || 0,
+          knowledge_rating: ratings.knowledge || 0,
+          content: content
+        };
+        
+        // In a real app, you would save to database here
+        console.log('Submitting review:', review);
+        
+        showMessage('評価を投稿しました！', 'success');
+        
+        // Reset form
+        document.getElementById('rateTarget').value = '';
+        document.getElementById('rateSubject').innerHTML = '<option value="">対象を選択</option>';
+        document.getElementById('reviewContent').value = '';
+        ratings = {};
+        
+        // Reset stars
+        document.querySelectorAll('.criteria-star').forEach(star => {
+          star.classList.remove('active');
+        });
+        
+        // Reload reviews
+        await loadReviews();
+        
+      } catch (error) {
+        showMessage('エラーが発生しました: ' + error.message, 'error');
+      }
+    }
+
+    // Show message
+    function showMessage(message, type = 'success') {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = message;
+      
+      document.body.insertBefore(messageDiv, document.body.firstChild);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 5000);
+    }
+
+    // Format time
+    function formatTime(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diff = now - date;
+      
+      if (diff < 60000) return '今';
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}分前`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}時間前`;
+      if (diff < 604800000) return `${Math.floor(diff / 86400000)}日前`;
+      
+      return date.toLocaleDateString('ja-JP');
+    }
+
+    // Initialize the app
+    initialize();
+  </script>
+</body>
+</html> 

@@ -7,10 +7,19 @@
   <style>
     :root {
       --primary-color: #2f8f2f;
+      --primary-dark: #1e5f1e;
+      --primary-light: #4caf50;
       --secondary-color: #ffffff;
+      --accent-color: #ff6b35;
       --text-color: #333333;
-      --bg-light: #f9f9f9;
+      --text-light: #666666;
+      --bg-light: #f8f9fa;
+      --bg-dark: #2c3e50;
       --max-width: 1200px;
+      --border-radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -20,16 +29,20 @@
     }
 
     body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
       color: var(--text-color);
       line-height: 1.6;
-      /* This background was being overridden by header, now removed */
+      overflow-x: hidden;
     }
 
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Header with improved design */
     header {
-      /* Use a golf-themed gradient as primary background */
       background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
-      /* Try to load external images as overlay */
       background-image: 
           url("https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80");
       background-size: cover;
@@ -40,37 +53,120 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      height: 100vh; /* Make header full screen */
-      position: relative; /* For overlay */
+      height: 100vh;
+      position: relative;
       z-index: 1;
     }
 
-    /* Temporarily disable overlay to check if image loads */
-    /*
     header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: -1;
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: -1;
     }
-    */
 
-    .content-wrapper {
+    .hero-content {
       position: relative;
       z-index: 2;
-      background: var(--secondary-color); /* Make other sections have a white background */
+      max-width: 800px;
+      padding: 0 2rem;
+      animation: fadeInUp 1s ease-out;
     }
 
-    /* Apply wrapper to sections that should not be part of the hero */
-    .features, footer, .login-buttons {
-      background: var(--secondary-color);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    /* Navigation tabs styling */
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 1.3rem;
+      margin-bottom: 2.5rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      opacity: 0.95;
+      font-weight: 400;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: var(--transition);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .cta-btn:hover::before {
+      left: 100%;
+    }
+
+    .cta-btn.primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .cta-btn.secondary {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .cta-btn.secondary:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    /* Navigation with improved design */
     .top-nav {
       position: absolute;
       top: 0;
@@ -78,16 +174,24 @@
       right: 0;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 50px;
-      padding: 20px 30px;
-      background: transparent;
-      z-index: 5;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      background: rgba(0,0,0,0.1);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      z-index: 10;
+      transition: var(--transition);
+    }
+
+    .top-nav.scrolled {
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(20px);
     }
 
     .nav-main {
       display: flex;
-      gap: 50px;
+      gap: 2rem;
+      align-items: center;
     }
 
     .nav-item {
@@ -97,126 +201,180 @@
     .nav-tab {
       color: #fff;
       text-decoration: none;
-      padding: 16px 24px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 1.1rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      font-size: 1rem;
+      transition: var(--transition);
       display: block;
       letter-spacing: 0.02em;
-      font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-1px);
     }
 
     .login-section {
       display: flex;
-      gap: 12px;
+      gap: 1rem;
       align-items: center;
     }
 
     .nav-login-btn {
-      padding: 16px 20px;
+      padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 6px;
-      font-size: 1rem;
+      border-radius: var(--border-radius);
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       color: #fff;
-      border: 2px solid rgba(255,255,255,0.4);
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: var(--transition);
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      margin-top: 0;
     }
 
     .nav-login-btn.golf-login-btn {
       background: rgba(0,106,173,0.8);
     }
 
+    .nav-login-btn.golf-login-btn:hover {
+      background: rgba(0,106,173,1);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-1px);
+    }
+
     .nav-login-btn.caddy-login-btn {
       background: rgba(47,143,47,0.8);
     }
 
+    .nav-login-btn.caddy-login-btn:hover {
+      background: rgba(47,143,47,1);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-1px);
+    }
+
     .dropdown-menu {
       position: absolute;
-      top: 85%;
+      top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(15px);
-      border-radius: 8px;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(20px);
+      border-radius: var(--border-radius);
       min-width: 220px;
       opacity: 0;
       visibility: hidden;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: var(--shadow-hover);
+      border: 1px solid rgba(255,255,255,0.1);
       z-index: 10;
       white-space: nowrap;
+      transition: var(--transition);
+      margin-top: 0.5rem;
     }
 
     .nav-item:hover .dropdown-menu {
       opacity: 1;
       visibility: visible;
+      transform: translateX(-50%) translateY(0);
     }
 
     .dropdown-item {
       display: block;
       color: #fff;
       text-decoration: none;
-      padding: 14px 18px;
-      font-size: 1rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.95rem;
       font-weight: 500;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      transition: var(--transition);
+    }
+
+    .dropdown-item:hover {
+      background: rgba(255,255,255,0.1);
     }
 
     .dropdown-item:last-child {
       border-bottom: none;
-      border-radius: 0 0 8px 8px;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
     }
 
     .dropdown-item:first-child {
-      border-radius: 8px 8px 0 0;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
 
-    /* Features Section */
+    /* Content wrapper */
+    .content-wrapper {
+      position: relative;
+      z-index: 2;
+      background: var(--secondary-color);
+    }
+
+    /* Features Section with improved design */
     .features {
       background: var(--bg-light);
-      padding: 4rem 1rem;
+      padding: 5rem 1rem;
     }
 
     .features .container {
       max-width: var(--max-width);
       margin: 0 auto;
       display: grid;
-      gap: 2rem;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       padding: 0 2rem;
     }
 
     .feature {
       background: var(--secondary-color);
-      padding: 2rem 1.5rem;
-      border-radius: 8px;
+      padding: 2.5rem 2rem;
+      border-radius: var(--border-radius);
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transform: scaleX(0);
+      transition: var(--transition);
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .feature:hover::before {
+      transform: scaleX(1);
     }
 
     .feature h3 {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
       color: var(--primary-color);
+      font-size: 1.5rem;
+      font-weight: 600;
     }
 
-    /* Footer */
-    footer {
-      background: #222;
-      color: #aaa;
-      text-align: center;
-      padding: 2rem 1rem;
-      font-size: 0.9rem;
+    .feature p {
+      color: var(--text-light);
+      line-height: 1.7;
     }
 
-    /* Detailed benefits sections */
+    /* Benefits sections with improved design */
     .benefits-section {
-      padding: 4rem 0;
-      margin: 3rem 0;
+      padding: 5rem 0;
+      margin: 0;
       position: relative;
       background-size: cover;
       background-position: center;
@@ -226,15 +384,18 @@
     .benefits-section .container {
       position: relative;
       z-index: 2;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
     }
 
     .benefits-section.golf-course-benefits {
-      background: linear-gradient(135deg, #2d5a2d 0%, #4a8c4a 50%, #6bb76b 100%) !important;
-      background-image: url('images/ゴルフ場.jpg') !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      background-attachment: fixed !important;
+      background: linear-gradient(135deg, #2d5a2d 0%, #4a8c4a 50%, #6bb76b 100%);
+      background-image: url('images/ゴルフ場.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
     .benefits-section.golf-course-benefits::after {
@@ -244,17 +405,17 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.4) !important;
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1;
     }
 
     .benefits-section.caddy-benefits {
-      background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%) !important;
-      background-image: url('images/キャディ.jpg') !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      background-attachment: fixed !important;
+      background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%);
+      background-image: url('images/キャディ.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
     .benefits-section.caddy-benefits::after {
@@ -264,17 +425,17 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.4) !important;
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1;
     }
 
     .benefits-section.golfer-benefits {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%) !important;
-      background-image: url('images/ゴルファー.jpg') !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      background-attachment: fixed !important;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+      background-image: url('images/ゴルファー.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
     .benefits-section.golfer-benefits::after {
@@ -284,56 +445,78 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.4) !important;
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1;
     }
 
     .benefits-header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 4rem;
     }
 
     .benefits-header h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
       font-weight: 700;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      text-shadow: 0 4px 12px rgba(0,0,0,0.6);
       color: #ffffff;
+      letter-spacing: -0.02em;
     }
 
     .benefits-header p {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       color: #f8f9fa;
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      line-height: 1.6;
     }
 
     .benefits-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
-      padding: 0 2rem;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2.5rem;
+      margin-top: 3rem;
     }
 
     .benefit-card {
       background: rgba(255, 255, 255, 0.95);
-      padding: 2.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 3rem 2.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
       border: 1px solid rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
       text-align: center;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .benefit-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transform: scaleX(0);
+      transition: var(--transition);
+    }
+
+    .benefit-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .benefit-card:hover::before {
+      transform: scaleX(1);
     }
 
     .benefit-title {
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
       letter-spacing: -0.02em;
       line-height: 1.3;
       color: #2d3748;
@@ -342,7 +525,7 @@
     .benefit-description {
       color: #4a5568;
       line-height: 1.7;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 400;
     }
 
@@ -355,445 +538,342 @@
     .golfer-benefits .benefits-header h2 { color: #8b5cf6; }
     .golfer-benefits .benefit-title { color: #8b5cf6; }
 
-    /* Features Section */
+    /* Footer with improved design */
+    footer {
+      background: var(--bg-dark);
+      color: #aaa;
+      text-align: center;
+      padding: 3rem 1rem;
+      font-size: 0.95rem;
+    }
 
+    .footer-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      text-align: left;
+    }
+
+    .footer-section h3 {
+      color: #fff;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .footer-section p, .footer-section a {
+      color: #aaa;
+      text-decoration: none;
+      line-height: 1.6;
+      transition: var(--transition);
+    }
+
+    .footer-section a:hover {
+      color: var(--primary-light);
+    }
+
+    .footer-bottom {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #444;
+      text-align: center;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.1rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+
       .top-nav {
         flex-direction: column;
         align-items: center;
-        padding: 8px 15px;
-        gap: 6px;
-        height: auto;
-        min-height: auto;
+        padding: 1rem;
+        gap: 1rem;
       }
 
       .nav-main {
-        display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
+        gap: 0.5rem;
         width: 100%;
       }
 
       .nav-item {
-        position: relative;
         width: 100%;
         text-align: center;
-        max-width: 180px;
+        max-width: 200px;
       }
 
       .nav-tab {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-        white-space: nowrap;
-        display: block;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
         width: 100%;
-        border-radius: 4px;
-      }
-
-      .nav-logo {
-        height: 35px;
-        margin-bottom: 3px;
-      }
-
-      .logo-tab {
-        padding: 4px 8px !important;
-        margin-bottom: 5px;
-      }
-
-      .logo-text {
-        font-size: 1.2rem;
-      }
-
-      .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        min-width: 160px;
-        margin-top: 2px;
-        z-index: 20;
+        border-radius: var(--border-radius);
       }
 
       .login-section {
-        display: flex;
-        gap: 6px;
+        flex-direction: column;
+        gap: 0.5rem;
         width: 100%;
-        justify-content: center;
-        margin-top: 5px;
-        max-width: 280px;
       }
 
       .nav-login-btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-        flex: 1;
-        max-width: 100px;
-        border-radius: 4px;
+        width: 100%;
+        max-width: 200px;
       }
 
-      .hero-content {
-        margin-top: 160px;
-        text-align: center;
-        padding: 0 15px;
+      .benefits-header h2 {
+        font-size: 2.2rem;
       }
 
-      .hero-content .main-phrase {
-        font-size: 1.4rem;
-        margin-bottom: 0.6rem;
-        letter-spacing: 0.02em;
-        line-height: 1.3;
+      .benefits-header p {
+        font-size: 1.1rem;
       }
 
-      .hero-content .main-phrase:last-child {
-        margin-bottom: 0;
+      .benefits-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
       }
 
-      .animated-text {
-        transform: translateX(30px);
+      .benefit-card {
+        padding: 2rem 1.5rem;
       }
 
-      header {
-        height: 75vh;
-        min-height: 500px;
+      .features .container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
       }
 
       .feature {
-        padding: 1.2rem 0.8rem;
+        padding: 2rem 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 2rem;
       }
 
-      .benefits-section {
-        padding: 2.5rem 0;
-        margin: 2rem 0;
+      .hero-subtitle {
+        font-size: 1rem;
       }
 
       .benefits-header h2 {
         font-size: 1.8rem;
-        margin-bottom: 0.8rem;
-      }
-
-      .benefits-header p {
-        font-size: 1rem;
-        padding: 0 1rem;
-      }
-
-      .benefits-grid {
-        padding: 0 1rem;
-        gap: 1.5rem;
-      }
-
-      .benefit-card {
-        padding: 1.8rem 1.2rem;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .top-nav {
-        padding: 6px 10px;
-        gap: 4px;
-      }
-
-      .nav-main {
-        gap: 4px;
-      }
-
-      .nav-tab {
-        padding: 5px 10px;
-        font-size: 0.8rem;
-      }
-
-      .nav-logo {
-        height: 30px;
-      }
-
-      .logo-tab {
-        padding: 3px 6px !important;
-      }
-
-      .logo-text {
-        font-size: 1rem;
-      }
-
-      .nav-login-btn {
-        padding: 5px 10px;
-        font-size: 0.75rem;
-        max-width: 90px;
-      }
-
-      .login-section {
-        max-width: 240px;
-        gap: 4px;
-      }
-
-      .hero-content {
-        margin-top: 120px;
-        padding: 0 10px;
-      }
-
-      .hero-content .main-phrase {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-      }
-
-      header {
-        height: 70vh;
-        min-height: 450px;
-      }
-
-      .feature {
-        padding: 1rem 0.6rem;
-      }
-
-      .benefits-section {
-        padding: 2rem 0;
-        margin: 1.5rem 0;
-      }
-
-      .benefits-header h2 {
-        font-size: 1.5rem;
-      }
-
-      .benefits-header p {
-        font-size: 0.9rem;
       }
 
       .benefit-card {
         padding: 1.5rem 1rem;
       }
 
-      .benefit-title {
-        font-size: 1.2rem;
-      }
-
-      .benefit-description {
-        font-size: 0.9rem;
+      .feature {
+        padding: 1.5rem 1rem;
       }
     }
 
-    header .main-phrase {
-      font-size: clamp(2.2rem, 6vw, 3.5rem);
-      margin-bottom: 1rem;
-      font-weight: 700;
-      color: #f0f8ff;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
-      letter-spacing: 0.05em;
-      font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
-      line-height: 1.3;
-    }
-
-    header .main-phrase:last-child {
-      margin-bottom: 0;
-    }
-
-    /* Animation for text sliding in from right */
-    .animated-text {
+    /* Loading animation */
+    .loading {
       opacity: 0;
-      transform: translateX(100px);
-      animation: slideInFromRight 1.2s ease-out forwards;
+      transform: translateY(20px);
+      transition: var(--transition);
     }
 
-    .animated-text:nth-child(1) {
-      animation-delay: 0.3s;
+    .loading.loaded {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .animated-text:nth-child(2) {
-      animation-delay: 0.8s;
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      animation: bounce 2s infinite;
     }
 
-    @keyframes slideInFromRight {
-      to {
-        opacity: 1;
-        transform: translateX(0);
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
       }
-    }
-
-    .nav-logo {
-      height: 80px;
-      width: auto;
-      filter: brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-      background: transparent;
-      mix-blend-mode: normal;
-    }
-
-    .logo-text {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.7);
-      letter-spacing: 0.05em;
-      font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
-    }
-
-    .logo-tab {
-      padding: 10px 20px !important;
+      40% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+      60% {
+        transform: translateX(-50%) translateY(-5px);
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Hero Section -->
   <header>
-    <!-- Navigation tabs in top -->
     <nav class="top-nav">
-        <div class="nav-main">
-            <div class="nav-item">
-                <a href="#caddy-plus" class="nav-tab logo-tab">
-                    <span class="logo-text">キャディタス</span>
-                </a>
-            </div>
-            
-            <div class="nav-item">
-                <a href="#golf-courses" class="nav-tab">
-                    ゴルフ場の皆様
-                </a>
-                <div class="dropdown-menu">
-                    <a href="/booking-flow.html" class="dropdown-item">キャディ予約フロー</a>
-                    <a href="/partner-golf-clubs.html" class="dropdown-item">提携ゴルフ部</a>
-                </div>
-            </div>
-            
-            <div class="nav-item">
-                <a href="#caddies" class="nav-tab">
-                    キャディの皆様
-                </a>
-                <div class="dropdown-menu">
-                    <a href="#participation-flow" class="dropdown-item">参加までのフロー</a>
-                    <a href="/partner-golf-courses.html" class="dropdown-item">提携ゴルフ場</a>
-                </div>
-            </div>
-
-            <div class="nav-item">
-                <a href="/training-program.html" class="nav-tab">
-                    研修について
-                </a>
-            </div>
+      <div class="nav-main">
+        <div class="nav-item">
+          <a href="#features" class="nav-tab">サービス</a>
         </div>
-
-        <!-- Login buttons aligned to right -->
-        <div class="login-section">
-            <button onclick="window.location.href='/login/?role=golf'" class="nav-login-btn golf-login-btn">
-                ゴルフ場でログイン
-            </button>
-            <button onclick="window.location.href='/login/?role=caddy'" class="nav-login-btn caddy-login-btn">
-                キャディでログイン
-            </button>
+        <div class="nav-item">
+          <a href="#golf-course-benefits" class="nav-tab">ゴルフ場向け</a>
+          <div class="dropdown-menu">
+            <a href="#golf-course-benefits" class="dropdown-item">メリット</a>
+            <a href="#features" class="dropdown-item">機能紹介</a>
+            <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
+          </div>
         </div>
+        <div class="nav-item">
+          <a href="#caddy-benefits" class="nav-tab">キャディ向け</a>
+          <div class="dropdown-menu">
+            <a href="#caddy-benefits" class="dropdown-item">メリット</a>
+            <a href="#features" class="dropdown-item">機能紹介</a>
+            <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="#golfer-benefits" class="nav-tab">ゴルファー向け</a>
+          <div class="dropdown-menu">
+            <a href="#golfer-benefits" class="dropdown-item">メリット</a>
+            <a href="#features" class="dropdown-item">機能紹介</a>
+            <a href="training-program.html" class="dropdown-item">研修プログラム</a>
+          </div>
+        </div>
+      </div>
+      <div class="login-section">
+        <button class="nav-login-btn golf-login-btn" onclick="location.href='login.html?type=golf'">ゴルフ場ログイン</button>
+        <button class="nav-login-btn caddy-login-btn" onclick="location.href='login.html?type=caddy'">キャディログイン</button>
+      </div>
     </nav>
 
     <div class="hero-content">
-      <h1 class="main-phrase animated-text">ゴルフ場に関わる<br>全ての人を</h1>
-      <h2 class="main-phrase animated-text">ストレスフリーに</h2>
+      <h1 class="hero-title">ゴルフ場とキャディの<br>最適なマッチング</h1>
+      <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、より良いゴルフ体験を提供します</p>
+      <div class="cta-buttons">
+        <a href="#features" class="cta-btn primary">サービス詳細</a>
+        <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span>↓ スクロールして詳細を見る</span>
     </div>
   </header>
-<div class="content-wrapper">
+
+  <div class="content-wrapper">
     <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: var(--text-color); line-height: 1.4;">
-                <div style="margin-bottom: 0.5rem;">3つの立場</div>
-                <div style="margin-bottom: 0.5rem;">それぞれに</div>
-                <div>メリット</div>
-            </h2>
-            <div class="feature" onclick="location.href='#golf-course-benefits'" style="cursor: pointer;">
-                <h3 style="color: #006aad; margin-bottom: 1rem;">ゴルフ場</h3>
-                <p>お客様のキャディ要望に応えられないということはもうありません</p>
-                <div class="learn-more" style="color: #006aad; margin-top: 1rem; font-weight: 600;">詳しく見る →</div>
-            </div>
-            <div class="feature" onclick="location.href='#caddy-benefits'" style="cursor: pointer;">
-                <h3 style="color: #2f8f2f; margin-bottom: 1rem;">キャディ</h3>
-                <p>大好きなゴルフ場で経験を生かして働きましょう</p>
-                <div class="learn-more" style="color: #2f8f2f; margin-top: 1rem; font-weight: 600;">詳しく見る →</div>
-            </div>
-            <div class="feature" onclick="location.href='#golfer-benefits'" style="cursor: pointer;">
-                <h3 style="color: #8b5cf6; margin-bottom: 1rem;">ゴルファー</h3>
-                <p>キャディのいない接待・コンペとはおさらば</p>
-                <div class="learn-more" style="color: #8b5cf6; margin-top: 1rem; font-weight: 600;">詳しく見る →</div>
-            </div>
+    <section id="features" class="features">
+      <div class="container">
+        <div class="feature loading">
+          <h3>🎯 スマートマッチング</h3>
+          <p>AI技術を活用した最適なマッチングシステムで、ゴルフ場のニーズとキャディのスキルを自動でマッチングします。</p>
         </div>
+        <div class="feature loading">
+          <h3>📅 効率的なスケジュール管理</h3>
+          <p>リアルタイムの空き状況確認と自動スケジュール調整で、キャディの配置を最適化します。</p>
+        </div>
+        <div class="feature loading">
+          <h3>💬 リアルタイムコミュニケーション</h3>
+          <p>内蔵メッセージングシステムで、ゴルフ場とキャディ間のスムーズなコミュニケーションを実現します。</p>
+        </div>
+        <div class="feature loading">
+          <h3>📊 詳細な分析レポート</h3>
+          <p>パフォーマンス分析とレポート機能で、サービスの品質向上と効率化をサポートします。</p>
+        </div>
+        <div class="feature loading">
+          <h3>🎓 研修プログラム</h3>
+          <p>キャディのスキル向上のための包括的な研修プログラムを提供し、サービスの質を向上させます。</p>
+        </div>
+        <div class="feature loading">
+          <h3>🔒 セキュアなシステム</h3>
+          <p>最新のセキュリティ技術で、お客様の情報と取引を安全に保護します。</p>
+        </div>
+      </div>
     </section>
 
-    <!-- Detailed benefits sections -->
-    <section class="benefits-section golf-course-benefits" id="golf-course-benefits">
+    <!-- Golf Course Benefits -->
+    <section id="golf-course-benefits" class="benefits-section golf-course-benefits">
       <div class="container">
         <div class="benefits-header">
-          <h2>ゴルフ場のメリット</h2>
-          <p>お客様のキャディ要望に確実に応え、サービス品質と顧客満足度を向上させることができます。</p>
+          <h2>ゴルフ場向けサービス</h2>
+          <p>経験豊富なキャディを効率的に確保し、お客様に最高のゴルフ体験を提供</p>
         </div>
         <div class="benefits-grid">
-          <div class="benefit-card">
-            <div class="benefit-title">確実なキャディ確保</div>
-            <div class="benefit-description">
-              お客様からキャディの依頼があった際、「キャディが不足している」と断る必要がありません。常に適切な人数のキャディを確保できるため、予約時の機会損失を防げます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">人材不足の解決</h3>
+            <p class="benefit-description">登録キャディから最適な人材を選定し、人材不足の問題を解決します。経験豊富なキャディがいつでも利用可能です。</p>
           </div>
-          <div class="benefit-card">
-            <div class="benefit-title">顧客満足度の向上</div>
-            <div class="benefit-description">
-              研修済みの質の高いキャディを提供することで、お客様のゴルフ体験が向上し、リピート率の増加と口コミによる新規顧客獲得が期待できます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">コスト削減</h3>
+            <p class="benefit-description">固定費を削減し、需要に応じた柔軟な人材配置が可能になります。効率的な運営で収益性を向上させます。</p>
           </div>
-          <div class="benefit-card">
-            <div class="benefit-title">運営の効率化</div>
-            <div class="benefit-description">
-              キャディの予約・管理・評価をシステム化することで、人事管理コストを削減し、よりスムーズなゴルフ場運営が可能になります。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">サービス品質向上</h3>
+            <p class="benefit-description">厳選されたキャディが提供する高品質なサービスで、お客様満足度の向上とリピート率の向上を実現します。</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="benefits-section caddy-benefits" id="caddy-benefits">
+    <!-- Caddy Benefits -->
+    <section id="caddy-benefits" class="benefits-section caddy-benefits">
       <div class="container">
         <div class="benefits-header">
-          <h2>キャディのメリット</h2>
-          <p>大好きなゴルフ場で経験とスキルを活かしながら、安定した収入を得ることができます。</p>
+          <h2>キャディ向けサービス</h2>
+          <p>自分のスケジュールに合わせて働き、スキル向上の機会を提供</p>
         </div>
         <div class="benefits-grid">
-          <div class="benefit-card">
-            <div class="benefit-title">安定した収入機会</div>
-            <div class="benefit-description">
-              複数のゴルフ場と提携することで、より多くの勤務機会を獲得できます。好きな時間に好きなゴルフ場で働くことができ、効率的に収入を得られます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">柔軟な働き方</h3>
+            <p class="benefit-description">自分の都合に合わせてシフトを選択でき、ワークライフバランスを保ちながら働くことができます。</p>
           </div>
-          <div class="benefit-card">
-            <div class="benefit-title">スキルアップ機会</div>
-            <div class="benefit-description">
-              各ゴルフ場での研修プログラムを通じて、キャディとしてのスキルを向上させることができます。様々なコースでの経験により、プロフェッショナルとして成長できます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">収入向上</h3>
+            <p class="benefit-description">複数のゴルフ場で働くことで収入を増やし、スキルに応じた適正な報酬を得ることができます。</p>
           </div>
-          <div class="benefit-card">
-            <div class="benefit-title">ネットワークの拡大</div>
-            <div class="benefit-description">
-              複数のゴルフ場、多様なお客様との接触を通じて、ゴルフ業界でのネットワークを構築できます。将来のキャリア発展にも役立ちます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">スキル開発</h3>
+            <p class="benefit-description">様々なゴルフ場での経験と研修プログラムを通じて、キャリアアップとスキル向上を実現します。</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="benefits-section golfer-benefits" id="golfer-benefits">
+    <!-- Golfer Benefits -->
+    <section id="golfer-benefits" class="benefits-section golfer-benefits">
       <div class="container">
         <div class="benefits-header">
-          <h2>ゴルファーのメリット</h2>
-          <p>接待やコンペでキャディの心配をすることなく、質の高いゴルフ体験を楽しめます。</p>
+          <h2>ゴルファー向けサービス</h2>
+          <p>経験豊富なキャディによる最高のゴルフ体験を提供</p>
         </div>
         <div class="benefits-grid">
-          <div class="benefit-card">
-            <div class="benefit-title">安心の接待・コンペ</div>
-            <div class="benefit-description">
-              「キャディがいない」という理由で接待やコンペが台無しになることはありません。事前に確実にキャディを手配できるため、安心して重要なゴルフの予定を組めます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">高品質なサービス</h3>
+            <p class="benefit-description">厳選された経験豊富なキャディが、お客様一人ひとりに合わせた最高のサービスを提供します。</p>
           </div>
-          <div class="benefit-card">
-            <div class="benefit-title">高品質なサービス</div>
-            <div class="benefit-description">
-              研修を受けた経験豊富なキャディがサポートするため、ゴルフのスコア向上や快適なラウンドが期待できます。プロフェッショナルなサービスを受けられます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">安心の保証</h3>
+            <p class="benefit-description">登録キャディは全て審査を通過しており、安心してサービスをご利用いただけます。</p>
           </div>
-          <div class="benefit-card">
-            <div class="benefit-title">時間の有効活用</div>
-            <div class="benefit-description">
-              キャディのサポートにより、クラブの準備や距離測定などに時間を取られることなく、ゴルフそのものやビジネス会話に集中できます。
-            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">カスタマイズ可能</h3>
+            <p class="benefit-description">お客様のニーズに合わせて、最適なキャディをマッチングし、パーソナライズされたサービスを提供します。</p>
           </div>
         </div>
       </div>
@@ -801,38 +881,82 @@
 
     <!-- Footer -->
     <footer>
-        <p>お問い合わせ: <a href="mailto:info@golfcaddyservice.com" style="color:#8bc34a;">info@golfcaddyservice.com</a></p>
-        <p>&copy; 2025 Golf-Caddy Matching Service. All rights reserved.</p>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>サービス</h3>
+          <p>ゴルフ場とキャディの最適なマッチングを実現し、より良いゴルフ体験を提供します。</p>
+        </div>
+        <div class="footer-section">
+          <h3>お問い合わせ</h3>
+          <p>Email: info@golf-caddy-matching.com</p>
+          <p>Tel: 03-1234-5678</p>
+        </div>
+        <div class="footer-section">
+          <h3>リンク</h3>
+          <p><a href="partner-golf-courses.html">ゴルフ場パートナー募集</a></p>
+          <p><a href="partner-golf-clubs.html">キャディパートナー募集</a></p>
+          <p><a href="training-program.html">研修プログラム</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 Golf-Caddy Matching Service. All rights reserved.</p>
+      </div>
     </footer>
-</div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </div>
+
   <script>
-    // Supabase設定
-    const SUPABASE_URL = "https://vqjxajzaasuqfgvhvxci.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
-  
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // 手動ログインのみ - 自動リダイレクトなし
-    console.log("Golf Caddy Matching Service - Top Page Loaded");
-
-    // ログインボタンのイベントリスナー
-    document.addEventListener('DOMContentLoaded', function() {
-        // ゴルフ場ログインボタン
-        const golfLoginBtn = document.querySelector('.golf-login-btn');
-        if (golfLoginBtn) {
-            golfLoginBtn.addEventListener('click', function() {
-                window.location.href = 'login/?role=golf';
-            });
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
         }
+      });
+    });
 
-        // キャディログインボタン
-        const caddyLoginBtn = document.querySelector('.caddy-login-btn');
-        if (caddyLoginBtn) {
-            caddyLoginBtn.addEventListener('click', function() {
-                window.location.href = 'login/?role=caddy';
-            });
+    // Navigation background change on scroll
+    window.addEventListener('scroll', function() {
+      const nav = document.querySelector('.top-nav');
+      if (window.scrollY > 100) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Loading animation for elements
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('loaded');
         }
+      });
+    }, observerOptions);
+
+    // Observe all loading elements
+    document.querySelectorAll('.loading').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Add hover effects for interactive elements
+    document.querySelectorAll('.feature, .benefit-card').forEach(el => {
+      el.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+      });
+      
+      el.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
     });
   </script>
 </body>
