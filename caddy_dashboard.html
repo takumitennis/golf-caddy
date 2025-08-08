@@ -501,7 +501,7 @@
       if(map[k]){map[k].style.display='block';}
       if(k==='prof') btnMainProf.classList.add('active');
       if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
-      if(k==='msg'){btnMainMsg.classList.add('active');showChatWithGolfCourse();}
+      if(k==='msg'){btnMainMsg.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
 
     // 初期表示
@@ -642,8 +642,7 @@
         loadChatMessages(courses[0].gid, courses[0].name);
       }
     }
-    // メッセージタブを開いたらチャット相手選択（本番はリスト化）
-    document.getElementById('btnMainMsg').onclick = showChatWithGolfCourse;
+
   </script>
 </body>
 </html> 
