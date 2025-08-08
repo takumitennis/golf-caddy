@@ -1385,7 +1385,7 @@
         `;
         
         bookingDiv.onclick = () => {
-          currentBookingId = booking.id;
+          currentBookingId = booking.booking_id;
           // 最初のキャディとチャット（本来は選択UIが必要）
           const firstCaddy = booking.booking_caddies?.[0];
           if (firstCaddy) {

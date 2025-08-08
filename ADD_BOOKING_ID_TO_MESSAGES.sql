@@ -1,15 +1,15 @@
 -- messagesテーブルにbooking_idカラムを追加
 -- 予定別のメッセージ管理を可能にする
 
--- booking_idカラムを追加
+-- booking_idカラムを追加（正しい主キー名を使用）
 ALTER TABLE public.messages 
-ADD COLUMN IF NOT EXISTS booking_id UUID REFERENCES public.bookings(id);
+ADD COLUMN IF NOT EXISTS booking_id UUID REFERENCES public.bookings(booking_id);
 
 -- 既存のメッセージのbooking_idを設定（オプション）
 -- この部分は既存データがある場合のみ実行
 -- UPDATE public.messages 
 -- SET booking_id = (
---   SELECT b.id 
+--   SELECT b.booking_id 
 --   FROM public.bookings b 
 --   WHERE b.gid = messages.receiver_id 
 --   LIMIT 1

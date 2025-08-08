@@ -109,3 +109,33 @@ ADD COLUMN IF NOT EXISTS appeal TEXT;
 - バケットはパブリックに設定されているため、アップロードされた画像は誰でもアクセス可能
 - 必要に応じて、認証済みユーザーのみアクセス可能な設定に変更可能
 - 定期的に不要な画像を削除してストレージ容量を管理 
+
+## 修正内容
+
+**問題**: `bookings`テーブルの主キーが`id`ではなく`booking_id`でした。
+
+**解決**: 外部キー参照を正しく修正しました：
+```sql
+-- 修正前（エラー）
+ALTER TABLE public.messages 
+ADD COLUMN IF NOT EXISTS booking_id UUID REFERENCES public.bookings(id);
+
+-- 修正後（正しい）
+ALTER TABLE public.messages 
+ADD COLUMN IF NOT EXISTS booking_id UUID REFERENCES public.bookings(booking_id);
+```
+
+## 実行してください
+
+Supabaseで以下のSQLを実行してください：
+
+```sql
+-- booking_idカラムを追加（正しい主キー名を使用）
+ALTER TABLE public.messages 
+ADD COLUMN IF NOT EXISTS booking_id UUID REFERENCES public.bookings(booking_id);
+
+-- booking_idのインデックスを作成（パフォーマンス向上）
+CREATE INDEX IF NOT EXISTS idx_messages_booking_id ON public.messages(booking_id);
+```
+
+これで予定別チャット機能が正常に動作するはずです！ 
