@@ -178,7 +178,7 @@
         const { count, error: countError } = await supabase
           .from('booking_caddies')
           .select('*', { count: 'exact', head: true })
-          .eq('cID', row.cid);
+          .eq('cid', row.cid);
         
         if (!countError && count !== null) {
           dispatchCount = count;
@@ -587,21 +587,21 @@
       
       // キャディの予定を取得
       const { data: bookings, error } = await supabase
-        .from('booking_caddies')
-        .select(`
-          *,
-          bookings (
-            booking_id,
-            date,
-            slots,
-            golf_courses (
-              gid,
-              name
+                  .from('booking_caddies')
+          .select(`
+            *,
+            bookings (
+              booking_id,
+              date,
+              slots,
+              golf_courses (
+                gid,
+                name
+              )
             )
-          )
-        `)
-        .eq('cID', cid)
-        .order('created_at', { ascending: false });
+          `)
+          .eq('cid', cid)
+          .order('created_at', { ascending: false });
 
       if (error) {
         messagesList.innerHTML = `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
