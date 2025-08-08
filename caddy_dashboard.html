@@ -578,34 +578,118 @@
     /* チャットUI用メッセージ取得・表示 */
     let chatPartnerId = null; // チャット相手ID
     let chatPartnerName = '';
+    let currentBookingId = null; // 現在の予定ID
 
-    async function loadChatMessages(partnerId, partnerName) {
-      chatPartnerId = partnerId;
-      chatPartnerName = partnerName;
+    // 予定一覧を表示
+    async function showBookingList() {
       const messagesList = document.getElementById('messagesList');
       messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">読み込み中...</div>';
-      // 送信・受信両方のメッセージを取得
-      const { data: messages, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`(sender_id.eq.${cid},receiver_id.eq.${partnerId}),(sender_id.eq.${partnerId},receiver_id.eq.${cid})`)
-        .order('created_at', { ascending: true });
+      
+      // キャディの予定を取得
+      const { data: bookings, error } = await supabase
+        .from('booking_caddies')
+        .select(`
+          *,
+          bookings (
+            id,
+            date,
+            slots,
+            golf_courses (
+              gid,
+              name
+            )
+          )
+        `)
+        .eq('cID', cid)
+        .order('created_at', { ascending: false });
+
       if (error) {
         messagesList.innerHTML = `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
         return;
       }
-      if (!messages || messages.length === 0) {
-        messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">メッセージはありません</div>';
+
+      if (!bookings || bookings.length === 0) {
+        messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">予定はありません</div>';
         return;
       }
-      messagesList.innerHTML = '';
-      messages.forEach(msg => {
-        const isSent = msg.sender_id === cid;
-        const bubble = document.createElement('div');
-        bubble.className = 'chat-bubble ' + (isSent ? 'sent' : 'received');
-        bubble.innerHTML = `${msg.content}<div class='chat-meta${isSent ? '' : ' received'}'>${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${msg.is_read ? "<span class='chat-badge read'>既読</span>" : (!isSent ? "<span class='chat-badge unread'>未読</span>" : '')}</div>`;
-        messagesList.appendChild(bubble);
+
+      messagesList.innerHTML = '<h3 style="margin-bottom:16px;color:#333;">予定一覧</h3>';
+      bookings.forEach(booking => {
+        const bookingDiv = document.createElement('div');
+        bookingDiv.style.cssText = `
+          background: #fff;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 8px;
+          cursor: pointer;
+          transition: background 0.2s;
+        `;
+        bookingDiv.onmouseover = () => bookingDiv.style.background = '#f5f5f5';
+        bookingDiv.onmouseout = () => bookingDiv.style.background = '#fff';
+        
+        const golfCourseName = booking.bookings?.golf_courses?.name || '不明';
+        const date = booking.bookings?.date || '不明';
+        
+        bookingDiv.innerHTML = `
+          <div style="font-weight:bold;color:#333;">${golfCourseName}</div>
+          <div style="color:#666;font-size:0.9rem;">${date}</div>
+          <div style="color:#27ae60;font-size:0.8rem;margin-top:4px;">タップしてチャット</div>
+        `;
+        
+        bookingDiv.onclick = () => {
+          currentBookingId = booking.bookings?.id;
+          chatPartnerId = booking.bookings?.golf_courses?.gid;
+          chatPartnerName = golfCourseName;
+          loadChatMessages();
+        };
+        
+        messagesList.appendChild(bookingDiv);
       });
+    }
+
+    async function loadChatMessages() {
+      if (!chatPartnerId || !currentBookingId) {
+        showBookingList();
+        return;
+      }
+
+      const messagesList = document.getElementById('messagesList');
+      messagesList.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:8px;background:#f0f0f0;border-radius:8px;">
+          <button onclick="showBookingList()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">←</button>
+          <div>
+            <div style="font-weight:bold;">${chatPartnerName}</div>
+            <div style="font-size:0.8rem;color:#666;">予定に関する連絡</div>
+          </div>
+        </div>
+      `;
+
+      // 予定に関連するメッセージを取得
+      const { data: messages, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${cid},receiver_id.eq.${chatPartnerId}),and(sender_id.eq.${chatPartnerId},receiver_id.eq.${cid})`)
+        .eq('booking_id', currentBookingId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        messagesList.innerHTML += `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
+        return;
+      }
+
+      if (!messages || messages.length === 0) {
+        messagesList.innerHTML += '<div style="text-align:center;color:#aaa;margin-top:20px;">メッセージはありません</div>';
+      } else {
+        messages.forEach(msg => {
+          const isSent = msg.sender_id === cid;
+          const bubble = document.createElement('div');
+          bubble.className = 'chat-bubble ' + (isSent ? 'sent' : 'received');
+          bubble.innerHTML = `${msg.content}<div class='chat-meta${isSent ? '' : ' received'}'>${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}${msg.is_read ? "<span class='chat-badge read'>既読</span>" : (!isSent ? "<span class='chat-badge unread'>未読</span>" : '')}</div>`;
+          messagesList.appendChild(bubble);
+        });
+      }
+      
       // スクロール最下部へ
       messagesList.scrollTop = messagesList.scrollHeight;
     }
@@ -614,33 +698,33 @@
     async function sendChatMessage() {
       const input = document.getElementById('chatInput');
       const content = input.value.trim();
-      if (!content || !chatPartnerId) return;
+      if (!content || !chatPartnerId || !currentBookingId) return;
+      
       const { error } = await supabase.from('messages').insert({
-        sender_type: 'caddy', sender_id: cid,
-        receiver_type: 'golf', receiver_id: chatPartnerId,
+        sender_type: 'caddy', 
+        sender_id: cid,
+        receiver_type: 'golf_course', 
+        receiver_id: chatPartnerId,
+        booking_id: currentBookingId,
         content,
         is_read: false
       });
+      
       if (error) {
         alert('送信エラー: ' + error.message);
         return;
       }
+      
       input.value = '';
-      loadChatMessages(chatPartnerId, chatPartnerName);
+      loadChatMessages();
     }
 
     document.getElementById('sendChatBtn').onclick = sendChatMessage;
     document.getElementById('chatInput').onkeydown = e => { if (e.key === 'Enter') sendChatMessage(); };
 
-    // チャット相手選択UI（例: ゴルフ場一覧から選択）
-    // ここではダミーで1人だけ選択肢を表示
+    // メッセージタブを開いたら予定一覧を表示
     async function showChatWithGolfCourse() {
-      // 本来はゴルフ場一覧を取得してリスト化
-      // ここでは最初の1件を仮で取得
-      const { data: courses } = await supabase.from('golf_courses').select('gid,name').limit(1);
-      if (courses && courses.length > 0) {
-        loadChatMessages(courses[0].gid, courses[0].name);
-      }
+      showBookingList();
     }
 
   </script>
