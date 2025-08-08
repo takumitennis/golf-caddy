@@ -601,7 +601,7 @@
             )
           `)
           .eq('cid', cid)
-          .order('created_at', { ascending: false });
+          .order('date', { ascending: false, foreignTable: 'bookings' });
 
       if (error) {
         messagesList.innerHTML = `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
