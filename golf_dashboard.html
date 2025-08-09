@@ -198,9 +198,20 @@
   <!-- Messages Tab -->
   <div id="mainMessages" class="hidden">
     <div id="messagesList"></div>
-    <div id="chatInputArea">
+    <div id="chatInputArea" style="display:none;">
       <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" />
       <button id="sendChatBtn">送信</button>
+    </div>
+  </div>
+
+  <!-- 空きキャディ一覧モーダル -->
+  <div id="availableCaddiesModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:120;">
+    <div style="background:#fff;padding:20px;border-radius:10px;width:92%;max-width:560px;max-height:80vh;overflow:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 id="availableCaddiesTitle" style="margin:0;">空きキャディ一覧</h3>
+        <button id="closeAvailableCaddies" style="background:#eee;border:1px solid #ddd;border-radius:6px;padding:6px 10px;cursor:pointer;">閉じる</button>
+      </div>
+      <div id="availableCaddiesList">読み込み中...</div>
     </div>
   </div>
 
@@ -667,7 +678,8 @@
         else if(cnt<3){td.className='cal-yellow';}
         else{td.className='cal-green';}
         td.innerHTML = `<small>${day}</small><br>${label}`;
-        td.style.cursor='default';
+        td.style.cursor='pointer';
+        td.onclick = () => openAvailableCaddiesModal(dateStr);
         row.appendChild(td);
         if((startWeekDay+day)%7===0){table.appendChild(row);row=document.createElement('tr');}
       }
@@ -1403,6 +1415,8 @@
 
     async function loadChatMessages() {
       if (!chatPartnerId || !currentBookingId) {
+        // 入力欄を隠す
+        document.getElementById('chatInputArea').style.display = 'none';
         showBookingList();
         return;
       }
@@ -1417,6 +1431,9 @@
           </div>
         </div>
       `;
+
+      // 入力欄を表示
+      document.getElementById('chatInputArea').style.display = 'flex';
 
       // 予定に関連するメッセージを取得
       const { data: messages, error } = await supabase
@@ -1480,6 +1497,69 @@
       showBookingList();
     }
 
-  </script>
-</body>
+    // 空きキャディ一覧モーダルを開く関数
+    async function openAvailableCaddiesModal(dateStr) {
+      document.getElementById('availableCaddiesModal').style.display = 'flex';
+      document.getElementById('availableCaddiesTitle').textContent = `${dateStr}の空きキャディ一覧`;
+      await loadAvailableCaddies(dateStr);
+    }
+
+        // 空きキャディ一覧を取得して表示
+    async function loadAvailableCaddies(dateStr) {
+      const availableCaddiesList = document.getElementById('availableCaddiesList');
+      availableCaddiesList.innerHTML = '<p>読み込み中...</p>';
+
+      try {
+        // 1) 該当日の空きキャディcidを取得
+        const { data: avails, error: availErr } = await supabase
+          .from('caddy_availability')
+          .select('cid')
+          .eq('date', dateStr);
+        if (availErr) {
+          availableCaddiesList.innerHTML = `<p>エラー: ${availErr.message}</p>`;
+          return;
+        }
+        const cidList = Array.from(new Set((avails || []).map(a => a.cid)));
+        if (cidList.length === 0) {
+          availableCaddiesList.innerHTML = '<p>この日付には空きキャディがありません。</p>';
+          return;
+        }
+
+        // 2) キャディ情報を取得
+        const { data: caddies, error: cErr } = await supabase
+          .from('caddies')
+          .select('cid, name, phone, email, university, golf_years, caddy_years, appeal')
+          .in('cid', cidList);
+        if (cErr) {
+          availableCaddiesList.innerHTML = `<p>エラー: ${cErr.message}</p>`;
+          return;
+        }
+
+        let html = '<h4 style="margin-bottom:10px;color:#333;">空きキャディ一覧</h4>';
+        caddies.forEach(caddy => {
+          html += `
+            <div style="border:1px solid #eee; padding:10px; margin-bottom:8px; border-radius:6px; background:#f9f9f9;">
+              <strong>${caddy.name}</strong> <small style="color:#888;">(${caddy.cid})</small><br>
+              <small>大学: ${caddy.university || '未設定'}</small><br>
+              <small>ゴルフ歴: ${caddy.golf_years ?? '不明'}年</small><br>
+              <small>キャディ歴: ${caddy.caddy_years ?? '不明'}年</small><br>
+              <small>アピール: ${caddy.appeal || 'なし'}</small><br>
+              <small>電話: ${caddy.phone || '未設定'}</small><br>
+              <small>メール: ${caddy.email || '未設定'}</small>
+            </div>
+          `;
+        });
+        availableCaddiesList.innerHTML = html;
+      } catch (error) {
+        availableCaddiesList.innerHTML = `<p>エラー: ${error.message}</p>`;
+      }
+    }
+
+    // モーダル閉じる
+    document.getElementById('closeAvailableCaddies').onclick = () => {
+      document.getElementById('availableCaddiesModal').style.display = 'none';
+    };
+ 
+    </script>
+  </body>
 </html> 

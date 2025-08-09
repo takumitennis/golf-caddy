@@ -141,13 +141,13 @@
     <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
     <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
   </div>
-  <div id="mainMessages" class="hidden">
-    <div id="messagesList"></div>
-    <div id="chatInputArea">
-      <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" />
-      <button id="sendChatBtn">送信</button>
+      <div id="mainMessages" class="hidden">
+      <div id="messagesList"></div>
+      <div id="chatInputArea" style="display:none;">
+        <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" />
+        <button id="sendChatBtn">送信</button>
+      </div>
     </div>
-  </div>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -650,6 +650,8 @@
 
     async function loadChatMessages() {
       if (!chatPartnerId || !currentBookingId) {
+        // 入力欄を隠す
+        document.getElementById('chatInputArea').style.display = 'none';
         showBookingList();
         return;
       }
@@ -664,6 +666,9 @@
           </div>
         </div>
       `;
+
+      // 入力欄を表示
+      document.getElementById('chatInputArea').style.display = 'flex';
 
       // 予定に関連するメッセージを取得
       const { data: messages, error } = await supabase
