@@ -174,25 +174,29 @@
   <div id="mainStatus">
     <!-- Tabs -->
     <div class="tabs">
-      <button id="btnTab1" class="active">募集作成</button>
-      <button id="btnTab2">空きキャディ確認</button>
+      <button id="btnTab1" class="active">空きキャディ確認</button>
+      <button id="btnTabConfirm">予約確認</button>
       <button id="btnTab3">研修可能日設定</button>
       <button id="btnTab4">研修予約者一覧</button>
     </div>
 
-    <!-- Tab 1: bookings -->
-    <div id="tab1">
-      <form id="createForm" style="margin-top:20px;">
-        <label>日付: <input type="date" id="bDate" required></label>
-        <label>必要キャディ数: <input type="number" id="bSlots" min="1" required style="width:80px"></label>
-        <button type="submit">募集作成</button>
-      </form>
-
-      <table>
+    <!-- Tab Confirm: 予約確認 -->
+    <div id="tabConfirm" class="hidden" style="margin-top:20px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="confPrev">◀</button>
+        <span id="confTitle"></span>
+        <button id="confNext">▶</button>
+        <button id="confReload" style="margin-left:auto;">再読み込み</button>
+      </div>
+      <table style="margin-top:10px; width:100%; border-collapse:collapse;">
         <thead>
-          <tr><th>日付</th><th>必要人数</th><th>ステータス</th></tr>
+          <tr>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">日付</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">確定キャディ数</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">参加キャディ</th>
+          </tr>
         </thead>
-        <tbody id="bookBody"></tbody>
+        <tbody id="confirmBody"></tbody>
       </table>
     </div>
 
@@ -591,6 +595,7 @@
       
       document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
       document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
+      document.getElementById('btnTabConfirm').onclick=()=>{switchTab(5)};
       document.getElementById('btnTab3').onclick=()=>{switchTab(3)};
       document.getElementById('btnTab4').onclick=()=>{switchTab(4)};
 
@@ -725,6 +730,10 @@
         tab2.classList.remove('hidden');
         btnTab2.classList.add('active');
         renderCal();
+      } else if(idx===5){
+        tabConfirm.classList.remove('hidden');
+        btnTabConfirm.classList.add('active');
+        renderConfirm();
       } else if(idx===3){
         tab3.classList.remove('hidden');
         btnTab3.classList.add('active');
@@ -1555,6 +1564,66 @@
     // 注: ランダム差配方針のため、空きキャディ一覧のポップアップは廃止
 // 必要な場合は、確定時にプロフィールを表示します。
 
+
+    // 予約確認：当月の予約（bookings＋booking_caddies＋caddies）
+    let confMonth = new Date().getMonth();
+    let confYear = new Date().getFullYear();
+    async function renderConfirm(){
+      const title = document.getElementById('confTitle');
+      title.textContent = `${confYear}年 ${confMonth+1}月`;
+      const tbody = document.getElementById('confirmBody');
+      tbody.innerHTML = '<tr><td colspan="3" style="padding:8px;color:#888;">読み込み中...</td></tr>';
+      const first = `${confYear}-${String(confMonth+1).padStart(2,'0')}-01`;
+      const lastDate = new Date(confYear, confMonth+1, 0).getDate();
+      const last = `${confYear}-${String(confMonth+1).padStart(2,'0')}-${String(lastDate).padStart(2,'0')}`;
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select(`
+          booking_id,date,
+          booking_caddies!inner (
+            cid,
+            caddies (cid,name,phone,email,university)
+          )
+        `)
+        .eq('gid', gid)
+        .gte('date', first)
+        .lte('date', last)
+        .order('date', { ascending: true });
+      if(error){ tbody.innerHTML = `<tr><td colspan='3' style='padding:8px;color:#e74c3c;'>${error.message}</td></tr>`; return; }
+      if(!bookings || bookings.length===0){ tbody.innerHTML = `<tr><td colspan='3' style='padding:8px;color:#888;'>当月の予約はありません</td></tr>`; return; }
+      tbody.innerHTML='';
+      bookings.forEach(b=>{
+        const cList = b.booking_caddies?.map(bc => bc.caddies?.name || bc.cid).filter(Boolean) || [];
+        const count = cList.length;
+        const names = cList.map(n=>`<span style='margin-right:8px;'>${n}</span>`).join('');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style='padding:8px;border-bottom:1px solid #eee;'>${b.date}</td>
+          <td style='padding:8px;border-bottom:1px solid #eee;'>${count} 名</td>
+          <td style='padding:8px;border-bottom:1px solid #eee;'>${names} <button data-bid='${b.booking_id}' class='btnMsgToCaddies' style='margin-left:8px;'>メッセージ</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      // メッセージ導線（該当予約の各キャディと個別に）
+      Array.from(document.getElementsByClassName('btnMsgToCaddies')).forEach(btn=>{
+        btn.onclick = async (e)=>{
+          const bid = e.currentTarget.getAttribute('data-bid');
+          // 予約の最初のキャディへ（本来は選択UIに拡張可能）
+          const b = bookings.find(x=>x.booking_id===bid);
+          const firstCaddy = b?.booking_caddies?.[0]?.cid;
+          if(firstCaddy){
+            currentBookingId = bid;
+            chatPartnerId = firstCaddy;
+            chatPartnerName = b.booking_caddies?.[0]?.caddies?.name || 'キャディ';
+            switchMain('msg');
+            loadChatMessages();
+          }
+        };
+      });
+    }
+    document.getElementById('confPrev').onclick=()=>{ if(--confMonth<0){confMonth=11;confYear--;} renderConfirm(); };
+    document.getElementById('confNext').onclick=()=>{ if(++confMonth>11){confMonth=0;confYear++;} renderConfirm(); };
+    document.getElementById('confReload').onclick=()=>{ renderConfirm(); };
 
     </script>
   </body>
