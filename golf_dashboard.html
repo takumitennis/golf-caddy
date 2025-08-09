@@ -785,7 +785,7 @@
       if (target && target.classList && target.classList.contains('avail-count')) {
         pendingReserveDate = target.getAttribute('data-date');
         const d = new Date(pendingReserveDate);
-        reserveDateText.textContent = `${d.getFullYear()}年 ${String(d.getMonth()+1)}月 ${String(d.getDate())}日`;
+        reserveDateText.textContent = `${d.getFullYear()}年 ${String(d.getMonth()+1)}月 ${String(d.getDate())}日 を予約しますか？`;
         reserveBar.style.display = 'flex';
       }
     });
@@ -1549,48 +1549,6 @@
       showBookingList();
     }
 
-    // 予約バーのイベントリスナー
-    document.addEventListener('DOMContentLoaded', () => {
-      const reserveBar = document.getElementById('reserveBar');
-      const reserveDateText = document.getElementById('reserveDateText');
-      const prevMonthBtn = document.getElementById('prevMonth');
-      const nextMonthBtn = document.getElementById('nextMonth');
-      const calTable = document.getElementById('calTable');
-      const calTitle = document.getElementById('calTitle');
-
-      // カレンダーの日付クリックで予約バーを表示
-      calTable.addEventListener('click', (event) => {
-        const target = event.target;
-        if (target.tagName === 'TD' && target.classList.contains('cal-green')) {
-          const date = target.querySelector('small').textContent;
-          const [year, month, day] = date.split('-');
-          const selectedDate = `${year}-${month}-${day}`;
-          reserveDateText.textContent = `${year}年 ${month}月 ${day}日`;
-          document.getElementById('reserveBtn').onclick = () => {
-            reserveDateText.textContent = `${year}年 ${month}月 ${day}日`;
-            reserveBar.style.display = 'flex';
-            // 予約処理をここに追加
-            reserveBooking(selectedDate);
-          };
-          document.getElementById('reserveCancel').onclick = () => {
-            reserveBar.style.display = 'none';
-          };
-        }
-      });
-
-      // 予約バーのキャンセルボタンで予約バーを非表示
-      document.getElementById('reserveCancel').onclick = () => {
-        reserveBar.style.display = 'none';
-      };
-
-      // 予約バーの予約ボタンで予約処理を実行
-      document.getElementById('reserveBtn').onclick = () => {
-        reserveDateText.textContent = `${year}年 ${month}月 ${day}日`;
-        reserveBar.style.display = 'none';
-        // 予約処理をここに追加
-        reserveBooking(selectedDate);
-      };
-    });
 
     // 予約処理
     async function reserveBooking(date) {
