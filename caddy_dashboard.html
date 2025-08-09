@@ -148,6 +148,7 @@
       <button id="aPrevMonth">◀</button>
       <span id="aCalTitle"></span>
       <button id="aNextMonth">▶</button>
+      <button id="aReload" style="margin-left:auto;">再読み込み</button>
     </div>
     <div style="color:#666; font-size:0.9rem; margin-top:6px;">予約が入っている日はゴルフ場名が表示されます（クリックで詳細）</div>
     <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
@@ -532,10 +533,10 @@
         .from('booking_caddies')
         .select(`
           booking_id,
-          bookings (
+          bookings!inner (
             date,
             gid,
-            golf_courses (
+            golf_courses!inner (
               gid,
               name,
               address,
@@ -559,7 +560,7 @@
       // 日付→予約のマップ
       const dateToAssign = new Map();
       (assigns||[])
-        .filter(a=>a.bookings && a.bookings.date >= firstStr && a.bookings.date <= lastStr)
+        .filter(a=>a.bookings && a.bookings.date && a.bookings.date >= firstStr && a.bookings.date <= lastStr)
         .forEach(a=>{
           dateToAssign.set(a.bookings.date, a);
         });
