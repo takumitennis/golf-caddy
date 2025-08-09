@@ -808,12 +808,11 @@
         // 1) その日の空きキャディからランダムに1名抽出
         const { data: avails, error: aErr } = await supabase
           .from('caddy_availability')
-          .select('cid')
-          .eq('date', dateStr)
-          .not('cid', 'is', null);
+          .select('cid,cID')
+          .eq('date', dateStr);
         if(aErr) throw aErr;
         if(!avails || avails.length===0){ alert('この日は空きキャディがいません'); return; }
-        const cidList = avails.map(a=>a.cid);
+        const cidList = avails.map(a=> a.cid || a.cID).filter(Boolean);
         const randomCid = cidList[Math.floor(Math.random()*cidList.length)];
 
         // 2) bookings 存在確認 or 作成
