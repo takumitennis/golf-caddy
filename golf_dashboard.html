@@ -154,7 +154,7 @@
   <h1>ゴルフ場マイページ</h1>
   <div class="tabs-main">
     <button id="btnMainProf">プロフィール</button>
-    <button id="btnMainStat" class="active">ステータス</button>
+    <button id="btnMainStat" class="active">予約管理</button>
     <button id="btnMainMsg">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
@@ -588,13 +588,13 @@
       const tab2=document.getElementById('tab2');
       const tab3=document.getElementById('tab3');
       const tab4=document.getElementById('tab4');
+      const tabConfirm=document.getElementById('tabConfirm');
       const btnTab1=document.getElementById('btnTab1');
-      const btnTab2=document.getElementById('btnTab2');
+      const btnTabConfirm=document.getElementById('btnTabConfirm');
       const btnTab3=document.getElementById('btnTab3');
       const btnTab4=document.getElementById('btnTab4');
       
       document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
-      document.getElementById('btnTab2').onclick=()=>{switchTab(2)};
       document.getElementById('btnTabConfirm').onclick=()=>{switchTab(5)};
       document.getElementById('btnTab3').onclick=()=>{switchTab(3)};
       document.getElementById('btnTab4').onclick=()=>{switchTab(4)};
@@ -720,15 +720,12 @@
     // render calendar on tab switch
     function switchTab(idx){
       // Hide all tabs
-      [tab1, tab2, tab3, tab4].forEach(tab => tab.classList.add('hidden'));
-      [btnTab1, btnTab2, btnTab3, btnTab4].forEach(btn => btn.classList.remove('active'));
+      [tab2, tabConfirm, tab3, tab4].forEach(tab => tab && tab.classList.add('hidden'));
+      [btnTab1, btnTabConfirm, btnTab3, btnTab4].forEach(btn => btn && btn.classList.remove('active'));
       
       if(idx===1){
-        tab1.classList.remove('hidden');
-        btnTab1.classList.add('active');
-      } else if(idx===2){
         tab2.classList.remove('hidden');
-        btnTab2.classList.add('active');
+        btnTab1.classList.add('active');
         renderCal();
       } else if(idx===5){
         tabConfirm.classList.remove('hidden');
