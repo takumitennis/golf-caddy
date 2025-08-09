@@ -204,7 +204,7 @@
         <button id="nextMonth">▶</button>
       </div>
       <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-      <small style="display:block;margin-top:8px;">緑=3名以上, 黄=1-2名, 赤=0名</small>
+      
     </div>
 
     <!-- Tab 3: Training availability -->
@@ -612,9 +612,9 @@
       const mainProfileDiv=document.getElementById('mainProfile');
       const mainStatusDiv=document.getElementById('mainStatus');
       const mainMessagesDiv=document.getElementById('mainMessages');
-      document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
-      document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
-      document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
+      const btnMainProf=document.getElementById('btnMainProf');
+      const btnMainStat=document.getElementById('btnMainStat');
+      const btnMainMsg=document.getElementById('btnMainMsg');
       
       // logout
       document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
@@ -751,6 +751,26 @@
     const mainProfileDiv=document.getElementById('mainProfile');
     const mainStatusDiv=document.getElementById('mainStatus');
     const mainMessagesDiv=document.getElementById('mainMessages');
+    const btnMainProf=document.getElementById('btnMainProf');
+    const btnMainStat=document.getElementById('btnMainStat');
+    const btnMainMsg=document.getElementById('btnMainMsg');
+
+    function switchMain(mode){
+      // hide all
+      [mainProfileDiv, mainStatusDiv, mainMessagesDiv].forEach(el=>el.classList.add('hidden'));
+      [btnMainProf, btnMainStat, btnMainMsg].forEach(btn=>btn.classList.remove('active'));
+      if(mode==='prof'){
+        mainProfileDiv.classList.remove('hidden');
+        btnMainProf.classList.add('active');
+      } else if(mode==='stat'){
+        mainStatusDiv.classList.remove('hidden');
+        btnMainStat.classList.add('active');
+      } else if(mode==='msg'){
+        mainMessagesDiv.classList.remove('hidden');
+        btnMainMsg.classList.add('active');
+      }
+    }
+
     document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
     document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
     document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
