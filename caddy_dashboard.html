@@ -183,6 +183,9 @@
 
     let cid;
     let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
+    // キャディ予定用の独立した月状態
+    let assignedCalMonth = calMonth;
+    let assignedCalYear = calYear;
     const calTable=document.getElementById('calTable');
     const lockInfo=document.getElementById('lockInfo');
 
@@ -622,7 +625,13 @@
       if(map[k]){map[k].style.display='block';}
       if(k==='prof') btnMainProf.classList.add('active');
       if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
-      if(k==='assign'){btnMainAssign.classList.add('active'); const first=new Date(calYear,calMonth,1);const last=new Date(calYear,calMonth+1,0); document.getElementById('aCalTitle').textContent=`${calYear}年 ${calMonth+1}月`; renderAssignedCal(first,last);} 
+      if(k==='assign'){
+        btnMainAssign.classList.add('active');
+        const first=new Date(assignedCalYear,assignedCalMonth,1);
+        const last=new Date(assignedCalYear,assignedCalMonth+1,0);
+        document.getElementById('aCalTitle').textContent=`${assignedCalYear}年 ${assignedCalMonth+1}月`;
+        renderAssignedCal(first,last);
+      } 
       if(k==='msg'){btnMainMsg.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
 
