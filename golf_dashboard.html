@@ -125,6 +125,29 @@
     .chat-badge.read {
       background: #27ae60;
     }
+    /* 予約バー */
+    #reserveBar {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      display: none;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 12px 16px;
+      z-index: 200;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    #reserveBar .reserve-info { color:#333; font-size: 0.95rem; }
+    #reserveBar button {
+      border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    }
+    #reserveBtn { background:#27ae60; color:#fff; }
+    #reserveCancel { background:#eee; color:#333; }
   </style>
 </head>
 <body>
@@ -136,6 +159,14 @@
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
   <div id="welcome" style="margin-top:10px;"></div>
+  <!-- 予約バー -->
+  <div id="reserveBar">
+    <div class="reserve-info"><span id="reserveDateText"></span> を予約しますか？</div>
+    <div style="display:flex; gap:8px;">
+      <button id="reserveCancel">キャンセル</button>
+      <button id="reserveBtn">予約する</button>
+    </div>
+  </div>
   <!-- Profile Tab -->
   <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
   
@@ -664,7 +695,7 @@
         const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td=document.createElement('td');
         const cnt=countMap[dateStr]||0;
-        const labelHtml = cnt===0 ? '×' : `<span style="color:#27ae60;font-weight:600">${cnt}</span>`;
+        const labelHtml = cnt===0 ? '×' : `<span class="avail-count" data-date="${dateStr}" style="color:#27ae60;font-weight:600">${cnt}</span>`;
         if(cnt===0){td.className='cal-red';}
         else{td.className='';}
         td.innerHTML = `<small>${day}</small><br>${labelHtml}`;
@@ -719,80 +750,92 @@
     // ---- main tabs ----
     const mainProfileDiv=document.getElementById('mainProfile');
     const mainStatusDiv=document.getElementById('mainStatus');
+    const mainMessagesDiv=document.getElementById('mainMessages');
     document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
     document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
-    function switchMain(mode){
-      const mainProfileDiv = document.getElementById('mainProfile');
-      const mainStatusDiv = document.getElementById('mainStatus');
-      const mainMessagesDiv = document.getElementById('mainMessages');
-      const btnMainProf = document.getElementById('btnMainProf');
-      const btnMainStat = document.getElementById('btnMainStat');
-      const btnMainMsg = document.getElementById('btnMainMsg');
-      
-      if(mode==='prof'){
-        mainProfileDiv.classList.remove('hidden');
-        mainStatusDiv.classList.add('hidden');
-        mainMessagesDiv.classList.add('hidden');
-        btnMainProf.classList.add('active');
-        btnMainStat.classList.remove('active');
-        btnMainMsg.classList.remove('active');
-      }else if(mode==='msg'){
-        mainMessagesDiv.classList.remove('hidden');
-        mainProfileDiv.classList.add('hidden');
-        mainStatusDiv.classList.add('hidden');
-        btnMainMsg.classList.add('active');
-        btnMainProf.classList.remove('active');
-        btnMainStat.classList.remove('active');
-        loadMessages('inbox');
-        
-        // Initialize message event listeners when messages tab is shown
-        setTimeout(() => {
-          const btnInbox = document.getElementById('btnInbox');
-          const btnSent = document.getElementById('btnSent');
-          const btnNewMessage = document.getElementById('btnNewMessage');
-          const cancelMessage = document.getElementById('cancelMessage');
-          const sendMessage = document.getElementById('sendMessage');
-          
-          if (btnInbox && !btnInbox.onclick) {
-            btnInbox.onclick = () => {
-              btnInbox.classList.add('active');
-              btnSent.classList.remove('active');
-              loadMessages('inbox');
-            };
-          }
-          
-          if (btnSent && !btnSent.onclick) {
-            btnSent.onclick = () => {
-              btnSent.classList.add('active');
-              btnInbox.classList.remove('active');
-              loadMessages('sent');
-            };
-          }
-          
-          if (btnNewMessage && !btnNewMessage.onclick) {
-            btnNewMessage.onclick = () => {
-              loadCaddiesForMessage();
-              document.getElementById('newMessageModal').style.display = 'flex';
-            };
-          }
-          
-          if (cancelMessage && !cancelMessage.onclick) {
-            cancelMessage.onclick = () => {
-              document.getElementById('newMessageModal').style.display = 'none';
-            };
-          }
-          
-          if (sendMessage && !sendMessage.onclick) {
-            sendMessage.onclick = sendNewMessage;
-          }
-        }, 100);
-      }else{
-        mainStatusDiv.classList.remove('hidden');
-        mainProfileDiv.classList.add('hidden');
-        mainMessagesDiv.classList.add('hidden');
-        btnMainStat.classList.add('active');
-        btnMainProf.classList.remove('active');
-        btnMainMsg.classList.remove('active');
+    document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
+
+    // 予約バー制御
+    const reserveBar = document.getElementById('reserveBar');
+    const reserveDateText = document.getElementById('reserveDateText');
+    let pendingReserveDate = null;
+
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target && target.classList && target.classList.contains('avail-count')) {
+        pendingReserveDate = target.getAttribute('data-date');
+        const d = new Date(pendingReserveDate);
+        reserveDateText.textContent = `${d.getFullYear()}年 ${String(d.getMonth()+1)}月 ${String(d.getDate())}日`;
+        reserveBar.style.display = 'flex';
+      }
+    });
+
+    document.getElementById('reserveCancel').onclick = () => {
+      reserveBar.style.display = 'none';
+      pendingReserveDate = null;
+    };
+
+    document.getElementById('reserveBtn').onclick = async () => {
+      if (!pendingReserveDate) return;
+      reserveBar.style.display = 'none';
+      await reserveBooking(pendingReserveDate);
+      pendingReserveDate = null;
+    };
+
+    // 予約処理
+    async function reserveBooking(dateStr){
+      try{
+        // 1) その日の空きキャディからランダムに1名抽出
+        const { data: avails, error: aErr } = await supabase
+          .from('caddy_availability')
+          .select('cid')
+          .eq('date', dateStr);
+        if(aErr) throw aErr;
+        if(!avails || avails.length===0){ alert('この日は空きキャディがいません'); return; }
+        const cidList = avails.map(a=>a.cid);
+        const randomCid = cidList[Math.floor(Math.random()*cidList.length)];
+
+        // 2) bookings 存在確認 or 作成
+        const { data: existing, error: exErr } = await supabase
+          .from('bookings')
+          .select('booking_id')
+          .eq('gid', gid)
+          .eq('date', dateStr)
+          .maybeSingle();
+        if(exErr && exErr.code!=='PGRST116') throw exErr;
+        let bookingId;
+        if(existing){ bookingId = existing.booking_id; }
+        else{
+          const { data: created, error: crErr } = await supabase
+            .from('bookings')
+            .insert({ gid, date: dateStr, slots: 1, status: 'pending' })
+            .select('booking_id')
+            .single();
+          if(crErr) throw crErr;
+          bookingId = created.booking_id;
+        }
+
+        // 3) booking_caddies に割当
+        const { error: bcErr } = await supabase
+          .from('booking_caddies')
+          .insert({ booking_id: bookingId, cid: randomCid });
+        if(bcErr) throw bcErr;
+
+        // 4) caddy_availability から該当cidのその日を削除（キャディ側スケジュール反映）
+        const { error: delErr } = await supabase
+          .from('caddy_availability')
+          .delete()
+          .eq('cid', randomCid)
+          .eq('date', dateStr);
+        if(delErr) throw delErr;
+
+        alert('予約が完了しました！');
+        // UI 更新
+        await loadBookings();
+        await renderCal();
+      } catch(err){
+        console.error(err);
+        alert('予約に失敗しました: ' + (err.message || JSON.stringify(err)));
       }
     }
 
@@ -1484,6 +1527,117 @@
     // メッセージタブを開いたら予定一覧を表示
     async function showChatWithCaddy() {
       showBookingList();
+    }
+
+    // 予約バーのイベントリスナー
+    document.addEventListener('DOMContentLoaded', () => {
+      const reserveBar = document.getElementById('reserveBar');
+      const reserveDateText = document.getElementById('reserveDateText');
+      const prevMonthBtn = document.getElementById('prevMonth');
+      const nextMonthBtn = document.getElementById('nextMonth');
+      const calTable = document.getElementById('calTable');
+      const calTitle = document.getElementById('calTitle');
+
+      // カレンダーの日付クリックで予約バーを表示
+      calTable.addEventListener('click', (event) => {
+        const target = event.target;
+        if (target.tagName === 'TD' && target.classList.contains('cal-green')) {
+          const date = target.querySelector('small').textContent;
+          const [year, month, day] = date.split('-');
+          const selectedDate = `${year}-${month}-${day}`;
+          reserveDateText.textContent = `${year}年 ${month}月 ${day}日`;
+          document.getElementById('reserveBtn').onclick = () => {
+            reserveDateText.textContent = `${year}年 ${month}月 ${day}日`;
+            reserveBar.style.display = 'flex';
+            // 予約処理をここに追加
+            reserveBooking(selectedDate);
+          };
+          document.getElementById('reserveCancel').onclick = () => {
+            reserveBar.style.display = 'none';
+          };
+        }
+      });
+
+      // 予約バーのキャンセルボタンで予約バーを非表示
+      document.getElementById('reserveCancel').onclick = () => {
+        reserveBar.style.display = 'none';
+      };
+
+      // 予約バーの予約ボタンで予約処理を実行
+      document.getElementById('reserveBtn').onclick = () => {
+        reserveDateText.textContent = `${year}年 ${month}月 ${day}日`;
+        reserveBar.style.display = 'none';
+        // 予約処理をここに追加
+        reserveBooking(selectedDate);
+      };
+    });
+
+    // 予約処理
+    async function reserveBooking(date) {
+      const slots = 1; // 仮定: 1人の予約
+      const status = 'pending'; // 仮定: 申込中
+
+      try {
+        // 予約が既に存在するか確認
+        const { data: existingBooking, error: bookingError } = await supabase
+          .from('bookings')
+          .select('booking_id, slots, status')
+          .eq('gid', gid)
+          .eq('date', date)
+          .single();
+
+        if (bookingError && bookingError.code !== 'PGRST116') { // PGRST116: No rows found
+          throw new Error(`予約の確認に失敗しました: ${bookingError.message}`);
+        }
+
+        let bookingIdToUse;
+        if (existingBooking) {
+          bookingIdToUse = existingBooking.booking_id;
+          console.log('予約が既に存在します。ID:', bookingIdToUse);
+        } else {
+          // 新しい予約を作成
+          const { data: newBooking, error: newBookingError } = await supabase
+            .from('bookings')
+            .insert({ gid, date, slots, status })
+            .select()
+            .single();
+
+          if (newBookingError) {
+            throw new Error(`新しい予約の作成に失敗しました: ${newBookingError.message}`);
+          }
+          bookingIdToUse = newBooking.booking_id;
+          console.log('新しい予約を作成しました。ID:', bookingIdToUse);
+        }
+
+        // キャディを予約に割り当てる
+        const { error: bookingCaddyError } = await supabase
+          .from('booking_caddies')
+          .insert({ booking_id: bookingIdToUse, cid: chatPartnerId });
+
+        if (bookingCaddyError) {
+          throw new Error(`キャディの割り当てに失敗しました: ${bookingCaddyError.message}`);
+        }
+
+        // カレンダーの予約数を更新
+        const { error: updateAvailabilityError } = await supabase
+          .from('caddy_availability')
+          .delete()
+          .eq('gid', gid)
+          .eq('date', date);
+
+        if (updateAvailabilityError) {
+          console.error('カレンダーの予約数更新エラー:', updateAvailabilityError);
+        }
+
+        alert('予約が完了しました！');
+        loadBookings(); // 予約一覧を更新
+        loadChatMessages(); // チャットメッセージを更新
+        showBookingList(); // 予定一覧を更新
+
+      } catch (error) {
+        console.error('予約エラー:', error);
+        alert('予約に失敗しました: ' + error.message);
+      }
     }
 
     // 注: ランダム差配方針のため、空きキャディ一覧のポップアップは廃止
