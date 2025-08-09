@@ -809,7 +809,8 @@
         const { data: avails, error: aErr } = await supabase
           .from('caddy_availability')
           .select('cid')
-          .eq('date', dateStr);
+          .eq('date', dateStr)
+          .not('cid', 'is', null);
         if(aErr) throw aErr;
         if(!avails || avails.length===0){ alert('この日は空きキャディがいません'); return; }
         const cidList = avails.map(a=>a.cid);

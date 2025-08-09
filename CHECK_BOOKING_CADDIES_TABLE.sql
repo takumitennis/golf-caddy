@@ -39,5 +39,9 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   AND tc.table_name = 'booking_caddies'
   AND tc.table_schema = 'public';
 
+-- NOT NULL制約の確認
+SELECT column_name, is_nullable FROM information_schema.columns 
+WHERE table_name='booking_caddies' AND table_schema='public' AND column_name in ('booking_id','cid');
+
 -- サンプルデータを確認
-SELECT * FROM public.booking_caddies LIMIT 3; 
+SELECT * FROM public.booking_caddies ORDER BY created_at DESC LIMIT 10; 
