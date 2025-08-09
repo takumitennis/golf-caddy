@@ -530,22 +530,15 @@
 
       // 予約データ取得（cidで絞込み）。月の範囲はJS側でフィルタ
       const { data: assigns, error } = await supabase
-        .from('booking_caddies')
+        .from('bookings')
         .select(`
           booking_id,
-          bookings!inner (
-            date,
-            gid,
-            golf_courses!inner (
-              gid,
-              name,
-              address,
-              description,
-              perks
-            )
-          )
+          date,
+          gid,
+          golf_courses ( gid,name,address,description,perks ),
+          booking_caddies!inner ( cid )
         `)
-        .eq('cid', cid);
+        .eq('booking_caddies.cid', cid);
       if(error){
         console.warn('予約取得エラー', error.message);
       }
@@ -560,16 +553,16 @@
       // 日付→予約のマップ
       const dateToAssign = new Map();
       (assigns||[])
-        .filter(a=>a.bookings && a.bookings.date && a.bookings.date >= firstStr && a.bookings.date <= lastStr)
+        .filter(a=>a.date && a.date >= firstStr && a.date <= lastStr)
         .forEach(a=>{
-          dateToAssign.set(a.bookings.date, a);
+          dateToAssign.set(a.date, a);
         });
 
       for(let day=1;day<=lastDate.getDate();day++){
         const dateStr=`${firstDate.getFullYear()}-${String(firstDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td=document.createElement('td');
         const assign = dateToAssign.get(dateStr);
-        td.innerHTML = `<small>${day}</small><br>${assign ? `<a href="#" data-bid="${assign.booking_id}" class="assigned-link">${assign.bookings.golf_courses?.name || '予約'}</a>` : ''}`;
+        td.innerHTML = `<small>${day}</small><br>${assign ? `<a href="#" data-bid="${assign.booking_id}" class="assigned-link">${assign.golf_courses?.name || '予約'}</a>` : ''}`;
         if(assign){
           td.querySelector('.assigned-link').onclick=(e)=>{e.preventDefault();openCourseDetail(assign)};
         }
@@ -582,8 +575,8 @@
     // ゴルフ場詳細モーダルを開く
     let pendingChat = { bookingId:null, gid:null, name:'' };
     function openCourseDetail(assign){
-      const gc = assign.bookings?.golf_courses || {};
-      pendingChat = { bookingId: assign.booking_id, gid: assign.bookings?.gid || null, name: gc.name || 'ゴルフ場' };
+      const gc = assign.golf_courses || {};
+      pendingChat = { bookingId: assign.booking_id, gid: assign.gid || null, name: gc.name || 'ゴルフ場' };
       document.getElementById('cdmName').textContent = gc.name || 'ゴルフ場';
       document.getElementById('cdmAddress').textContent = `住所: ${gc.address || '未設定'}`;
       document.getElementById('cdmDescription').textContent = `説明: ${gc.description || '未設定'}`;
