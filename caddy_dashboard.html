@@ -132,14 +132,39 @@
   <div id="mainProfile" style="margin-top:15px;"></div>
   <div id="mainShift" class="hidden" style="margin-top:15px;">
     <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="prevMonth">◀</button>
-      <span id="calTitle"></span>
-      <button id="nextMonth">▶</button>
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <!-- 左：シフト入力カレンダー -->
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="prevMonth">◀</button>
+          <span id="calTitle"></span>
+          <button id="nextMonth">▶</button>
+        </div>
+        <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+        <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
+        <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
+      </div>
+      <!-- 右：キャディ予定カレンダー -->
+      <div style="flex:1; background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:12px;">
+        <h3 style="margin:0 0 8px;">キャディ予定</h3>
+        <div style="color:#666; font-size:0.9rem; margin-bottom:6px;">予約が入っている日はゴルフ場名が表示されます</div>
+        <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+      </div>
     </div>
-    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
-    <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
+  </div>
+
+  <!-- ゴルフ場詳細モーダル -->
+  <div id="courseDetailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:120;">
+    <div style="background:#fff; width:92%; max-width:520px; border-radius:10px; padding:16px;">
+      <h3 id="cdmName" style="margin:0 0 8px;">ゴルフ場</h3>
+      <div style="color:#666; font-size:0.9rem; margin-bottom:10px;" id="cdmAddress">住所: 未設定</div>
+      <div style="white-space:pre-wrap; background:#f8f9fa; border:1px solid #eee; padding:10px; border-radius:6px; margin-bottom:10px;" id="cdmDescription">説明: 未設定</div>
+      <div style="background:#f8fff2; border:1px solid #e3f3d6; padding:10px; border-radius:6px; margin-bottom:12px;" id="cdmPerks">特典: なし</div>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button id="cdmClose" style="background:#eee; border:1px solid #ddd; border-radius:6px; padding:8px 12px; cursor:pointer;">閉じる</button>
+        <button id="cdmChat" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:8px 12px; cursor:pointer;">チャットを開始する</button>
+      </div>
+    </div>
   </div>
       <div id="mainMessages" class="hidden">
       <div id="messagesList"></div>
@@ -471,6 +496,9 @@
         if((startWD+day)%7===0){calTable.appendChild(row);row=document.createElement('tr');}
       }
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
+
+      // 右側の「キャディ予定」も同月で更新
+      renderAssignedCal(first, last);
     }
 
     async function toggle(dateStr,isAvail){
@@ -483,6 +511,94 @@
       }
       renderCal();
     }
+
+    // キャディ予定（予約確定分）を右側カレンダーに描画
+    async function renderAssignedCal(firstDate, lastDate){
+      const table = document.getElementById('assignedCalTable');
+      table.innerHTML='';
+      // 見出し
+      const headerRow=document.createElement('tr');
+      ;['日','月','火','水','木','金','土'].forEach(d=>{const th=document.createElement('th');th.textContent=d;headerRow.appendChild(th);});
+      table.appendChild(headerRow);
+
+      // 予約データ取得（cidで絞込み）。月の範囲はJS側でフィルタ
+      const { data: assigns, error } = await supabase
+        .from('booking_caddies')
+        .select(`
+          booking_id,
+          bookings (
+            date,
+            gid,
+            golf_courses (
+              gid,
+              name,
+              address,
+              description,
+              perks
+            )
+          )
+        `)
+        .eq('cid', cid);
+      if(error){
+        console.warn('予約取得エラー', error.message);
+      }
+      const startWD = firstDate.getDay();
+      let row=document.createElement('tr');
+      for(let i=0;i<startWD;i++)row.appendChild(document.createElement('td'));
+
+      // 日付文字列のための範囲
+      const firstStr = firstDate.toISOString().slice(0,10);
+      const lastStr  = lastDate.toISOString().slice(0,10);
+
+      // 日付→予約のマップ
+      const dateToAssign = new Map();
+      (assigns||[])
+        .filter(a=>a.bookings && a.bookings.date >= firstStr && a.bookings.date <= lastStr)
+        .forEach(a=>{
+          dateToAssign.set(a.bookings.date, a);
+        });
+
+      for(let day=1;day<=lastDate.getDate();day++){
+        const dateStr=`${firstDate.getFullYear()}-${String(firstDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td=document.createElement('td');
+        const assign = dateToAssign.get(dateStr);
+        td.innerHTML = `<small>${day}</small><br>${assign ? `<a href="#" data-bid="${assign.booking_id}" class="assigned-link">${assign.bookings.golf_courses?.name || '予約'}</a>` : ''}`;
+        if(assign){
+          td.querySelector('.assigned-link').onclick=(e)=>{e.preventDefault();openCourseDetail(assign)};
+        }
+        row.appendChild(td);
+        if((startWD+day)%7===0){table.appendChild(row);row=document.createElement('tr');}
+      }
+      if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));table.appendChild(row);} 
+    }
+
+    // ゴルフ場詳細モーダルを開く
+    let pendingChat = { bookingId:null, gid:null, name:'' };
+    function openCourseDetail(assign){
+      const gc = assign.bookings?.golf_courses || {};
+      pendingChat = { bookingId: assign.booking_id, gid: assign.bookings?.gid || null, name: gc.name || 'ゴルフ場' };
+      document.getElementById('cdmName').textContent = gc.name || 'ゴルフ場';
+      document.getElementById('cdmAddress').textContent = `住所: ${gc.address || '未設定'}`;
+      document.getElementById('cdmDescription').textContent = `説明: ${gc.description || '未設定'}`;
+      document.getElementById('cdmPerks').textContent = `特典: ${gc.perks || 'なし'}`;
+      document.getElementById('courseDetailModal').style.display='flex';
+    }
+
+    document.getElementById('cdmClose').onclick=()=>{
+      document.getElementById('courseDetailModal').style.display='none';
+    };
+
+    // 「チャットを開始する」→ メッセージタブで該当ゴルフ場とチャット（予約IDも紐付け）
+    document.getElementById('cdmChat').onclick=()=>{
+      document.getElementById('courseDetailModal').style.display='none';
+      if(pendingChat.gid){
+        // 既存のチャット処理に連携
+        currentBookingId = pendingChat.bookingId;
+        loadChatMessages(pendingChat.gid, pendingChat.name);
+        // タブ切替
+        document.getElementById('btnMainMsg').click();
+      }
+    };
 
     // main tabs
     const mainProf=document.getElementById('mainProfile');
