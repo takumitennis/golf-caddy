@@ -125,6 +125,7 @@
   <div class="tabs-main">
     <button id="btnMainProf" class="active">プロフィール</button>
     <button id="btnMainShift">シフト</button>
+    <button id="btnMainAssign">キャディ予定</button>
     <button id="btnMainMsg">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
@@ -132,25 +133,24 @@
   <div id="mainProfile" style="margin-top:15px;"></div>
   <div id="mainShift" class="hidden" style="margin-top:15px;">
     <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
-    <div style="display:flex; gap:16px; align-items:flex-start;">
-      <!-- 左：シフト入力カレンダー -->
-      <div style="flex:1;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button id="prevMonth">◀</button>
-          <span id="calTitle"></span>
-          <button id="nextMonth">▶</button>
-        </div>
-        <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-        <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
-        <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
-      </div>
-      <!-- 右：キャディ予定カレンダー -->
-      <div style="flex:1; background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:12px;">
-        <h3 style="margin:0 0 8px;">キャディ予定</h3>
-        <div style="color:#666; font-size:0.9rem; margin-bottom:6px;">予約が入っている日はゴルフ場名が表示されます</div>
-        <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-      </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="prevMonth">◀</button>
+      <span id="calTitle"></span>
+      <button id="nextMonth">▶</button>
     </div>
+    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+    <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
+    <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
+  </div>
+  <!-- 新タブ: キャディ予定 -->
+  <div id="mainAssigned" class="hidden" style="margin-top:15px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="aPrevMonth">◀</button>
+      <span id="aCalTitle"></span>
+      <button id="aNextMonth">▶</button>
+    </div>
+    <div style="color:#666; font-size:0.9rem; margin-top:6px;">予約が入っている日はゴルフ場名が表示されます（クリックで詳細）</div>
+    <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
   </div>
 
   <!-- ゴルフ場詳細モーダル -->
@@ -497,8 +497,11 @@
       }
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
 
-      // 右側の「キャディ予定」も同月で更新
-      renderAssignedCal(first, last);
+      // 「キャディ予定」タブ側のカレンダーも同月で更新
+      if(document.getElementById('mainAssigned')){
+        document.getElementById('aCalTitle').textContent = `${calYear}年 ${calMonth+1}月`;
+        renderAssignedCal(first, last);
+      }
     }
 
     async function toggle(dateStr,isAvail){
@@ -604,19 +607,22 @@
     const mainProf=document.getElementById('mainProfile');
     const mainShift=document.getElementById('mainShift');
     const mainMsg=document.getElementById('mainMessages');
+    const mainAssigned=document.getElementById('mainAssigned');
     document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
     document.getElementById('btnMainShift').onclick=()=>switchMain('shift');
+    document.getElementById('btnMainAssign').onclick=()=>switchMain('assign');
     document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
     function switchMain(k){
-      const map={prof:mainProf,shift:mainShift,msg:mainMsg};
+      const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg};
       // hide all
       Object.values(map).forEach(el=>{el.style.display='none';});
-      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainMsg.classList.remove('active');
+      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainAssign.classList.remove('active');btnMainMsg.classList.remove('active');
 
       // show selected
       if(map[k]){map[k].style.display='block';}
       if(k==='prof') btnMainProf.classList.add('active');
       if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
+      if(k==='assign'){btnMainAssign.classList.add('active'); const first=new Date(calYear,calMonth,1);const last=new Date(calYear,calMonth+1,0); document.getElementById('aCalTitle').textContent=`${calYear}年 ${calMonth+1}月`; renderAssignedCal(first,last);} 
       if(k==='msg'){btnMainMsg.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
 
