@@ -373,7 +373,68 @@
         <input id="email" type="email" required placeholder="メールアドレスを入力" />
         <span class="err" id="errEmail">ログインIDを入力してください。</span>
       </div>
-      
+
+      <div id="signupStep2" style="display:none;">
+        <div class="form-group">
+          <label>氏名</label>
+          <input id="name" type="text" placeholder="山田 太郎" />
+          <span class="err" id="errName">氏名を入力してください。</span>
+        </div>
+        <div class="form-group">
+          <label>ふりがな</label>
+          <input id="nameKana" type="text" placeholder="やまだ たろう" />
+          <span class="err" id="errNameKana">ふりがなを入力してください。</span>
+        </div>
+        <div class="form-group">
+          <label>パスワード（6文字以上）</label>
+          <input id="signupPass" type="password" placeholder="パスワード" />
+          <span class="err" id="errSignupPass">6文字以上で入力してください。</span>
+        </div>
+        <div class="form-group">
+          <label>電話番号</label>
+          <input id="phone" type="tel" placeholder="090-1234-5678" />
+          <span class="err" id="errPhone">電話番号を入力してください。</span>
+        </div>
+        <div class="form-group">
+          <label>住所</label>
+          <input id="address" type="text" placeholder="東京都〇〇区..." />
+          <span class="err" id="errAddress">住所を入力してください。</span>
+        </div>
+        <div class="form-group">
+          <label>（任意）所属大学</label>
+          <input id="university" type="text" placeholder="〇〇大学" />
+        </div>
+        <div class="form-group">
+          <label>（任意）ゴルフ歴（年）</label>
+          <input id="golfYears" type="number" min="0" placeholder="5" />
+        </div>
+        <div class="form-group">
+          <label>（任意）キャディ歴（年）</label>
+          <input id="caddyYears" type="number" min="0" placeholder="1" />
+        </div>
+        <div class="form-group">
+          <label>（任意）ベストスコア</label>
+          <input id="bestScore" type="number" min="40" max="200" placeholder="85" />
+        </div>
+        <div class="form-group">
+          <label>（任意）一言挨拶</label>
+          <input id="greeting" type="text" placeholder="よろしくお願いします！" />
+        </div>
+        <div class="form-group">
+          <label>（任意）アピールポイント</label>
+          <input id="appeal" type="text" placeholder="コミュニケーションが得意です など" />
+        </div>
+        <div class="form-group">
+          <label>（任意）プロフィール写真</label>
+          <input id="avatar" type="file" accept="image/*" />
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:.5rem;">
+          <input id="agree" type="checkbox" />
+          <label for="agree" style="margin:0;">規約に同意します</label>
+          <span class="err" id="errAgree">規約に同意してください。</span>
+        </div>
+      </div>
+
       <div class="form-group" id="passwordGroup">
         <label id="passwordLabel">パスワード</label>
         <input id="pass" type="password" required placeholder="パスワードを入力" />
@@ -385,6 +446,7 @@
       </button>
       
       <a href="#" class="toggle" id="toggle">新規登録はこちら</a>
+      <a href="#" class="toggle" id="nextStep" style="display:none;">次へ</a>
     </form>
   </div>
 
@@ -560,21 +622,54 @@
             }, 1000);
           }
         } else {
-          // 新規登録処理（パスワードレス認証）
-          const { data, error } = await supabase.auth.signInWithOtp({
-            email: email,
+          // サインアップ（2ステップの必須項目チェック）
+          const name = document.getElementById('name').value.trim();
+          const nameKana = document.getElementById('nameKana').value.trim();
+          const signupPass = document.getElementById('signupPass').value;
+          const phone = document.getElementById('phone').value.trim();
+          const address = document.getElementById('address').value.trim();
+          const agree = document.getElementById('agree').checked;
+          if (!name){ showError('name','氏名を入力してください'); hasError = true; }
+          if (!nameKana){ showError('nameKana','ふりがなを入力してください'); hasError = true; }
+          if (!signupPass || signupPass.length < 6){ showError('signupPass','6文字以上で入力してください'); hasError = true; }
+          if (!phone){ showError('phone','電話番号を入力してください'); hasError = true; }
+          if (!address){ showError('address','住所を入力してください'); hasError = true; }
+          if (!agree){ document.getElementById('errAgree').classList.add('show'); hasError = true; }
+          if (hasError){ setLoading(false); return; }
+
+          const university = document.getElementById('university').value.trim();
+          const golfYears = document.getElementById('golfYears').value;
+          const caddyYears = document.getElementById('caddyYears').value;
+          const bestScore = document.getElementById('bestScore').value;
+          const greeting = document.getElementById('greeting').value.trim();
+          const appeal = document.getElementById('appeal').value.trim();
+
+          // Supabase signUp（パスワード方式）
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: signupPass,
             options: {
-              data: {
-                role: role
-              }
+              data: { role, name, nameKana, phone, address, university, golfYears, caddyYears, bestScore, greeting, appeal }
             }
           });
-          
-          if (error) {
-            showMessage("登録に失敗しました: " + error.message, 'error');
-          } else {
-            showMessage("確認メールを送信しました。メールをご確認ください。", 'success');
+          if (signUpError){ showMessage('登録に失敗しました: ' + signUpError.message,'error'); setLoading(false); return; }
+
+          // caddiesプロファイル初期登録
+          if (role === 'caddy'){
+            await supabase.from('caddies').upsert({
+              email,
+              name,
+              phone,
+              address,
+              university: university || null,
+              golf_years: golfYears ? Number(golfYears) : null,
+              caddy_years: caddyYears ? Number(caddyYears) : null,
+              best_score: bestScore ? Number(bestScore) : null,
+              appeal,
+              greeting
+            }, { onConflict: 'email' });
           }
+          showMessage('確認メールを送信しました。メールをご確認ください。','success');
         }
       } catch (error) {
         showMessage("エラーが発生しました: " + error.message, 'error');
