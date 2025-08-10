@@ -186,9 +186,9 @@
     <!-- 予約一覧（キャディ予定のリスト表示用） -->
     <div id="assignedListContainer" class="hidden" style="margin-top:15px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="alPrevMonth">◀</button>
+        <button id="alPrevMonth" onclick="window.alNav && window.alNav(-1)">◀</button>
         <span id="alTitle" style="font-weight:600;"></span>
-        <button id="alNextMonth">▶</button>
+        <button id="alNextMonth" onclick="window.alNav && window.alNav(1)">▶</button>
       </div>
       <table style="margin-top:10px; width:100%; border-collapse:collapse;">
         <thead>
@@ -726,15 +726,11 @@
         };
       });
 
-      // 月移動コントロール
-      const prev = document.getElementById('alPrevMonth');
-      const next = document.getElementById('alNextMonth');
-      if (prev) prev.onclick = () => {
-        if (--alMonth < 0) { alMonth = 11; alYear--; }
-        renderAssignedList();
-      };
-      if (next) next.onclick = () => {
-        if (++alMonth > 11) { alMonth = 0; alYear++; }
+      // 月移動（グローバル関数にして一度だけバインド）
+      window.alNav = (delta)=>{
+        alMonth += delta;
+        if (alMonth < 0) { alMonth = 11; alYear--; }
+        if (alMonth > 11) { alMonth = 0; alYear++; }
         renderAssignedList();
       };
     }
