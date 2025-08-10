@@ -357,7 +357,7 @@
   <div class="login-container">
     <form id="authForm" class="card" novalidate>
       <div class="logo">
-        <h1>🏌️ Golf-Caddy</h1>
+        <h1 style="letter-spacing:-0.02em;color:#2f8f2f;font-weight:800;">Golf-Caddy</h1>
         <p>マッチングサービス</p>
       </div>
       
@@ -447,6 +447,7 @@
       
       <a href="#" class="toggle" id="toggle">新規登録はこちら</a>
       <a href="#" class="toggle" id="nextStep" style="display:none;">次へ</a>
+      <div id="stepNote" style="display:none;color:#666;font-size:.9rem;margin-top:6px;text-align:center;">次へを押して詳細を入力してください</div>
     </form>
   </div>
 
@@ -518,6 +519,20 @@
       
       // エラーメッセージをクリア
       clearErrors();
+    });
+
+    // サインアップ: 次へボタンで詳細フォームを表示
+    document.addEventListener('click', (e)=>{
+      if (e.target && e.target.id === 'nextStep'){
+        e.preventDefault();
+        if (mode !== 'signup') return;
+        const email = document.getElementById('email').value.trim();
+        if (!email || !email.includes('@')) { showError('email','有効なメールアドレスを入力してください'); return; }
+        document.getElementById('signupStep2').style.display='block';
+        document.getElementById('nextStep').style.display='none';
+        const note = document.getElementById('stepNote');
+        if (note) note.style.display='none';
+      }
     });
 
     // エラー表示のクリア

@@ -875,7 +875,9 @@
        document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
        document.getElementById('mainProfile').innerHTML=`
         <div style='display:flex;gap:16px;align-items:center'>
-          <img src='${row.avatar_url??"https://placehold.co/100x100"}' style='width:100px;height:100px;border-radius:50%;object-fit:cover;'>
+          <div id='avatarCircle' style='width:100px;height:100px;border-radius:50%;background:#ddd;overflow:hidden;'>
+            ${row.avatar_url ? `<img src='${row.avatar_url}' style='width:100%;height:100%;object-fit:cover;'>` : ''}
+          </div>
           <h2>${row.name}</h2>
           <button id='editProfBtn'>編集</button>
         </div>`;
@@ -923,10 +925,15 @@
       }
       const file=document.getElementById('pAvatar').files[0];
       if(file){
-        const path=`avatars/${cid||'tmp_'+Date.now()}`;
-        await supabase.storage.from('avatars').upload(path,file,{upsert:true});
-        const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-        payload.avatar_url=urlData.publicUrl;
+        const path=`avatars/${cid||('tmp_'+Date.now())}.jpg`;
+        const { error:upErr } = await supabase.storage.from('avatars').upload(path,file,{upsert:true});
+        if(!upErr){
+          const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+          payload.avatar_url=urlData.publicUrl;
+          await supabase.from('caddies').update({ avatar_url: payload.avatar_url }).eq('cid', cid);
+          // 画面即時反映
+          renderProfileDisplay({ ...row, ...payload, cid });
+        }
       }
     }
 
