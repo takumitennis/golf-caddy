@@ -155,7 +155,7 @@
   <div class="tabs-main">
     <button id="btnMainProf">プロフィール</button>
     <button id="btnMainStat" class="active">予約管理</button>
-    <button id="btnMainMsg">メッセージ</button>
+    <button id="btnMainMsg" style="display:none;">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
   <div id="welcome" style="margin-top:10px;"></div>
@@ -420,11 +420,11 @@
       
       // 旧UIの残骸に依存しないようガード
       try {
-        await loadBookings();
+      await loadBookings();
       } catch (e) {
         console.warn('loadBookings skipped:', e?.message || e);
       }
-
+      
       // Initialize all event listeners after gid is set
       initializeEventListeners();
       isInitialized = true;
@@ -457,15 +457,15 @@
     const createFormEl = document.getElementById('createForm');
     if (createFormEl) {
       createFormEl.onsubmit = async e => {
-        e.preventDefault();
+      e.preventDefault();
         const date = document.getElementById('bDate')?.value;
         const slots = parseInt(document.getElementById('bSlots')?.value, 10);
-        if (!date || !slots) return;
+      if (!date || !slots) return;
         const { error } = await supabase.from('bookings').insert({ gid, date, slots });
-        if (error){ alert(error.message); return; }
-        e.target.reset();
-        loadBookings();
-      };
+      if (error){ alert(error.message); return; }
+      e.target.reset();
+      loadBookings();
+    };
     }
 
     // Training slots modal functions
@@ -614,7 +614,7 @@
       const btnTabConfirm=document.getElementById('btnTabConfirm');
       const btnTab3=document.getElementById('btnTab3');
       const btnTab4=document.getElementById('btnTab4');
-
+      
       if (btnTab1) btnTab1.onclick=()=>{switchTab(1)};
       if (btnTabConfirm) btnTabConfirm.onclick=()=>{switchTab(5)};
       if (btnTab3) btnTab3.onclick=()=>{switchTab(3)};
@@ -689,10 +689,18 @@
 
       // 初期表示は「空きキャディ確認」を開く（年/月初期化後）
       try { switchTab(1); } catch (e) { console.warn('switchTab init warn:', e?.message || e); }
-      // インラインメッセージ領域は他タブでは表示させない
+      // インラインメッセージ領域は対象タブ以外では表示させない
       document.addEventListener('click', (ev)=>{
         const tgt = ev.target;
-        if (tgt && (tgt.id==='btnTab1' || tgt.id==='btnTab3' || tgt.id==='btnTabConfirm')) {
+        if (!tgt) return;
+        // 予約管理内タブ切替時
+        if (tgt.id==='btnTab1' || tgt.id==='btnTab3' || tgt.id==='btnTabConfirm') {
+          const inline = document.getElementById('inlineMessageArea');
+          if (inline) inline.remove();
+          inlineTrainingMode = false;
+        }
+        // 上段メインタブ切替時
+        if (tgt.id==='btnMainProf' || tgt.id==='btnMainStat' || tgt.id==='btnMainMsg') {
           const inline = document.getElementById('inlineMessageArea');
           if (inline) inline.remove();
           inlineTrainingMode = false;
@@ -761,20 +769,36 @@
       // Hide all tabs
       [tab2, tabConfirm, tab3, tab4].forEach(tab => tab && tab.classList.add('hidden'));
       [btnTab1, btnTabConfirm, btnTab3, btnTab4].forEach(btn => btn && btn.classList.remove('active'));
-
+      
       if(idx===1){
+        // 空きキャディ確認に切り替え時はインラインメッセージを消す
+        const inline = document.getElementById('inlineMessageArea');
+        if (inline) inline.remove();
+        inlineTrainingMode = false;
         if (tab2) tab2.classList.remove('hidden');
         if (btnTab1) btnTab1.classList.add('active');
         renderCal();
       } else if(idx===5){
+        // 予約確認に切り替え時は前月のインライン欄が残らないよう消去
+        const inline = document.getElementById('inlineMessageArea');
+        if (inline) inline.remove();
+        inlineTrainingMode = false;
         if (tabConfirm) tabConfirm.classList.remove('hidden');
         if (btnTabConfirm) btnTabConfirm.classList.add('active');
         renderConfirm();
       } else if(idx===3){
+        // 研修可能日設定に切り替わるタイミングでインラインメッセージは消す
+        const inline = document.getElementById('inlineMessageArea');
+        if (inline) inline.remove();
+        inlineTrainingMode = false;
         if (tab3) tab3.classList.remove('hidden');
         if (btnTab3) btnTab3.classList.add('active');
         renderTrainingCal();
       } else if(idx===4){
+        // 研修予約者一覧に切り替え時もインラインメッセージは消す
+        const inline = document.getElementById('inlineMessageArea');
+        if (inline) inline.remove();
+        inlineTrainingMode = false;
         if (tab4) tab4.classList.remove('hidden');
         if (btnTab4) btnTab4.classList.add('active');
         if (gid) {
@@ -831,7 +855,7 @@
     const _btnMainMsg = document.getElementById('btnMainMsg');
     if (_btnMainProf) _btnMainProf.onclick=(e)=>{ e.preventDefault?.(); switchMain('prof'); };
     if (_btnMainStat) _btnMainStat.onclick=(e)=>{ e.preventDefault?.(); switchMain('stat'); };
-    if (_btnMainMsg) _btnMainMsg.onclick=(e)=>{ e.preventDefault?.(); switchMain('msg'); };
+    if (_btnMainMsg) _btnMainMsg.onclick=(e)=>{ e.preventDefault?.(); /* hidden */ };
 
     // 予約バー制御
     const reserveBar = document.getElementById('reserveBar');
@@ -1031,7 +1055,7 @@
       const first = `${trainingCalYear}-${String(trainingCalMonth+1).padStart(2,'0')}-01`;
       const lastDate = new Date(trainingCalYear, trainingCalMonth+1, 0).getDate();
       const last = `${trainingCalYear}-${String(trainingCalMonth+1).padStart(2,'0')}-${String(lastDate).padStart(2,'0')}`;
-      const { data: requests, error: requestsError } = await supabase
+        const { data: requests, error: requestsError } = await supabase
           .from('training_requests')
           .select('id, cid, training_date, status, created_at')
           .eq('gid', gid)
@@ -1121,7 +1145,7 @@
               <span style="display:flex; align-items:center; gap:8px;">
                 <button class="trProfile" data-cid="${caddy?.cid||''}" onclick="event.stopPropagation()">プロフィール</button>
                 <button class="trMessage" data-cid="${caddy?.cid||''}" data-date="${request.training_date}" onclick="event.stopPropagation()">メッセージ</button>
-                <span style="background:${statusColor}; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.9em;">${statusText}</span>
+              <span style="background:${statusColor}; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.9em;">${statusText}</span>
               </span>
             </div>
             
@@ -1305,11 +1329,11 @@
         let query;
         if (type === 'inbox') {
           query = supabase
-            .from('messages')
-            .select('*')
+          .from('messages')
+          .select('*')
             .eq('receiver_type', 'golf_course')
             .eq('receiver_id', gid)
-            .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false });
         } else {
           query = supabase
             .from('messages')
@@ -1842,6 +1866,6 @@
     if (_confNext) _confNext.onclick=()=>{ if(++confMonth>11){confMonth=0;confYear++;} renderConfirm(); };
     if (_confReload) _confReload.onclick=()=>{ renderConfirm(); };
 
-    </script>
-  </body>
+  </script>
+</body>
 </html> 
