@@ -432,16 +432,18 @@
 
     // 2. load bookings
     async function loadBookings(){
+      // 予約確認タブで最新状態を描画するための補助。旧UI要素(bookBody)がない場合は何もしない
+      const tbody = document.getElementById('bookBody');
+      if (!tbody) return;
       const { data, error } = await supabase
-        .from("bookings")
-        .select("booking_id,date,slots,status")
-        .eq("gid", gid)
-        .order("date", { ascending: true });
-      const tbody = document.getElementById("bookBody");
-      tbody.innerHTML = "";
+        .from('bookings')
+        .select('booking_id,date,slots,status')
+        .eq('gid', gid)
+        .order('date', { ascending: true });
+      tbody.innerHTML = '';
       if (error){ console.error(error); return; }
-      data.forEach(b => {
-        tbody.insertAdjacentHTML("beforeend",
+      (data||[]).forEach(b => {
+        tbody.insertAdjacentHTML('beforeend',
           `<tr><td>${b.date}</td><td>${b.slots}</td><td>${b.status}</td></tr>`);
       });
     }
@@ -1507,15 +1509,16 @@
       });
     }
 
-    async function loadChatMessages() {
+    async function loadChatMessages(inline=false) {
       if (!chatPartnerId || !currentBookingId) {
         // 入力欄を隠す
-        document.getElementById('chatInputArea').style.display = 'none';
-        showBookingList();
+        const area = inline ? document.getElementById('inlineMessageArea') : document.getElementById('chatInputArea');
+        if (!inline && area) area.style.display = 'none';
+        if (!inline) showBookingList();
         return;
       }
 
-      const messagesList = document.getElementById('messagesList');
+      const messagesList = inline ? document.getElementById('inlineMessagesList') : document.getElementById('messagesList');
       messagesList.innerHTML = `
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:8px;background:#f0f0f0;border-radius:8px;">
           <button onclick="showBookingList()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">←</button>
@@ -1527,7 +1530,7 @@
       `;
 
       // 入力欄を表示
-      document.getElementById('chatInputArea').style.display = 'flex';
+      if (!inline) document.getElementById('chatInputArea').style.display = 'flex';
 
       // 予定に関連するメッセージを取得
       const { data: messages, error } = await supabase
@@ -1559,8 +1562,8 @@
     }
 
     // メッセージ送信
-    async function sendChatMessage() {
-      const input = document.getElementById('chatInput');
+    async function sendChatMessage(inline=false) {
+      const input = inline ? document.getElementById('inlineChatInput') : document.getElementById('chatInput');
       const content = input.value.trim();
       if (!content || !chatPartnerId || !currentBookingId) return;
       
@@ -1631,7 +1634,13 @@
         tr.innerHTML = `
           <td style='padding:8px;border-bottom:1px solid #eee;'>${b.date}</td>
           <td style='padding:8px;border-bottom:1px solid #eee;'>${count} 名</td>
-          <td style='padding:8px;border-bottom:1px solid #eee;'>${names} <button data-bid='${b.booking_id}' class='btnMsgToCaddies' style='margin-left:8px;'>メッセージ</button></td>
+          <td style='padding:8px;border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; gap:8px;'>
+            <span>${names}</span>
+            <span>
+              <button data-bid='${b.booking_id}' class='btnProfile' style='margin-right:8px;'>プロフィール</button>
+              <button data-bid='${b.booking_id}' class='btnMsgToCaddies'>メッセージ</button>
+            </span>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -1646,9 +1655,73 @@
             currentBookingId = bid;
             chatPartnerId = firstCaddy;
             chatPartnerName = b.booking_caddies?.[0]?.caddies?.name || 'キャディ';
-            switchMain('msg');
-            loadChatMessages();
+            // メッセージ欄を予約者一覧の下に展開
+            const mainStatusDiv = document.getElementById('mainStatus');
+            if (mainStatusDiv) {
+              const existing = document.getElementById('inlineMessageArea');
+              if (!existing) {
+                const inline = document.createElement('div');
+                inline.id = 'inlineMessageArea';
+                inline.innerHTML = `
+                  <div style="margin-top:12px; background:#fff; border:1px solid #eee; border-radius:8px;">
+                    <div id="inlineMessagesList" style="max-height:260px; overflow:auto; padding:12px;"></div>
+                    <div style="display:flex; gap:8px; padding:12px; border-top:1px solid #eee;">
+                      <input id="inlineChatInput" type="text" placeholder="メッセージを入力..." style="flex:1; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+                      <button id="inlineSendChatBtn" style="background:#27ae60;color:#fff;border:none;border-radius:6px;padding:8px 14px;">送信</button>
+                    </div>
+                  </div>`;
+                mainStatusDiv.appendChild(inline);
+              }
+              await loadChatMessages(true);
+              const sendBtn = document.getElementById('inlineSendChatBtn');
+              const inputEl = document.getElementById('inlineChatInput');
+              if (sendBtn && inputEl) {
+                sendBtn.onclick = async ()=>{
+                  await sendChatMessage(true);
+                };
+                inputEl.onkeydown = (ev)=>{ if (ev.key==='Enter') sendBtn.click(); };
+              }
+            }
           }
+        };
+      });
+
+      // プロフィールボタン（キャディプロフィール表示）
+      Array.from(document.getElementsByClassName('btnProfile')).forEach(btn=>{
+        btn.onclick = async (e)=>{
+          const bid = e.currentTarget.getAttribute('data-bid');
+          const b = bookings.find(x=>x.booking_id===bid);
+          const first = b?.booking_caddies?.[0]?.cid;
+          if (!first) return;
+          const { data: caddy, error } = await supabase
+            .from('caddies')
+            .select('cid,name,phone,email,university,golf_years,caddy_years,appeal,avatar_url')
+            .eq('cid', first)
+            .maybeSingle();
+          if (error) { alert(error.message); return; }
+          const modal = document.createElement('div');
+          modal.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:200;';
+          modal.innerHTML = `
+            <div style="background:#fff; width:92%; max-width:520px; border-radius:10px; padding:16px;">
+              <h3 style="margin:0 0 8px;">キャディプロフィール</h3>
+              <div style="display:flex; gap:12px;">
+                <img src="${caddy?.avatar_url||''}" alt="avatar" style="width:96px;height:96px;border-radius:50%;object-fit:cover;background:#eee;"/>
+                <div>
+                  <div><b>氏名:</b> ${caddy?.name||'-'}</div>
+                  <div><b>大学:</b> ${caddy?.university||'-'}</div>
+                  <div><b>ゴルフ経験:</b> ${caddy?.golf_years||'-'} 年</div>
+                  <div><b>キャディ経験:</b> ${caddy?.caddy_years||'-'} 年</div>
+                </div>
+              </div>
+              <div style="margin-top:10px; white-space:pre-wrap; background:#f8f9fa; border:1px solid #eee; padding:10px; border-radius:6px;">
+                ${caddy?.appeal||''}
+              </div>
+              <div style="text-align:right;margin-top:12px;">
+                <button id="profileCloseBtn" style="background:#eee;border:1px solid #ddd;border-radius:6px;padding:8px 12px;cursor:pointer;">閉じる</button>
+              </div>
+            </div>`;
+          document.body.appendChild(modal);
+          document.getElementById('profileCloseBtn').onclick=()=>{ document.body.removeChild(modal); };
         };
       });
     }
