@@ -289,10 +289,19 @@
             </div>`);
         }
         const modal = document.getElementById('trainModal');
-        // イベントリスナーを（もし存在すれば）一度削除してから再設定
+        // イベントリスナーを安全に差し替え
         const oldReqBtn = document.getElementById('reqTrainingBtn');
-        const newReqBtn = oldReqBtn.cloneNode(true);
-        oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
+        const newReqBtn = document.createElement('button');
+        newReqBtn.id = 'reqTrainingBtn';
+        newReqBtn.textContent = oldReqBtn ? oldReqBtn.textContent : '研修を希望する';
+        newReqBtn.style = oldReqBtn ? oldReqBtn.getAttribute('style') : '';
+        if (oldReqBtn && oldReqBtn.parentNode){
+          oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
+        } else {
+          // フォールバック: ステータスカード内の末尾に配置
+          const statusCard = document.getElementById('mainStatus');
+          if (statusCard) statusCard.appendChild(newReqBtn);
+        }
 
         // Modal state variables
         let selectedGolfCourse = null;
@@ -748,8 +757,14 @@
       // 月移動: 毎回ボタンに再バインド
       const prevBtn = document.getElementById('alPrevMonth');
       const nextBtn = document.getElementById('alNextMonth');
-      if (prevBtn) prevBtn.onclick = ()=>{ if(--alMonth<0){alMonth=11;alYear--;} renderAssignedList(); };
-      if (nextBtn) nextBtn.onclick = ()=>{ if(++alMonth>11){alMonth=0;alYear++;} renderAssignedList(); };
+      if (prevBtn) {
+        prevBtn.onclick = null;
+        prevBtn.addEventListener('click', (ev)=>{ ev.preventDefault(); if(--alMonth<0){alMonth=11;alYear--;} renderAssignedList(); });
+      }
+      if (nextBtn) {
+        nextBtn.onclick = null;
+        nextBtn.addEventListener('click', (ev)=>{ ev.preventDefault(); if(++alMonth>11){alMonth=0;alYear++;} renderAssignedList(); });
+      }
     }
 
     // ゴルフ場詳細モーダルを開く
