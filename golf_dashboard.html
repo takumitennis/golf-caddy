@@ -1013,11 +1013,17 @@
         
         console.log('Table check result:', { tableCheck, tableError });
         
-        const { data: requests, error: requestsError } = await supabase
+      // 当月フィルタ
+      const first = `${trainingCalYear}-${String(trainingCalMonth+1).padStart(2,'0')}-01`;
+      const lastDate = new Date(trainingCalYear, trainingCalMonth+1, 0).getDate();
+      const last = `${trainingCalYear}-${String(trainingCalMonth+1).padStart(2,'0')}-${String(lastDate).padStart(2,'0')}`;
+      const { data: requests, error: requestsError } = await supabase
           .from('training_requests')
           .select('id, cid, training_date, status, created_at')
           .eq('gid', gid)
-          .order('created_at', { ascending: false });
+          .gte('training_date', first)
+          .lte('training_date', last)
+          .order('training_date', { ascending: false });
         
         console.log('Training requests query result:', { requests, requestsError });
         
@@ -1098,7 +1104,11 @@
                 <strong>${caddy?.name || '不明'}</strong>
                 <span style="color:#666; margin-left:10px;">希望研修日: ${request.training_date || '日付未選択'}</span>
               </div>
-              <span style="background:${statusColor}; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.9em;">${statusText}</span>
+              <span style="display:flex; align-items:center; gap:8px;">
+                <button class="trProfile" data-cid="${caddy?.cid||''}" onclick="event.stopPropagation()">プロフィール</button>
+                <button class="trMessage" data-cid="${caddy?.cid||''}" data-date="${request.training_date}" onclick="event.stopPropagation()">メッセージ</button>
+                <span style="background:${statusColor}; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.9em;">${statusText}</span>
+              </span>
             </div>
             
             <div id="detail-${request.id}" class="request-detail" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid #eee;">
@@ -1123,6 +1133,75 @@
       });
       
       container.innerHTML = html;
+
+      // 研修: プロフィール
+      Array.from(document.getElementsByClassName('trProfile')).forEach(btn=>{
+        btn.onclick = async (e)=>{
+          const cid = e.currentTarget.getAttribute('data-cid');
+          if (!cid) return;
+          const { data: caddy, error } = await supabase
+            .from('caddies')
+            .select('cid,name,phone,email,university,golf_years,caddy_years,appeal,avatar_url')
+            .eq('cid', cid)
+            .maybeSingle();
+          if (error) { alert(error.message); return; }
+          const modal = document.createElement('div');
+          modal.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:200;';
+          modal.innerHTML = `
+            <div style="background:#fff; width:92%; max-width:520px; border-radius:10px; padding:16px;">
+              <h3 style="margin:0 0 8px;">キャディプロフィール</h3>
+              <div style="display:flex; gap:12px;">
+                <img src="${caddy?.avatar_url||''}" alt="avatar" style="width:96px;height:96px;border-radius:50%;object-fit:cover;background:#eee;"/>
+                <div>
+                  <div><b>氏名:</b> ${caddy?.name||'-'}</div>
+                  <div><b>大学:</b> ${caddy?.university||'-'}</div>
+                  <div><b>ゴルフ経験:</b> ${caddy?.golf_years||'-'} 年</div>
+                  <div><b>キャディ経験:</b> ${caddy?.caddy_years||'-'} 年</div>
+                </div>
+              </div>
+              <div style="margin-top:10px; white-space:pre-wrap; background:#f8f9fa; border:1px solid #eee; padding:10px; border-radius:6px;">${caddy?.appeal||''}</div>
+              <div style="text-align:right;margin-top:12px;">
+                <button id="trProfileCloseBtn" style="background:#eee;border:1px solid #ddd;border-radius:6px;padding:8px 12px;cursor:pointer;">閉じる</button>
+              </div>
+            </div>`;
+          document.body.appendChild(modal);
+          document.getElementById('trProfileCloseBtn').onclick=()=>{ document.body.removeChild(modal); };
+        };
+      });
+
+      // 研修: メッセージ（当月・インライン）
+      Array.from(document.getElementsByClassName('trMessage')).forEach(btn=>{
+        btn.onclick = async (e)=>{
+          const cid = e.currentTarget.getAttribute('data-cid');
+          chatPartnerId = cid;
+          chatPartnerName = '研修希望キャディ';
+          currentBookingId = `training:${trainingCalYear}-${String(trainingCalMonth+1).padStart(2,'0')}`; // 擬似ID（messagesのbooking_id列がNULL許容なら別分岐可）
+          const mainStatusDiv = document.getElementById('mainStatus');
+          if (mainStatusDiv) {
+            let inline = document.getElementById('inlineMessageArea');
+            if (!inline) {
+              inline = document.createElement('div');
+              inline.id = 'inlineMessageArea';
+              inline.innerHTML = `
+                <div style=\"margin-top:12px; background:#fff; border:1px solid #eee; border-radius:8px;\">
+                  <div id=\"inlineMessagesList\" style=\"max-height:260px; overflow:auto; padding:12px;\"></div>
+                  <div style=\"display:flex; gap:8px; padding:12px; border-top:1px solid #eee;\">
+                    <input id=\"inlineChatInput\" type=\"text\" placeholder=\"メッセージを入力...\" style=\"flex:1; padding:8px; border:1px solid #ccc; border-radius:6px;\" />
+                    <button id=\"inlineSendChatBtn\" style=\"background:#27ae60;color:#fff;border:none;border-radius:6px;padding:8px 14px;\">送信</button>
+                  </div>
+                </div>`;
+              mainStatusDiv.appendChild(inline);
+            }
+            await loadChatMessages(true);
+            const sendBtn = document.getElementById('inlineSendChatBtn');
+            const inputEl = document.getElementById('inlineChatInput');
+            if (sendBtn && inputEl) {
+              sendBtn.onclick = async ()=>{ await sendChatMessage(true); };
+              inputEl.onkeydown = (ev)=>{ if (ev.key==='Enter') sendBtn.click(); };
+            }
+          }
+        };
+      });
       } catch (error) {
         console.error('Error in loadTrainingRequests:', error);
         const errorMessage = error.message || '不明なエラーが発生しました';
@@ -1442,7 +1521,10 @@
       const messagesList = document.getElementById('messagesList');
       messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">読み込み中...</div>';
       
-      // ゴルフ場の予定を取得
+      // ゴルフ場の予定を取得（現在のメッセージ表示は当月のみ）
+      const first = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+      const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+      const last = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(lastDate).padStart(2,'0')}`;
       const { data: bookings, error } = await supabase
         .from('bookings')
                   .select(`
@@ -1456,6 +1538,8 @@
             )
           `)
         .eq('gid', gid)
+        .gte('date', first)
+        .lte('date', last)
         .order('date', { ascending: false });
 
       if (error) {
