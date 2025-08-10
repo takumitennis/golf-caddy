@@ -124,7 +124,7 @@
   <h1>キャディマイページ<!-- v=2025-08-10-01 --></h1>
   <div class="tabs-main">
     <button id="btnMainProf" class="active">プロフィール</button>
-    <button id="btnMainShift">シフト</button>
+    <button id="btnMainShift">シフト編集</button>
     <button id="btnMainAssign">キャディ予定</button>
     <button id="btnMainMsg">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
@@ -139,8 +139,14 @@
       <button id="nextMonth">▶</button>
     </div>
     <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <small>○ = 空きあり / ❌ = 空きなし（セルをクリックで切替・編集締切は前月15日）</small><br>
-    <button id="confirmShiftBtn" style="margin-top:12px;padding:8px 16px;">シフトを確定する</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+      <small>○ = 空きあり / ❌ = 空きなし（編集は「シフトを編集する」を押してから。締切は前月15日）</small>
+      <span id="editBadge" style="margin-left:auto;color:#666;">通常モード</span>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button id="editShiftBtn" style="padding:8px 16px;">シフトを編集する</button>
+      <button id="saveShiftBtn" style="padding:8px 16px;" disabled>確定する</button>
+    </div>
   </div>
   <!-- 新タブ: キャディ予定 -->
   <div id="mainAssigned" class="hidden" style="margin-top:15px;">
@@ -188,6 +194,8 @@
     let assignedCalMonth = calMonth;
     let assignedCalYear = calYear;
     const calTable=document.getElementById('calTable');
+    const pendingInserts = new Set();
+    const pendingDeletes = new Set();
     const lockInfo=document.getElementById('lockInfo');
 
     supabase.auth.getUser().then(async ({ data })=>{
@@ -458,6 +466,8 @@
     document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
     document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
 
+    let editMode = false; // 編集モード: trueの時だけカレンダーを変更可能
+
     async function renderCal(){
       const first=new Date(calYear,calMonth,1);
       const last=new Date(calYear,calMonth+1,0);
@@ -476,6 +486,8 @@
       const deadline=new Date(calYear, calMonth-1, 15); // 前月15日
       const today=new Date();
       const locked = today > deadline;
+      const badge = document.getElementById('editBadge');
+      if (badge) badge.textContent = editMode ? '編集モード' : '通常モード';
       lockInfo.textContent= locked? `${calMonth+1}月分の編集締切（前月15日）を過ぎています` : '';
 
       calTable.innerHTML='';
@@ -491,7 +503,7 @@
         const isAvail=availSet.has(dateStr);
         td.className=isAvail?'cal-ok':'cal-ng';
         td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
-        if(!locked){
+        if(!locked && editMode){
           td.onclick=()=>toggle(dateStr,isAvail);
         } else {
           td.classList.add('locked');
@@ -509,13 +521,15 @@
     }
 
     async function toggle(dateStr,isAvail){
-      if(isAvail){ // delete row
-        const { error } = await supabase.from('caddy_availability').delete().eq('cid',cid).eq('date',dateStr);
-        if(error){alert(error.message);return;}
+      if (!editMode) return; // 通常モードでは反応しない
+      if(isAvail){
+        pendingDeletes.add(dateStr);
+        pendingInserts.delete(dateStr);
       } else {
-        const { error } = await supabase.from('caddy_availability').insert({ cid, date: dateStr });
-        if(error){alert(error.message);return;}
+        pendingInserts.add(dateStr);
+        pendingDeletes.delete(dateStr);
       }
+      // 見た目だけ即時反映
       renderCal();
     }
 
@@ -618,7 +632,16 @@
       // show selected
       if(map[k]){map[k].style.display='block';}
       if(k==='prof') btnMainProf.classList.add('active');
-      if(k==='shift'){btnMainShift.classList.add('active');renderCal();}
+      if(k==='shift'){
+        btnMainShift.classList.add('active');
+        editMode = false; // シフトタブ入場時は通常モード
+        pendingInserts.clear(); pendingDeletes.clear();
+        const saveBtn = document.getElementById('saveShiftBtn');
+        const editBtn = document.getElementById('editShiftBtn');
+        if (saveBtn) saveBtn.disabled = true;
+        if (editBtn) editBtn.disabled = false;
+        renderCal();
+      }
       if(k==='assign'){
         btnMainAssign.classList.add('active');
         const first=new Date(assignedCalYear,assignedCalMonth,1);
@@ -656,6 +679,43 @@
 
 
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
+
+    // シフト編集/確定ボタン
+    const editBtn = document.getElementById('editShiftBtn');
+    const saveBtn = document.getElementById('saveShiftBtn');
+    if (editBtn) editBtn.onclick = ()=>{
+      editMode = true;
+      const badge = document.getElementById('editBadge');
+      if (badge) badge.textContent = '編集モード';
+      if (saveBtn) saveBtn.disabled = false;
+      editBtn.disabled = true;
+      renderCal();
+    };
+    if (saveBtn) saveBtn.onclick = async ()=>{
+      // 一括反映
+      try {
+        if (pendingDeletes.size>0){
+          const dates = Array.from(pendingDeletes);
+          await supabase.from('caddy_availability').delete().eq('cid', cid).in('date', dates);
+        }
+        if (pendingInserts.size>0){
+          const rows = Array.from(pendingInserts).map(d=>({ cid, date: d }));
+          await supabase.from('caddy_availability').insert(rows);
+        }
+        pendingDeletes.clear();
+        pendingInserts.clear();
+        editMode = false;
+        if (saveBtn) saveBtn.disabled = true;
+        if (editBtn) editBtn.disabled = false;
+        const badge = document.getElementById('editBadge');
+        if (badge) badge.textContent = '通常モード';
+        renderCal();
+        alert('シフトを確定しました');
+      } catch (e) {
+        console.error(e);
+        alert('保存に失敗しました: ' + (e.message||e));
+      }
+    };
 
     function renderProfileDisplay(row){
        document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
