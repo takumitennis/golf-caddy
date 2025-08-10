@@ -141,7 +141,6 @@
     <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
     <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
       <small>○ = 空きあり / ❌ = 空きなし（編集は「シフトを編集する」を押してから。締切は前月15日）</small>
-      <span id="editBadge" style="margin-left:auto;color:#666;">通常モード</span>
     </div>
     <div style="margin-top:12px;display:flex;gap:8px;">
       <button id="editShiftBtn" style="padding:8px 16px;">シフトを編集する</button>
@@ -486,8 +485,6 @@
       const deadline=new Date(calYear, calMonth-1, 15); // 前月15日
       const today=new Date();
       const locked = today > deadline;
-      const badge = document.getElementById('editBadge');
-      if (badge) badge.textContent = editMode ? '編集モード' : '通常モード';
       lockInfo.textContent= locked? `${calMonth+1}月分の編集締切（前月15日）を過ぎています` : '';
 
       calTable.innerHTML='';
@@ -529,8 +526,18 @@
         pendingInserts.add(dateStr);
         pendingDeletes.delete(dateStr);
       }
-      // 見た目だけ即時反映
-      renderCal();
+      // 見た目だけ即時反映（ローカルの暫定Setを基に描画）
+      const cells = calTable.querySelectorAll('td');
+      cells.forEach((td)=>{
+        const small = td.querySelector('small');
+        if(!small) return;
+        const day = small.textContent.trim();
+        if(!day||isNaN(day)) return;
+        const dateStr2=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const nowAvail = (dateStr2===dateStr) ? !isAvail : (td.classList.contains('cal-ok'));
+        td.className = nowAvail ? 'cal-ok' : 'cal-ng';
+        td.innerHTML=`<small>${day}</small><br>${nowAvail?'<span class="ok-circle"></span>':'❌'}`;
+      });
     }
 
     // キャディ予定（予約確定分）を右側カレンダーに描画
@@ -577,6 +584,10 @@
         const td=document.createElement('td');
         const assign = dateToAssign.get(dateStr);
         td.innerHTML = `<small>${day}</small><br>${assign ? `<a href="#" data-bid="${assign.booking_id}" class="assigned-link">${assign.golf_courses?.name || '予約'}</a>` : ''}`;
+        if (assign) {
+          td.style.background = '#e8f5e9'; // 予約ありを淡い緑で表示
+          td.style.border = '2px solid #81c784';
+        }
         if(assign){
           td.querySelector('.assigned-link').onclick=(e)=>{e.preventDefault();openCourseDetail(assign)};
         }
@@ -685,8 +696,6 @@
     const saveBtn = document.getElementById('saveShiftBtn');
     if (editBtn) editBtn.onclick = ()=>{
       editMode = true;
-      const badge = document.getElementById('editBadge');
-      if (badge) badge.textContent = '編集モード';
       if (saveBtn) saveBtn.disabled = false;
       editBtn.disabled = true;
       renderCal();
@@ -707,8 +716,7 @@
         editMode = false;
         if (saveBtn) saveBtn.disabled = true;
         if (editBtn) editBtn.disabled = false;
-        const badge = document.getElementById('editBadge');
-        if (badge) badge.textContent = '通常モード';
+        // 戻す
         renderCal();
         alert('シフトを確定しました');
       } catch (e) {
