@@ -664,6 +664,9 @@
       };
       
       document.getElementById('saveProfileEditBtn').onclick = saveProfileEdit;
+
+      // 初期表示は「空きキャディ確認」を開く
+      switchTab(1);
     }
 
     // --- Calendar variables (moved outside initializeEventListeners) ---
@@ -1640,9 +1643,12 @@
         };
       });
     }
-    document.getElementById('confPrev').onclick=()=>{ if(--confMonth<0){confMonth=11;confYear--;} renderConfirm(); };
-    document.getElementById('confNext').onclick=()=>{ if(++confMonth>11){confMonth=0;confYear++;} renderConfirm(); };
-    document.getElementById('confReload').onclick=()=>{ renderConfirm(); };
+    const _confPrev = document.getElementById('confPrev');
+    const _confNext = document.getElementById('confNext');
+    const _confReload = document.getElementById('confReload');
+    if (_confPrev) _confPrev.onclick=()=>{ if(--confMonth<0){confMonth=11;confYear--;} renderConfirm(); };
+    if (_confNext) _confNext.onclick=()=>{ if(++confMonth>11){confMonth=0;confYear++;} renderConfirm(); };
+    if (_confReload) _confReload.onclick=()=>{ renderConfirm(); };
 
     </script>
   </body>
