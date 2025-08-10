@@ -166,6 +166,7 @@
   <div id="courseDetailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:120;">
     <div style="background:#fff; width:92%; max-width:520px; border-radius:10px; padding:16px;">
       <h3 id="cdmName" style="margin:0 0 8px;">ゴルフ場</h3>
+      <img id="cdmImage" src="" alt="course" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px; display:none; margin:6px 0 10px;" />
       <div style="color:#666; font-size:0.9rem; margin-bottom:10px;" id="cdmAddress">住所: 未設定</div>
       <div style="white-space:pre-wrap; background:#f8f9fa; border:1px solid #eee; padding:10px; border-radius:6px; margin-bottom:10px;" id="cdmDescription">説明: 未設定</div>
       <div style="background:#f8fff2; border:1px solid #e3f3d6; padding:10px; border-radius:6px; margin-bottom:12px;" id="cdmPerks">特典: なし</div>
@@ -601,7 +602,7 @@
           booking_id,
           date,
           gid,
-          golf_courses ( gid,name,address,description,perks ),
+          golf_courses ( gid,name,address,description,perks,image_url ),
           booking_caddies!inner ( cid )
         `)
         .eq('booking_caddies.cid', cid);
@@ -744,8 +745,8 @@
       // 月移動: 毎回ボタンに再バインド
       const prevBtn = document.getElementById('alPrevMonth');
       const nextBtn = document.getElementById('alNextMonth');
-      if (prevBtn) prevBtn.onclick = ()=>{ alMonth = (alMonth+11)%12; if (alMonth===11) alYear--; renderAssignedList(); };
-      if (nextBtn) nextBtn.onclick = ()=>{ alMonth = (alMonth+1)%12; if (alMonth===0) alYear++; renderAssignedList(); };
+      if (prevBtn) prevBtn.onclick = ()=>{ if(--alMonth<0){alMonth=11;alYear--;} renderAssignedList(); };
+      if (nextBtn) nextBtn.onclick = ()=>{ if(++alMonth>11){alMonth=0;alYear++;} renderAssignedList(); };
     }
 
     // ゴルフ場詳細モーダルを開く
@@ -754,6 +755,8 @@
       const gc = assign.golf_courses || {};
       pendingChat = { bookingId: assign.booking_id, gid: assign.gid || null, name: gc.name || 'ゴルフ場' };
       document.getElementById('cdmName').textContent = gc.name || 'ゴルフ場';
+      const img = document.getElementById('cdmImage');
+      if (gc.image_url){ img.src = gc.image_url; img.style.display='block'; } else { img.style.display='none'; }
       document.getElementById('cdmAddress').textContent = `住所: ${gc.address || '未設定'}`;
       document.getElementById('cdmDescription').textContent = `説明: ${gc.description || '未設定'}`;
       document.getElementById('cdmPerks').textContent = `特典: ${gc.perks || 'なし'}`;
