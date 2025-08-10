@@ -57,7 +57,19 @@
         .order('created_at', { ascending: false })
         .limit(50);
       if (error){
-        list.innerHTML = `<div class="card">読み込みエラー: ${error.message}</div>`;
+        list.innerHTML = `<div class="card">読み込みエラー: ${error.message}<br><br>
+        まだテーブルがないようです。SupabaseのSQLで次を実行してください:<pre style='white-space:pre-wrap;'>
+CREATE TABLE IF NOT EXISTS public.announcements (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title text NOT NULL,
+  content text NOT NULL,
+  audience text NOT NULL CHECK (audience IN ('all','golf','caddy')),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.announcements ENABLE ROW LEVEL SECURITY;
+CREATE POLICY ann_read_all ON public.announcements FOR SELECT USING (true);
+-- 例: INSERT INTO public.announcements (title, content, audience) VALUES ('アップデート','新機能を公開しました','all');
+</pre></div>`;
         return;
       }
       if (!data || data.length === 0){ empty.style.display='block'; return; }

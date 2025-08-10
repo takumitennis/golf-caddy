@@ -645,6 +645,17 @@
     // キャディ予定（予約確定分）をゴルフ場側の予約確認と同様のリストで表示
     let alMonth = new Date().getMonth();
     let alYear = new Date().getFullYear();
+    // 月移動を常に利用可能に（グローバル関数）
+    window.alNav = (delta)=>{
+      alMonth += delta;
+      if (alMonth < 0) { alMonth = 11; alYear--; }
+      if (alMonth > 11) { alMonth = 0; alYear++; }
+      // タブがキャディ予定の時のみ反映
+      const container = document.getElementById('assignedListContainer');
+      if (container && container.style.display !== 'none') {
+        renderAssignedList();
+      }
+    };
     async function renderAssignedList(){
       const container = document.getElementById('assignedListContainer');
       const body = document.getElementById('assignedListBody');
@@ -730,15 +741,11 @@
         };
       });
 
-      // 月移動: グローバル関数（存在しない場合のみ定義）
-      if (!window.alNav) {
-        window.alNav = (delta)=>{
-          alMonth += delta;
-          if (alMonth < 0) { alMonth = 11; alYear--; }
-          if (alMonth > 11) { alMonth = 0; alYear++; }
-          renderAssignedList();
-        };
-      }
+      // 月移動: 毎回ボタンに再バインド
+      const prevBtn = document.getElementById('alPrevMonth');
+      const nextBtn = document.getElementById('alNextMonth');
+      if (prevBtn) prevBtn.onclick = ()=>{ alMonth = (alMonth+11)%12; if (alMonth===11) alYear--; renderAssignedList(); };
+      if (nextBtn) nextBtn.onclick = ()=>{ alMonth = (alMonth+1)%12; if (alMonth===0) alYear++; renderAssignedList(); };
     }
 
     // ゴルフ場詳細モーダルを開く
