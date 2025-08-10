@@ -500,8 +500,10 @@
       }
     });
 
-    document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
-    document.getElementById('nextMonth').onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+    const pm = document.getElementById('prevMonth');
+    const nm = document.getElementById('nextMonth');
+    if (pm) pm.onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
+    if (nm) nm.onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
 
     let editMode = false; // 編集モード: trueの時だけカレンダーを変更可能
 
@@ -963,9 +965,9 @@
 
 
     /* チャットUI用メッセージ取得・表示 */
-    let chatPartnerId = null; // チャット相手ID
-    let chatPartnerName = '';
-    let currentBookingId = null; // 現在の予定ID
+    var chatPartnerId = null; // チャット相手ID
+    var chatPartnerName = '';
+    var currentBookingId = null; // 現在の予定ID
 
     // 予定一覧を表示
     async function showBookingList() {
