@@ -485,10 +485,10 @@
         }
       }
 
-      if(initialShowProfile) {
+      if (typeof initialShowProfile !== 'undefined' && initialShowProfile) {
         switchMain('prof');
         initialShowProfile = false;
-              }
+      }
       } else {
         // プロフィールが存在しない場合のステータス表示
         const ms2 = document.getElementById('mainStatus');
@@ -958,9 +958,10 @@
       }
     }
 
-    document.getElementById('confirmShiftBtn').onclick=async()=>{
-      alert('シフトを確定しました');
-    };
+    (function(){
+      const btn = document.getElementById('confirmShiftBtn');
+      if (btn) btn.onclick=async()=>{ alert('シフトを確定しました'); };
+    })();
 
 
 
