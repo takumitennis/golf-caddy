@@ -193,7 +193,7 @@
           <tr>
             <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">日付</th>
             <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">ゴルフ場</th>
-            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">操作</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">メッセージ</th>
           </tr>
         </thead>
         <tbody id="assignedListBody"></tbody>
@@ -660,7 +660,7 @@
         .from('bookings')
         .select(`
           booking_id,date,
-          golf_courses ( gid,name,address,description,perks ),
+          golf_courses ( gid,name,description,perks ),
           booking_caddies!inner ( cid )
         `)
         .eq('booking_caddies.cid', cid)
@@ -670,18 +670,32 @@
       if (error){ body.innerHTML = `<tr><td colspan='3' style='padding:8px;color:#e74c3c;'>${error.message}</td></tr>`; return; }
       if (!bookings || bookings.length===0){ body.innerHTML = `<tr><td colspan='3' style='padding:8px;color:#888;'>当月の予約はありません</td></tr>`; return; }
       body.innerHTML='';
-      bookings.forEach(b=>{
+      for (const b of bookings){
+        // 最新メッセージのプレビューを取得（該当ゴルフ場との当該予約）
+        let preview = '';
+        try {
+          const { data: msgs } = await supabase
+            .from('messages')
+            .select('content, created_at')
+            .eq('booking_id', b.booking_id)
+            .or(`and(sender_id.eq.${cid},receiver_id.eq.${b.golf_courses?.gid}),and(sender_id.eq.${b.golf_courses?.gid},receiver_id.eq.${cid})`)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          preview = (msgs && msgs[0]?.content) ? msgs[0].content.slice(0, 40) : '';
+        } catch {}
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style='padding:8px;border-bottom:1px solid #eee;'>${b.date}</td>
-          <td style='padding:8px;border-bottom:1px solid #eee;'>${b.golf_courses?.name || ''}</td>
-          <td style='padding:8px;border-bottom:1px solid #eee; text-align:right;'>
-            <button class='alProfile' data-bid='${b.booking_id}'>プロフィール</button>
-            <button class='alMsg' data-bid='${b.booking_id}'>メッセージ</button>
+          <td style='padding:8px;border-bottom:1px solid #eee;'>
+            <a href="#" class='alProfile' data-bid='${b.booking_id}' style='color:#2e7d32;font-weight:600;'>${b.golf_courses?.name || ''}</a>
+          </td>
+          <td style='padding:8px;border-bottom:1px solid #eee;'>
+            <a href="#" class='alMsg' data-bid='${b.booking_id}' style='color:#555;'>${preview || '（メッセージなし）'}</a>
           </td>
         `;
         body.appendChild(tr);
-      });
+      }
       // ハンドラ
       Array.from(document.getElementsByClassName('alProfile')).forEach(btn=>{
         btn.onclick = async (e)=>{
