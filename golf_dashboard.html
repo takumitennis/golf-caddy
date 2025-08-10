@@ -406,8 +406,13 @@
         </div>`;
       document.getElementById('mainProfile').innerHTML = profHtml;
       
-      await loadBookings();
-      
+      // 旧UIの残骸に依存しないようガード
+      try {
+        await loadBookings();
+      } catch (e) {
+        console.warn('loadBookings skipped:', e?.message || e);
+      }
+
       // Initialize all event listeners after gid is set
       initializeEventListeners();
       isInitialized = true;
