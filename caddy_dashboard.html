@@ -650,21 +650,28 @@
     const mainShift=document.getElementById('mainShift');
     const mainMsg=document.getElementById('mainMessages');
     const mainAssigned=document.getElementById('mainAssigned');
-    document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
-    document.getElementById('btnMainShift').onclick=()=>switchMain('shift');
-    document.getElementById('btnMainAssign').onclick=()=>switchMain('assign');
-    document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
+    const btnMainProfEl = document.getElementById('btnMainProf');
+    const btnMainShiftEl = document.getElementById('btnMainShift');
+    const btnMainAssignEl = document.getElementById('btnMainAssign');
+    const btnMainMsgEl = document.getElementById('btnMainMsg');
+    if (btnMainProfEl) btnMainProfEl.onclick=()=>switchMain('prof');
+    if (btnMainShiftEl) btnMainShiftEl.onclick=()=>switchMain('shift');
+    if (btnMainAssignEl) btnMainAssignEl.onclick=()=>switchMain('assign');
+    if (btnMainMsgEl) btnMainMsgEl.onclick=()=>switchMain('msg');
     function switchMain(k){
       const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg};
       // hide all
       Object.values(map).forEach(el=>{el.style.display='none';});
-      btnMainProf.classList.remove('active');btnMainShift.classList.remove('active');btnMainAssign.classList.remove('active');btnMainMsg.classList.remove('active');
+      btnMainProfEl?.classList.remove('active');
+      btnMainShiftEl?.classList.remove('active');
+      btnMainAssignEl?.classList.remove('active');
+      btnMainMsgEl?.classList.remove('active');
 
       // show selected
       if(map[k]){map[k].style.display='block';}
-      if(k==='prof') btnMainProf.classList.add('active');
+      if(k==='prof') btnMainProfEl?.classList.add('active');
       if(k==='shift'){
-        btnMainShift.classList.add('active');
+        btnMainShiftEl?.classList.add('active');
         editMode = false; // シフトタブ入場時は通常モード
         pendingInserts.clear(); pendingDeletes.clear();
         const saveBtn = document.getElementById('saveShiftBtn');
@@ -674,7 +681,7 @@
         renderCal();
       }
       if(k==='assign'){
-        btnMainAssign.classList.add('active');
+        btnMainAssignEl?.classList.add('active');
         const first=new Date(assignedCalYear,assignedCalMonth,1);
         const last=new Date(assignedCalYear,assignedCalMonth+1,0);
         const aTitle = document.getElementById('aCalTitle');
@@ -702,7 +709,7 @@
         }
         renderAssignedCal(first,last);
       } 
-      if(k==='msg'){btnMainMsg.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
+      if(k==='msg'){btnMainMsgEl?.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
 
     // 初期表示
