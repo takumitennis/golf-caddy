@@ -180,6 +180,25 @@
         <button id="sendChatBtn">送信</button>
       </div>
     </div>
+    
+    <!-- 予約一覧（キャディ予定のリスト表示用） -->
+    <div id="assignedListContainer" class="hidden" style="margin-top:15px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="alPrevMonth">◀</button>
+        <span id="alTitle"></span>
+        <button id="alNextMonth">▶</button>
+      </div>
+      <table style="margin-top:10px; width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">日付</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">ゴルフ場</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="assignedListBody"></tbody>
+      </table>
+    </div>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -617,6 +636,85 @@
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));table.appendChild(row);} 
     }
 
+    // キャディ予定（予約確定分）をゴルフ場側の予約確認と同様のリストで表示
+    let alMonth = new Date().getMonth();
+    let alYear = new Date().getFullYear();
+    async function renderAssignedList(){
+      const container = document.getElementById('assignedListContainer');
+      const body = document.getElementById('assignedListBody');
+      const title = document.getElementById('alTitle');
+      if (!container || !body || !title) return;
+      // 表示切替
+      container.classList.remove('hidden');
+      document.getElementById('mainAssigned')?.classList.add('hidden');
+
+      title.textContent = `${alYear}年 ${alMonth+1}月`;
+      body.innerHTML = '<tr><td colspan="3" style="padding:8px;color:#888;">読み込み中...</td></tr>';
+      const first = `${alYear}-${String(alMonth+1).padStart(2,'0')}-01`;
+      const lastDate = new Date(alYear, alMonth+1, 0).getDate();
+      const last = `${alYear}-${String(alMonth+1).padStart(2,'0')}-${String(lastDate).padStart(2,'0')}`;
+
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select(`
+          booking_id,date,
+          golf_courses ( gid,name,address,description,perks ),
+          booking_caddies!inner ( cid )
+        `)
+        .eq('booking_caddies.cid', cid)
+        .gte('date', first)
+        .lte('date', last)
+        .order('date', { ascending: true });
+      if (error){ body.innerHTML = `<tr><td colspan='3' style='padding:8px;color:#e74c3c;'>${error.message}</td></tr>`; return; }
+      if (!bookings || bookings.length===0){ body.innerHTML = `<tr><td colspan='3' style='padding:8px;color:#888;'>当月の予約はありません</td></tr>`; return; }
+      body.innerHTML='';
+      bookings.forEach(b=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style='padding:8px;border-bottom:1px solid #eee;'>${b.date}</td>
+          <td style='padding:8px;border-bottom:1px solid #eee;'>${b.golf_courses?.name || ''}</td>
+          <td style='padding:8px;border-bottom:1px solid #eee; text-align:right;'>
+            <button class='alProfile' data-bid='${b.booking_id}'>プロフィール</button>
+            <button class='alMsg' data-bid='${b.booking_id}'>メッセージ</button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+      // ハンドラ
+      Array.from(document.getElementsByClassName('alProfile')).forEach(btn=>{
+        btn.onclick = async (e)=>{
+          const bid = e.currentTarget.getAttribute('data-bid');
+          const b = bookings.find(x=>x.booking_id===bid);
+          if (!b) return;
+          openCourseDetail({
+            booking_id: b.booking_id,
+            gid: b.golf_courses?.gid,
+            golf_courses: b.golf_courses
+          });
+        };
+      });
+      Array.from(document.getElementsByClassName('alMsg')).forEach(btn=>{
+        btn.onclick = async (e)=>{
+          const bid = e.currentTarget.getAttribute('data-bid');
+          const b = bookings.find(x=>x.booking_id===bid);
+          if (!b) return;
+          currentBookingId = bid;
+          chatPartnerId = b.golf_courses?.gid;
+          chatPartnerName = b.golf_courses?.name || 'ゴルフ場';
+          // メッセージタブへ
+          const btnMsg = document.getElementById('btnMainMsg');
+          if (btnMsg) btnMsg.click();
+          loadChatMessages();
+        };
+      });
+
+      // 月移動
+      const prev = document.getElementById('alPrevMonth');
+      const next = document.getElementById('alNextMonth');
+      if (prev) prev.onclick=()=>{ if(--alMonth<0){alMonth=11;alYear--;} renderAssignedList(); };
+      if (next) next.onclick=()=>{ if(++alMonth>11){alMonth=0;alYear++;} renderAssignedList(); };
+    }
+
     // ゴルフ場詳細モーダルを開く
     let pendingChat = { bookingId:null, gid:null, name:'' };
     function openCourseDetail(assign){
@@ -682,32 +780,7 @@
       }
       if(k==='assign'){
         btnMainAssignEl?.classList.add('active');
-        const first=new Date(assignedCalYear,assignedCalMonth,1);
-        const last=new Date(assignedCalYear,assignedCalMonth+1,0);
-        const aTitle = document.getElementById('aCalTitle');
-        aTitle.textContent=`${assignedCalYear}年 ${assignedCalMonth+1}月`;
-        // イベントを明示的に再バインド
-        const aPrev = document.getElementById('aPrevMonth');
-        const aNext = document.getElementById('aNextMonth');
-        if(aPrev){
-          aPrev.onclick=()=>{
-            if(--assignedCalMonth<0){assignedCalMonth=11;assignedCalYear--;}
-            const f=new Date(assignedCalYear,assignedCalMonth,1);
-            const l=new Date(assignedCalYear,assignedCalMonth+1,0);
-            aTitle.textContent=`${assignedCalYear}年 ${assignedCalMonth+1}月`;
-            renderAssignedCal(f,l);
-          };
-        }
-        if(aNext){
-          aNext.onclick=()=>{
-            if(++assignedCalMonth>11){assignedCalMonth=0;assignedCalYear++;}
-            const f=new Date(assignedCalYear,assignedCalMonth,1);
-            const l=new Date(assignedCalYear,assignedCalMonth+1,0);
-            aTitle.textContent=`${assignedCalYear}年 ${assignedCalMonth+1}月`;
-            renderAssignedCal(f,l);
-          };
-        }
-        renderAssignedCal(first,last);
+        await renderAssignedList();
       } 
       if(k==='msg'){btnMainMsgEl?.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
