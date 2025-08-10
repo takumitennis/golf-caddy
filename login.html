@@ -604,6 +604,21 @@
         hasError = true;
       }
       
+      // サインアップ時にステップ2が未表示なら、まず表示してから終了（ユーザーに次の入力を促す）
+      if (mode === "signup") {
+        const step2 = document.getElementById('signupStep2');
+        const isHidden = step2 && (step2.style.display === 'none' || step2.offsetParent === null);
+        if (isHidden) {
+          step2.style.display = 'block';
+          const nextBtn = document.getElementById('nextStep');
+          if (nextBtn) nextBtn.style.display = 'none';
+          const note = document.getElementById('stepNote');
+          if (note) note.style.display = 'none';
+          setLoading(false);
+          return; // ここでは登録処理は行わず、次の入力へ誘導
+        }
+      }
+
       if (mode === "login" && !password) {
         showError("pass", "パスワードを入力してください");
         hasError = true;
