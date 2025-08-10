@@ -308,6 +308,11 @@
     let calYear = new Date().getFullYear();
     let trainingCalMonth = new Date().getMonth();
     let trainingCalYear = new Date().getFullYear();
+    // Training requests list month
+    let trMonth = new Date().getMonth();
+    let trYear = new Date().getFullYear();
+    // Inline chat mode flag for training (no booking_id)
+    let inlineTrainingMode = false;
     let confMonth = new Date().getMonth();
     let confYear = new Date().getFullYear();
     
@@ -684,6 +689,15 @@
 
       // 初期表示は「空きキャディ確認」を開く（年/月初期化後）
       try { switchTab(1); } catch (e) { console.warn('switchTab init warn:', e?.message || e); }
+      // インラインメッセージ領域は他タブでは表示させない
+      document.addEventListener('click', (ev)=>{
+        const tgt = ev.target;
+        if (tgt && (tgt.id==='btnTab1' || tgt.id==='btnTab3' || tgt.id==='btnTabConfirm')) {
+          const inline = document.getElementById('inlineMessageArea');
+          if (inline) inline.remove();
+          inlineTrainingMode = false;
+        }
+      }, true);
     }
 
     // --- Calendar variables (initialized at top) ---
@@ -1192,6 +1206,7 @@
                 </div>`;
               mainStatusDiv.appendChild(inline);
             }
+            inlineTrainingMode = true;
             await loadChatMessages(true);
             const sendBtn = document.getElementById('inlineSendChatBtn');
             const inputEl = document.getElementById('inlineChatInput');
@@ -1617,12 +1632,22 @@
       if (!inline) document.getElementById('chatInputArea').style.display = 'flex';
 
       // 予定に関連するメッセージを取得
-      const { data: messages, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`and(sender_id.eq.${gid},receiver_id.eq.${chatPartnerId}),and(sender_id.eq.${chatPartnerId},receiver_id.eq.${gid})`)
-        .eq('booking_id', currentBookingId)
-        .order('created_at', { ascending: true });
+      let messages, error;
+      if (inlineTrainingMode) {
+        ({ data: messages, error } = await supabase
+          .from('messages')
+          .select('*')
+          .or(`and(sender_id.eq.${gid},receiver_id.eq.${chatPartnerId}),and(sender_id.eq.${chatPartnerId},receiver_id.eq.${gid})`)
+          .is('booking_id', null)
+          .order('created_at', { ascending: true }));
+      } else {
+        ({ data: messages, error } = await supabase
+          .from('messages')
+          .select('*')
+          .or(`and(sender_id.eq.${gid},receiver_id.eq.${chatPartnerId}),and(sender_id.eq.${chatPartnerId},receiver_id.eq.${gid})`)
+          .eq('booking_id', currentBookingId)
+          .order('created_at', { ascending: true }));
+      }
 
       if (error) {
         messagesList.innerHTML += `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
@@ -1656,7 +1681,7 @@
         sender_id: gid,
         receiver_type: 'caddy', 
         receiver_id: chatPartnerId,
-        booking_id: currentBookingId,
+        booking_id: inlineTrainingMode ? null : currentBookingId,
         subject: '予定に関する連絡',
         content,
         is_read: false
@@ -1756,6 +1781,7 @@
                   </div>`;
                 mainStatusDiv.appendChild(inline);
               }
+              inlineTrainingMode = false;
               await loadChatMessages(true);
               const sendBtn = document.getElementById('inlineSendChatBtn');
               const inputEl = document.getElementById('inlineChatInput');
