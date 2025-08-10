@@ -224,7 +224,8 @@
 
       // ステータスタブのHTMLを生成（プロフィールが存在する場合のみ）
       if (row && row.cid) {
-        document.getElementById('mainStatus').innerHTML = `
+        const ms1 = document.getElementById('mainStatus');
+        if (ms1) ms1.innerHTML = `
           <div class="card">
             <h3>ステータス</h3>
             <p><strong>今までのキャディ派遣回数:</strong> ${dispatchCount} 回</p>
@@ -455,7 +456,8 @@
               }
       } else {
         // プロフィールが存在しない場合のステータス表示
-        document.getElementById('mainStatus').innerHTML = `
+        const ms2 = document.getElementById('mainStatus');
+        if (ms2) ms2.innerHTML = `
           <div class="card">
             <h3>ステータス</h3>
             <p>プロフィール登録後にステータス情報が表示されます。</p>
@@ -712,8 +714,8 @@
       if(k==='msg'){btnMainMsgEl?.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
 
-    // 初期表示
-    switchMain('prof');
+    // 初期表示（プロフィールが描画済みであればprof、それ以外はshiftにフォールバック）
+    try { switchMain('prof'); } catch(e) { switchMain('shift'); }
 
 
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
