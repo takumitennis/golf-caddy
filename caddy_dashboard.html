@@ -17,6 +17,7 @@
     .cal-ok{background:#ffffff;cursor:pointer}
     .ok-circle{display:inline-block;width:16px;height:16px;border:2px solid #4caf50;border-radius:50%}
     .cal-ng{background:#eeeeee;cursor:pointer}
+    .cal-booked{background:#e8f5e9;border:2px solid #81c784;cursor:default}
     .locked{opacity:0.5;cursor:not-allowed}
     /* --- LINE風チャットUI --- */
     #mainMessages {
@@ -481,6 +482,16 @@
       const availSet=new Set();
       if(!error){ data.forEach(r=>availSet.add(r.date)); }
 
+      // fetch booked days for current month (bookings joined)
+      const { data: assigns } = await supabase
+        .from('bookings')
+        .select('date, booking_caddies!inner (cid), golf_courses(name)')
+        .eq('booking_caddies.cid', cid)
+        .gte('date', first.toISOString().slice(0,10))
+        .lte('date', last.toISOString().slice(0,10));
+      const bookedMap = new Map(); // date -> golf course name
+      (assigns||[]).forEach(a=>{ bookedMap.set(a.date, a.golf_courses?.name || '予約'); });
+
       // determine lock flag (editing allowed?)
       const deadline=new Date(calYear, calMonth-1, 15); // 前月15日
       const today=new Date();
@@ -497,13 +508,22 @@
       for(let day=1;day<=last.getDate();day++){
         const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td=document.createElement('td');
-        const isAvail=availSet.has(dateStr);
-        td.className=isAvail?'cal-ok':'cal-ng';
-        td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
-        if(!locked && editMode){
-          td.onclick=()=>toggle(dateStr,isAvail);
+        const isBooked = bookedMap.has(dateStr);
+        const isAvail = availSet.has(dateStr);
+        if (isBooked) {
+          // 予約確定日は編集対象にしない。表示は「予定確定」文字
+          td.className = 'cal-booked';
+          td.innerHTML = `<small>${day}</small><br><span style="color:#2e7d32;font-weight:700;">予定確定</span>`;
         } else {
-          td.classList.add('locked');
+          td.className=isAvail?'cal-ok':'cal-ng';
+          td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
+          if(!locked && editMode){
+            td.onclick=()=>toggle(dateStr,isAvail);
+          } else {
+            td.classList.add('locked');
+          }
+        } else {
+          // nothing
         }
         row.appendChild(td);
         if((startWD+day)%7===0){calTable.appendChild(row);row=document.createElement('tr');}
@@ -583,7 +603,7 @@
         const dateStr=`${firstDate.getFullYear()}-${String(firstDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td=document.createElement('td');
         const assign = dateToAssign.get(dateStr);
-        td.innerHTML = `<small>${day}</small><br>${assign ? `<a href="#" data-bid="${assign.booking_id}" class="assigned-link">${assign.golf_courses?.name || '予約'}</a>` : ''}`;
+        td.innerHTML = `<small>${day}</small><br>${assign ? `<a href="#" data-bid="${assign.booking_id}" class="assigned-link"><span class="ok-circle" style="border-color:#2e7d32"></span> ${assign.golf_courses?.name || '予約'}</a>` : ''}`;
         if (assign) {
           td.style.background = '#e8f5e9'; // 予約ありを淡い緑で表示
           td.style.border = '2px solid #81c784';
