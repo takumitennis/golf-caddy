@@ -729,6 +729,7 @@
       });
       Array.from(document.getElementsByClassName('alMsg')).forEach(btn=>{
         btn.onclick = async (e)=>{
+          e.preventDefault();
           const bid = e.currentTarget.getAttribute('data-bid');
           const b = bookings.find(x=>x.booking_id===bid);
           if (!b) return;
@@ -739,6 +740,8 @@
           await loadChatMessages();
           const chatArea = document.getElementById('chatInputArea');
           if (chatArea) chatArea.style.display='flex';
+          const listEl = document.getElementById('messagesList');
+          if (listEl) listEl.scrollTop = listEl.scrollHeight;
         };
       });
 
