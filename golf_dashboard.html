@@ -584,7 +584,6 @@
     // Initialize all event listeners after gid is available
     function initializeEventListeners() {
       // --- Tabs logic ---
-      const tab1=document.getElementById('tab1');
       const tab2=document.getElementById('tab2');
       const tab3=document.getElementById('tab3');
       const tab4=document.getElementById('tab4');
@@ -593,11 +592,11 @@
       const btnTabConfirm=document.getElementById('btnTabConfirm');
       const btnTab3=document.getElementById('btnTab3');
       const btnTab4=document.getElementById('btnTab4');
-      
-      document.getElementById('btnTab1').onclick=()=>{switchTab(1)};
-      document.getElementById('btnTabConfirm').onclick=()=>{switchTab(5)};
-      document.getElementById('btnTab3').onclick=()=>{switchTab(3)};
-      document.getElementById('btnTab4').onclick=()=>{switchTab(4)};
+
+      if (btnTab1) btnTab1.onclick=()=>{switchTab(1)};
+      if (btnTabConfirm) btnTabConfirm.onclick=()=>{switchTab(5)};
+      if (btnTab3) btnTab3.onclick=()=>{switchTab(3)};
+      if (btnTab4) btnTab4.onclick=()=>{switchTab(4)};
 
       // --- Calendar logic ---
       document.getElementById('prevMonth').onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
@@ -719,29 +718,40 @@
 
     // render calendar on tab switch
     function switchTab(idx){
+      // Query elements each time to avoid undefined references
+      const tab2 = document.getElementById('tab2');
+      const tabConfirm = document.getElementById('tabConfirm');
+      const tab3 = document.getElementById('tab3');
+      const tab4 = document.getElementById('tab4');
+      const btnTab1 = document.getElementById('btnTab1');
+      const btnTabConfirm = document.getElementById('btnTabConfirm');
+      const btnTab3 = document.getElementById('btnTab3');
+      const btnTab4 = document.getElementById('btnTab4');
+
       // Hide all tabs
       [tab2, tabConfirm, tab3, tab4].forEach(tab => tab && tab.classList.add('hidden'));
       [btnTab1, btnTabConfirm, btnTab3, btnTab4].forEach(btn => btn && btn.classList.remove('active'));
-      
+
       if(idx===1){
-        tab2.classList.remove('hidden');
-        btnTab1.classList.add('active');
+        if (tab2) tab2.classList.remove('hidden');
+        if (btnTab1) btnTab1.classList.add('active');
         renderCal();
       } else if(idx===5){
-        tabConfirm.classList.remove('hidden');
-        btnTabConfirm.classList.add('active');
+        if (tabConfirm) tabConfirm.classList.remove('hidden');
+        if (btnTabConfirm) btnTabConfirm.classList.add('active');
         renderConfirm();
       } else if(idx===3){
-        tab3.classList.remove('hidden');
-        btnTab3.classList.add('active');
+        if (tab3) tab3.classList.remove('hidden');
+        if (btnTab3) btnTab3.classList.add('active');
         renderTrainingCal();
       } else if(idx===4){
-        tab4.classList.remove('hidden');
-        btnTab4.classList.add('active');
+        if (tab4) tab4.classList.remove('hidden');
+        if (btnTab4) btnTab4.classList.add('active');
         if (gid) {
           loadTrainingRequests();
         } else {
-          document.getElementById('trainingRequestsList').innerHTML = '<p>読み込み中...</p>';
+          const listEl = document.getElementById('trainingRequestsList');
+          if (listEl) listEl.innerHTML = '<p>読み込み中...</p>';
           // Wait for gid to be initialized
           const checkGid = setInterval(() => {
             if (gid) {
@@ -762,24 +772,36 @@
     const btnMainMsg=document.getElementById('btnMainMsg');
 
     function switchMain(mode){
+      // Query fresh elements in case DOM changed
+      const mainProfileDiv=document.getElementById('mainProfile');
+      const mainStatusDiv=document.getElementById('mainStatus');
+      const mainMessagesDiv=document.getElementById('mainMessages');
+      const btnMainProf=document.getElementById('btnMainProf');
+      const btnMainStat=document.getElementById('btnMainStat');
+      const btnMainMsg=document.getElementById('btnMainMsg');
+
       // hide all
-      [mainProfileDiv, mainStatusDiv, mainMessagesDiv].forEach(el=>el.classList.add('hidden'));
-      [btnMainProf, btnMainStat, btnMainMsg].forEach(btn=>btn.classList.remove('active'));
+      [mainProfileDiv, mainStatusDiv, mainMessagesDiv].forEach(el=>el && el.classList.add('hidden'));
+      [btnMainProf, btnMainStat, btnMainMsg].forEach(btn=>btn && btn.classList.remove('active'));
       if(mode==='prof'){
-        mainProfileDiv.classList.remove('hidden');
-        btnMainProf.classList.add('active');
+        if (mainProfileDiv) mainProfileDiv.classList.remove('hidden');
+        if (btnMainProf) btnMainProf.classList.add('active');
       } else if(mode==='stat'){
-        mainStatusDiv.classList.remove('hidden');
-        btnMainStat.classList.add('active');
+        if (mainStatusDiv) mainStatusDiv.classList.remove('hidden');
+        if (btnMainStat) btnMainStat.classList.add('active');
       } else if(mode==='msg'){
-        mainMessagesDiv.classList.remove('hidden');
-        btnMainMsg.classList.add('active');
+        if (mainMessagesDiv) mainMessagesDiv.classList.remove('hidden');
+        if (btnMainMsg) btnMainMsg.classList.add('active');
       }
     }
 
-    document.getElementById('btnMainProf').onclick=()=>switchMain('prof');
-    document.getElementById('btnMainStat').onclick=()=>switchMain('stat');
-    document.getElementById('btnMainMsg').onclick=()=>switchMain('msg');
+    // Main tab buttons (guarded)
+    const _btnMainProf = document.getElementById('btnMainProf');
+    const _btnMainStat = document.getElementById('btnMainStat');
+    const _btnMainMsg = document.getElementById('btnMainMsg');
+    if (_btnMainProf) _btnMainProf.onclick=()=>switchMain('prof');
+    if (_btnMainStat) _btnMainStat.onclick=()=>switchMain('stat');
+    if (_btnMainMsg) _btnMainMsg.onclick=()=>switchMain('msg');
 
     // 予約バー制御
     const reserveBar = document.getElementById('reserveBar');
