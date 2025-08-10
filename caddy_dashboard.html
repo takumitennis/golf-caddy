@@ -129,7 +129,7 @@
     <button id="btnMainProf" class="active">プロフィール</button>
     <button id="btnMainShift">シフト編集</button>
     <button id="btnMainAssign">キャディ予定</button>
-    <button id="btnMainMsg">メッセージ</button>
+    <button id="btnMainNotice">お知らせ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
   <div id="welcome" style="margin-top:10px;"></div>
@@ -181,6 +181,10 @@
         <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" />
         <button id="sendChatBtn">送信</button>
       </div>
+    </div>
+    <!-- お知らせ（運営から） -->
+    <div id="mainNotice" class="hidden" style="margin-top:15px;">
+      <iframe src="notifications.html" style="width:100%;height:70vh;border:1px solid #e0e0e0;border-radius:8px;background:#fff;"></iframe>
     </div>
     
     <!-- 予約一覧（キャディ予定のリスト表示用） -->
@@ -726,13 +730,15 @@
         };
       });
 
-      // 月移動（グローバル関数にして一度だけバインド）
-      window.alNav = (delta)=>{
-        alMonth += delta;
-        if (alMonth < 0) { alMonth = 11; alYear--; }
-        if (alMonth > 11) { alMonth = 0; alYear++; }
-        renderAssignedList();
-      };
+      // 月移動: グローバル関数（存在しない場合のみ定義）
+      if (!window.alNav) {
+        window.alNav = (delta)=>{
+          alMonth += delta;
+          if (alMonth < 0) { alMonth = 11; alYear--; }
+          if (alMonth > 11) { alMonth = 0; alYear++; }
+          renderAssignedList();
+        };
+      }
     }
 
     // ゴルフ場詳細モーダルを開く
@@ -767,17 +773,18 @@
     const mainProf=document.getElementById('mainProfile');
     const mainShift=document.getElementById('mainShift');
     const mainMsg=document.getElementById('mainMessages');
+    const mainNotice=document.getElementById('mainNotice');
     const mainAssigned=document.getElementById('mainAssigned');
     const btnMainProfEl = document.getElementById('btnMainProf');
     const btnMainShiftEl = document.getElementById('btnMainShift');
     const btnMainAssignEl = document.getElementById('btnMainAssign');
-    const btnMainMsgEl = document.getElementById('btnMainMsg');
+    const btnMainNoticeEl = document.getElementById('btnMainNotice');
     if (btnMainProfEl) btnMainProfEl.onclick=()=>switchMain('prof');
     if (btnMainShiftEl) btnMainShiftEl.onclick=()=>switchMain('shift');
     if (btnMainAssignEl) btnMainAssignEl.onclick=()=>switchMain('assign');
-    if (btnMainMsgEl) btnMainMsgEl.onclick=()=>switchMain('msg');
+    if (btnMainNoticeEl) btnMainNoticeEl.onclick=()=>switchMain('notice');
     function switchMain(k){
-      const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg};
+      const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg,notice:mainNotice};
       // hide all
       Object.values(map).forEach(el=>{el.style.display='none';});
       // 予約リスト（新UI）も確実に隠す
@@ -786,7 +793,7 @@
       btnMainProfEl?.classList.remove('active');
       btnMainShiftEl?.classList.remove('active');
       btnMainAssignEl?.classList.remove('active');
-      btnMainMsgEl?.classList.remove('active');
+      btnMainNoticeEl?.classList.remove('active');
 
       // show selected
       if(map[k]){map[k].style.display='block';}
@@ -805,7 +812,7 @@
         btnMainAssignEl?.classList.add('active');
         renderAssignedList();
       } 
-      if(k==='msg'){btnMainMsgEl?.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
+      if(k==='notice'){btnMainNoticeEl?.classList.add('active');}
     }
 
     // 初期表示（プロフィールが描画済みであればprof、それ以外はshiftにフォールバック）
