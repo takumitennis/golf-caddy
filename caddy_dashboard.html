@@ -735,10 +735,10 @@
           currentBookingId = bid;
           chatPartnerId = b.golf_courses?.gid;
           chatPartnerName = b.golf_courses?.name || 'ゴルフ場';
-          // メッセージタブへ
-          const btnMsg = document.getElementById('btnMainMsg');
-          if (btnMsg) btnMsg.click();
-          loadChatMessages();
+          switchMain('msg');
+          await loadChatMessages();
+          const chatArea = document.getElementById('chatInputArea');
+          if (chatArea) chatArea.style.display='flex';
         };
       });
 
@@ -771,11 +771,12 @@
     document.getElementById('cdmChat').onclick=()=>{
       document.getElementById('courseDetailModal').style.display='none';
       if(pendingChat.gid){
-        // 既存のチャット処理に連携
+        // 予約IDと相手ID/名前を設定してチャット画面へ
         currentBookingId = pendingChat.bookingId;
-        loadChatMessages(pendingChat.gid, pendingChat.name);
-        // タブ切替
-        document.getElementById('btnMainMsg').click();
+        chatPartnerId = pendingChat.gid;
+        chatPartnerName = pendingChat.name || 'ゴルフ場';
+        switchMain('msg');
+        loadChatMessages();
       }
     };
 
