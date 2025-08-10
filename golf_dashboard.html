@@ -303,6 +303,13 @@
 
     let gid = null;
     let isInitialized = false;
+    // Month/Year state must be initialized before any render* is called
+    let calMonth = new Date().getMonth();
+    let calYear = new Date().getFullYear();
+    let trainingCalMonth = new Date().getMonth();
+    let trainingCalYear = new Date().getFullYear();
+    let confMonth = new Date().getMonth();
+    let confYear = new Date().getFullYear();
     
     // 1. Check login & role and initialize everything
     supabase.auth.getUser().then(async ({ data }) => {
@@ -670,13 +677,11 @@
       
       document.getElementById('saveProfileEditBtn').onclick = saveProfileEdit;
 
-      // 初期表示は「空きキャディ確認」を開く
-      switchTab(1);
+      // 初期表示は「空きキャディ確認」を開く（年/月初期化後）
+      try { switchTab(1); } catch (e) { console.warn('switchTab init warn:', e?.message || e); }
     }
 
-    // --- Calendar variables (moved outside initializeEventListeners) ---
-    let calMonth = new Date().getMonth();
-    let calYear = new Date().getFullYear();
+    // --- Calendar variables (initialized at top) ---
 
     async function renderCal(){
       const first = new Date(calYear,calMonth,1);
@@ -720,9 +725,7 @@
         table.appendChild(row);
       }
     }
-    // Training calendar variables (moved outside initializeEventListeners)
-    let trainingCalMonth = new Date().getMonth();
-    let trainingCalYear = new Date().getFullYear();
+    // Training calendar variables (initialized at top)
 
     // render calendar on tab switch
     function switchTab(idx){
@@ -1593,8 +1596,6 @@
 
 
     // 予約確認：当月の予約（bookings＋booking_caddies＋caddies）
-    let confMonth = new Date().getMonth();
-    let confYear = new Date().getFullYear();
     async function renderConfirm(){
       const title = document.getElementById('confTitle');
       title.textContent = `${confYear}年 ${confMonth+1}月`;
