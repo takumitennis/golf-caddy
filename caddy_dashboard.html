@@ -119,6 +119,8 @@
     .chat-badge.read {
       background: #27ae60;
     }
+    /* Utility */
+    .hidden{ display:none; }
   </style>
 </head>
 <body>
@@ -154,7 +156,7 @@
       <button id="aPrevMonth">◀</button>
       <span id="aCalTitle"></span>
       <button id="aNextMonth">▶</button>
-      <button id="aReload" style="margin-left:auto;">再読み込み</button>
+      
     </div>
     <div style="color:#666; font-size:0.9rem; margin-top:6px;">予約が入っている日はゴルフ場名が表示されます（クリックで詳細）</div>
     <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
@@ -184,9 +186,7 @@
     <!-- 予約一覧（キャディ予定のリスト表示用） -->
     <div id="assignedListContainer" class="hidden" style="margin-top:15px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="alPrevMonth">◀</button>
-        <span id="alTitle"></span>
-        <button id="alNextMonth">▶</button>
+        <span id="alTitle" style="font-weight:600;"></span>
       </div>
       <table style="margin-top:10px; width:100%; border-collapse:collapse;">
         <thead>
@@ -646,7 +646,9 @@
       if (!container || !body || !title) return;
       // 表示切替
       container.classList.remove('hidden');
-      document.getElementById('mainAssigned')?.classList.add('hidden');
+      container.style.display = 'block';
+      const mainAssignedEl = document.getElementById('mainAssigned');
+      if (mainAssignedEl) mainAssignedEl.style.display = 'none';
 
       title.textContent = `${alYear}年 ${alMonth+1}月`;
       body.innerHTML = '<tr><td colspan="3" style="padding:8px;color:#888;">読み込み中...</td></tr>';
@@ -708,11 +710,7 @@
         };
       });
 
-      // 月移動
-      const prev = document.getElementById('alPrevMonth');
-      const next = document.getElementById('alNextMonth');
-      if (prev) prev.onclick=()=>{ if(--alMonth<0){alMonth=11;alYear--;} renderAssignedList(); };
-      if (next) next.onclick=()=>{ if(++alMonth>11){alMonth=0;alYear++;} renderAssignedList(); };
+      // 月移動コントロールは廃止（常に当月のみ表示）
     }
 
     // ゴルフ場詳細モーダルを開く
@@ -760,6 +758,9 @@
       const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg};
       // hide all
       Object.values(map).forEach(el=>{el.style.display='none';});
+      // 予約リスト（新UI）も確実に隠す
+      const assignedListContainer = document.getElementById('assignedListContainer');
+      if (assignedListContainer) assignedListContainer.style.display = 'none';
       btnMainProfEl?.classList.remove('active');
       btnMainShiftEl?.classList.remove('active');
       btnMainAssignEl?.classList.remove('active');
@@ -780,13 +781,19 @@
       }
       if(k==='assign'){
         btnMainAssignEl?.classList.add('active');
-        await renderAssignedList();
+        renderAssignedList();
       } 
       if(k==='msg'){btnMainMsgEl?.classList.add('active');if(typeof showChatWithGolfCourse === 'function') showChatWithGolfCourse();}
     }
 
     // 初期表示（プロフィールが描画済みであればprof、それ以外はshiftにフォールバック）
     try { switchMain('prof'); } catch(e) { switchMain('shift'); }
+    // タブボタン初期状態
+    const b1 = document.getElementById('btnMainProf');
+    const b2 = document.getElementById('btnMainShift');
+    const b3 = document.getElementById('btnMainAssign');
+    const b4 = document.getElementById('btnMainMsg');
+    if (b1 && !b1.classList.contains('active')) b1.classList.add('active');
 
 
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
