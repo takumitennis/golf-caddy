@@ -446,17 +446,20 @@
       });
     }
 
-    // 3. create booking
-    document.getElementById("createForm").onsubmit = async e => {
-      e.preventDefault();
-      const date = document.getElementById("bDate").value;
-      const slots = parseInt(document.getElementById("bSlots").value,10);
-      if (!date || !slots) return;
-      const { error } = await supabase.from("bookings").insert({ gid, date, slots });
-      if (error){ alert(error.message); return; }
-      e.target.reset();
-      loadBookings();
-    };
+    // 3. create booking (UIが存在する場合のみセット)
+    const createFormEl = document.getElementById('createForm');
+    if (createFormEl) {
+      createFormEl.onsubmit = async e => {
+        e.preventDefault();
+        const date = document.getElementById('bDate')?.value;
+        const slots = parseInt(document.getElementById('bSlots')?.value, 10);
+        if (!date || !slots) return;
+        const { error } = await supabase.from('bookings').insert({ gid, date, slots });
+        if (error){ alert(error.message); return; }
+        e.target.reset();
+        loadBookings();
+      };
+    }
 
     // Training slots modal functions
     let currentEditingDate = null;
@@ -810,9 +813,9 @@
     const _btnMainProf = document.getElementById('btnMainProf');
     const _btnMainStat = document.getElementById('btnMainStat');
     const _btnMainMsg = document.getElementById('btnMainMsg');
-    if (_btnMainProf) _btnMainProf.onclick=()=>switchMain('prof');
-    if (_btnMainStat) _btnMainStat.onclick=()=>switchMain('stat');
-    if (_btnMainMsg) _btnMainMsg.onclick=()=>switchMain('msg');
+    if (_btnMainProf) _btnMainProf.onclick=(e)=>{ e.preventDefault?.(); switchMain('prof'); };
+    if (_btnMainStat) _btnMainStat.onclick=(e)=>{ e.preventDefault?.(); switchMain('stat'); };
+    if (_btnMainMsg) _btnMainMsg.onclick=(e)=>{ e.preventDefault?.(); switchMain('msg'); };
 
     // 予約バー制御
     const reserveBar = document.getElementById('reserveBar');
