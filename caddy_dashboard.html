@@ -144,12 +144,12 @@
     <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
     <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
       <small>○ = 空きあり / ❌ = 空きなし（編集は「シフトを編集する」を押してから。締切は前月15日）</small>
-    </div>
+  </div>
     <div style="margin-top:12px;display:flex;gap:8px;">
       <button id="editShiftBtn" style="padding:8px 16px;">シフトを編集する</button>
       <button id="saveShiftBtn" style="padding:8px 16px;" disabled>確定する</button>
+      </div>
     </div>
-  </div>
   <!-- 新タブ: キャディ予定 -->
   <div id="mainAssigned" class="hidden" style="margin-top:15px;">
     <div style="display:flex;align-items:center;gap:10px;">
@@ -161,7 +161,7 @@
     <div style="color:#666; font-size:0.9rem; margin-top:6px;">予約が入っている日はゴルフ場名が表示されます（クリックで詳細）</div>
     <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
   </div>
-
+  
   <!-- ゴルフ場詳細モーダル -->
   <div id="courseDetailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:120;">
     <div style="background:#fff; width:92%; max-width:520px; border-radius:10px; padding:16px;">
@@ -174,8 +174,8 @@
         <button id="cdmClose" style="background:#eee; border:1px solid #ddd; border-radius:6px; padding:8px 12px; cursor:pointer;">閉じる</button>
         <button id="cdmChat" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:8px 12px; cursor:pointer;">チャットを開始する</button>
       </div>
-    </div>
-  </div>
+      </div>
+      </div>
       <div id="mainMessages" class="hidden">
       <div id="messagesList"></div>
       <div id="chatInputArea" style="display:none;">
@@ -205,8 +205,8 @@
         </thead>
         <tbody id="assignedListBody"></tbody>
       </table>
-    </div>
-  
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const supabase = window.supabase.createClient(
@@ -296,7 +296,7 @@
         newReqBtn.textContent = oldReqBtn ? oldReqBtn.textContent : '研修を希望する';
         newReqBtn.style = oldReqBtn ? oldReqBtn.getAttribute('style') : '';
         if (oldReqBtn && oldReqBtn.parentNode){
-          oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
+        oldReqBtn.parentNode.replaceChild(newReqBtn, oldReqBtn);
         } else {
           // フォールバック: ステータスカード内の末尾に配置
           const statusCard = document.getElementById('mainStatus');
@@ -488,7 +488,7 @@
       if (typeof initialShowProfile !== 'undefined' && initialShowProfile) {
         switchMain('prof');
         initialShowProfile = false;
-      }
+              }
       } else {
         // プロフィールが存在しない場合のステータス表示
         const ms2 = document.getElementById('mainStatus');
@@ -554,12 +554,12 @@
           td.className = 'cal-booked';
           td.innerHTML = `<small>${day}</small><br><span style="color:#2e7d32;font-weight:700;">予定確定</span>`;
         } else {
-          td.className=isAvail?'cal-ok':'cal-ng';
-          td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
+        td.className=isAvail?'cal-ok':'cal-ng';
+        td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
           if(!locked && editMode){
-            td.onclick=()=>toggle(dateStr,isAvail);
-          } else {
-            td.classList.add('locked');
+          td.onclick=()=>toggle(dateStr,isAvail);
+        } else {
+          td.classList.add('locked');
           }
         }
         row.appendChild(td);
@@ -893,32 +893,86 @@
     };
 
     function renderProfileDisplay(row){
-       document.getElementById('welcome').textContent=`ようこそ ${row.name} さん`;
+       document.getElementById('welcome').textContent=`ようこそ ${row.name||''} さん`;
        document.getElementById('mainProfile').innerHTML=`
-        <div style='display:flex;gap:16px;align-items:center'>
-          <div id='avatarCircle' style='width:100px;height:100px;border-radius:50%;background:#ddd;overflow:hidden;'>
+        <div class="card" style='display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap'>
+          <div id='avatarCircle' style='width:110px;height:110px;border-radius:50%;background:#ddd;overflow:hidden;'>
             ${row.avatar_url ? `<img src='${row.avatar_url}' style='width:100%;height:100%;object-fit:cover;'>` : ''}
           </div>
-          <h2>${row.name}</h2>
-          <button id='editProfBtn'>編集</button>
+          <div style='min-width:220px;flex:1;'>
+            <h2 style='margin:0 0 8px;'>${row.name||'未設定'}</h2>
+            <div style='color:#555;font-size:.95rem;line-height:1.9;'>
+              <div>電話: ${row.phone||'未設定'}</div>
+              <div>所属大学: ${row.university||'未設定'}</div>
+              <div>ゴルフ歴: ${row.golf_years??0} 年</div>
+              <div>キャディ歴: ${row.caddy_years??0} 年</div>
+            </div>
+          </div>
+          <div style='flex-basis:100%;margin-top:8px;'>
+            <div style='font-weight:700;margin-bottom:6px;'>アピール</div>
+            <div style='white-space:pre-wrap;background:#f8f9fa;border:1px solid #eee;border-radius:6px;padding:10px;'>${row.appeal||'未設定'}</div>
+          </div>
+          <div style='margin-left:auto;'>
+            <button id='editProfBtn'>編集</button>
+          </div>
         </div>`;
-       document.getElementById('editProfBtn').onclick=renderProfileForm.bind(null,row);
+       const btn = document.getElementById('editProfBtn');
+       if (btn) btn.onclick=renderProfileForm.bind(null,row);
     }
 
     function renderProfileForm(row={}){
       document.getElementById('mainProfile').innerHTML=`
-        <form id='profForm' style='max-width:480px'>
-          <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
-          <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
-          <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
-          <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
-          <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
-          <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
-          <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
-          <label>アピール<textarea id='pAppeal'>${row.appeal??""}</textarea></label><br>
-          <button type='submit'>保存</button>
-        </form>`;
-      document.getElementById('profForm').onsubmit=saveProfile.bind(null,row);
+        <div style='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap'>
+          <form id='profForm' style='max-width:520px;flex:1 1 320px'>
+            <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
+            <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
+            <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
+            <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
+            <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
+            <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
+            <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
+            <label>アピール<textarea id='pAppeal' rows='5'>${row.appeal??""}</textarea></label><br>
+            <button type='submit'>保存</button>
+          </form>
+          <div id='profPreview' class='card' style='flex:1 1 260px;min-width:260px;'>
+            <div id='ppAvatar' style='width:120px;height:120px;border-radius:50%;background:#ddd;overflow:hidden;'>
+              ${row.avatar_url ? `<img src='${row.avatar_url}' style='width:100%;height:100%;object-fit:cover;'>` : ''}
+            </div>
+            <h3 id='ppName' style='margin:12px 0 8px;'>${row.name||''}</h3>
+            <div class='pp-line'>電話: <span id='ppPhone'>${row.phone||''}</span></div>
+            <div class='pp-line'>所属大学: <span id='ppUni'>${row.university||''}</span></div>
+            <div class='pp-line'>ゴルフ歴: <span id='ppGolf'>${row.golf_years??0}</span> 年</div>
+            <div class='pp-line'>キャディ歴: <span id='ppCaddy'>${row.caddy_years??0}</span> 年</div>
+            <div style='margin-top:8px;font-weight:700;'>アピール</div>
+            <div id='ppAppeal' style='white-space:pre-wrap;background:#f8f9fa;border:1px solid #eee;border-radius:6px;padding:10px;'>${row.appeal||''}</div>
+          </div>
+        </div>`;
+      const form = document.getElementById('profForm');
+      if (form) form.onsubmit=saveProfile.bind(null,row);
+      // 入力即時プレビュー
+      const syncText = (id, viewId, suffix='')=>{
+        const el = document.getElementById(id); const v = document.getElementById(viewId);
+        if (el && v){ el.addEventListener('input', ()=>{ v.textContent = el.value + suffix; }); }
+      };
+      syncText('pName','ppName');
+      syncText('pPhone','ppPhone');
+      syncText('pUni','ppUni');
+      document.getElementById('pGolf')?.addEventListener('input', (e)=>{ const v=document.getElementById('ppGolf'); if(v) v.textContent=e.target.value||'0'; });
+      document.getElementById('pCaddy')?.addEventListener('input', (e)=>{ const v=document.getElementById('ppCaddy'); if(v) v.textContent=e.target.value||'0'; });
+      document.getElementById('pAppeal')?.addEventListener('input', (e)=>{ const v=document.getElementById('ppAppeal'); if(v) v.textContent=e.target.value; });
+      const fileInput = document.getElementById('pAvatar');
+      if (fileInput){
+        fileInput.addEventListener('change', (ev)=>{
+          const file = ev.target.files && ev.target.files[0];
+          if(!file) return;
+          const reader = new FileReader();
+          reader.onload = ()=>{
+            const box = document.getElementById('ppAvatar');
+            if (box){ box.innerHTML = `<img src='${reader.result}' style='width:100%;height:100%;object-fit:cover;'>`; }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
     }
 
     async function saveProfile(row,e){
@@ -946,7 +1000,9 @@
       }
       const file=document.getElementById('pAvatar').files[0];
       if(file){
-        const path=`avatars/${cid||('tmp_'+Date.now())}.jpg`;
+        // ストレージ: 競合を避ける一意キー（フォルダ: caddies）
+        const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
+        const path=`caddies/${cid||('tmp_'+Date.now())}_${Date.now()}.${ext}`;
         const { error:upErr } = await supabase.storage.from('avatars').upload(path,file,{upsert:true});
         if(!upErr){
           const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
@@ -992,17 +1048,17 @@
           `)
           .eq('cid', cid)
           .order('date', { ascending: false, foreignTable: 'bookings' });
-
-      if (error) {
+        
+        if (error) {
         messagesList.innerHTML = `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
-        return;
-      }
-
+          return;
+        }
+        
       if (!bookings || bookings.length === 0) {
         messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">予定はありません</div>';
-        return;
-      }
-
+          return;
+        }
+        
       messagesList.innerHTML = '<h3 style="margin-bottom:16px;color:#333;">予定一覧</h3>';
       bookings.forEach(booking => {
         const bookingDiv = document.createElement('div');
@@ -1050,12 +1106,12 @@
       messagesList.innerHTML = `
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:8px;background:#f0f0f0;border-radius:8px;">
           <button onclick="showBookingList()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">←</button>
-          <div>
+                <div>
             <div style="font-weight:bold;">${chatPartnerName}</div>
             <div style="font-size:0.8rem;color:#666;">予定に関する連絡</div>
-          </div>
-        </div>
-      `;
+                </div>
+            </div>
+          `;
 
       // 入力欄を表示
       document.getElementById('chatInputArea').style.display = 'flex';
@@ -1067,12 +1123,12 @@
         .or(`and(sender_id.eq.${cid},receiver_id.eq.${chatPartnerId}),and(sender_id.eq.${chatPartnerId},receiver_id.eq.${cid})`)
         .eq('booking_id', currentBookingId)
         .order('created_at', { ascending: true });
-
-      if (error) {
+        
+        if (error) {
         messagesList.innerHTML += `<div style='color:#e74c3c;'>エラー: ${error.message}</div>`;
-        return;
-      }
-
+          return;
+        }
+        
       if (!messages || messages.length === 0) {
         messagesList.innerHTML += '<div style="text-align:center;color:#aaa;margin-top:20px;">メッセージはありません</div>';
       } else {
@@ -1096,17 +1152,17 @@
       if (!content || !chatPartnerId || !currentBookingId) return;
       
       const { error } = await supabase.from('messages').insert({
-        sender_type: 'caddy', 
-        sender_id: cid,
-        receiver_type: 'golf_course', 
+            sender_type: 'caddy',
+            sender_id: cid,
+            receiver_type: 'golf_course',
         receiver_id: chatPartnerId,
         booking_id: currentBookingId,
         subject: '予定に関する連絡',
         content,
         is_read: false
-      });
-      
-      if (error) {
+          });
+        
+        if (error) {
         alert('送信エラー: ' + error.message);
         return;
       }
