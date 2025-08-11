@@ -481,12 +481,15 @@
       });
     }
 
-    // ロール選択のイベントリスナー
+    // ロール選択のイベントリスナー（URLに固定してログイン先を制御）
     roleOptions.forEach(option => {
       option.addEventListener('click', () => {
         role = option.dataset.role;
         updateRoleSelection();
         updateFormDisplay();
+        const params = new URLSearchParams(location.search);
+        params.set('role', role);
+        history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
       });
     });
 
@@ -697,6 +700,13 @@
               best_score: bestScore ? Number(bestScore) : null,
               appeal,
               greeting
+            }, { onConflict: 'email' });
+          } else if (role === 'golf'){
+            await supabase.from('golf_courses').upsert({
+              email,
+              name,
+              address,
+              phone
             }, { onConflict: 'email' });
           }
           showMessage('確認メールを送信しました。メールをご確認ください。','success');
