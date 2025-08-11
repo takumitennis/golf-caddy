@@ -135,7 +135,7 @@
   <div id="welcome" style="margin-top:10px;"></div>
   <div id="mainProfile" style="margin-top:15px;"></div>
   <div id="mainShift" class="hidden" style="margin-top:15px;">
-    <div id="lockInfo" style="margin:8px 0;color:#d32f2f;"></div>
+    <div id="lockInfo" style="margin:8px 0;color:#d32f2f;display:none;"></div>
     <div style="display:flex;align-items:center;gap:10px;">
       <button id="prevMonth">◀</button>
       <span id="calTitle"></span>
@@ -143,7 +143,7 @@
     </div>
     <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
     <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
-      <small>○ = 空きあり / ❌ = 空きなし（編集は「シフトを編集する」を押してから。締切は前月15日）</small>
+      <small>○ = 空きあり / ❌ = 空きなし（編集は「シフトを編集する」を押してから）</small>
   </div>
     <div style="margin-top:12px;display:flex;gap:8px;">
       <button id="editShiftBtn" style="padding:8px 16px;">シフトを編集する</button>
@@ -531,11 +531,9 @@
       const bookedMap = new Map(); // date -> golf course name
       (assigns||[]).forEach(a=>{ bookedMap.set(a.date, a.golf_courses?.name || '予約'); });
 
-      // determine lock flag (editing allowed?)
-      const deadline=new Date(calYear, calMonth-1, 15); // 前月15日
-      const today=new Date();
-      const locked = today > deadline;
-      lockInfo.textContent= locked? `${calMonth+1}月分の編集締切（前月15日）を過ぎています` : '';
+      // 締切アラートは廃止
+      const locked = false;
+      if (lockInfo) lockInfo.textContent = '';
 
       calTable.innerHTML='';
       const headerRow=document.createElement('tr');
@@ -556,7 +554,7 @@
         } else {
         td.className=isAvail?'cal-ok':'cal-ng';
         td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
-          if(!locked && editMode){
+          if(editMode){
           td.onclick=()=>toggle(dateStr,isAvail);
         } else {
           td.classList.add('locked');
@@ -897,7 +895,7 @@
        document.getElementById('mainProfile').innerHTML=`
         <div class="card" style='display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap'>
           <div id='avatarCircle' style='width:110px;height:110px;border-radius:50%;background:#ddd;overflow:hidden;'>
-            ${row.avatar_url ? `<img src='${row.avatar_url}' style='width:100%;height:100%;object-fit:cover;'>` : ''}
+            ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : ''}
           </div>
           <div style='min-width:220px;flex:1;'>
             <h2 style='margin:0 0 8px;'>${row.name||'未設定'}</h2>
@@ -913,7 +911,7 @@
             <div style='white-space:pre-wrap;background:#f8f9fa;border:1px solid #eee;border-radius:6px;padding:10px;'>${row.appeal||'未設定'}</div>
           </div>
           <div style='margin-left:auto;'>
-            <button id='editProfBtn'>編集</button>
+          <button id='editProfBtn'>編集</button>
           </div>
         </div>`;
        const btn = document.getElementById('editProfBtn');
@@ -924,19 +922,19 @@
       document.getElementById('mainProfile').innerHTML=`
         <div style='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap'>
           <form id='profForm' style='max-width:520px;flex:1 1 320px'>
-            <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
-            <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
-            <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
-            <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
-            <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
-            <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
-            <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
+          <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
+          <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
+          <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
+          <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
+          <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
+          <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
+          <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
             <label>アピール<textarea id='pAppeal' rows='5'>${row.appeal??""}</textarea></label><br>
-            <button type='submit'>保存</button>
+          <button type='submit'>保存</button>
           </form>
           <div id='profPreview' class='card' style='flex:1 1 260px;min-width:260px;'>
             <div id='ppAvatar' style='width:120px;height:120px;border-radius:50%;background:#ddd;overflow:hidden;'>
-              ${row.avatar_url ? `<img src='${row.avatar_url}' style='width:100%;height:100%;object-fit:cover;'>` : ''}
+              ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : ''}
             </div>
             <h3 id='ppName' style='margin:12px 0 8px;'>${row.name||''}</h3>
             <div class='pp-line'>電話: <span id='ppPhone'>${row.phone||''}</span></div>
@@ -1005,11 +1003,12 @@
         const path=`caddies/${cid||('tmp_'+Date.now())}_${Date.now()}.${ext}`;
         const { error:upErr } = await supabase.storage.from('avatars').upload(path,file,{upsert:true});
         if(!upErr){
-          const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-          payload.avatar_url=urlData.publicUrl;
+        const { data:urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+        payload.avatar_url=urlData.publicUrl;
           await supabase.from('caddies').update({ avatar_url: payload.avatar_url }).eq('cid', cid);
-          // 画面即時反映
-          renderProfileDisplay({ ...row, ...payload, cid });
+          // 画面即時反映（キャッシュ回避のためクエリ付与）
+          const updated = { ...row, ...payload, cid, avatar_url: payload.avatar_url + `?v=${Date.now()}` };
+          renderProfileDisplay(updated);
         }
       }
     }
