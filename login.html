@@ -457,7 +457,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // URL クエリからロールを取得
+    // URL クエリからロールを取得（なければエントリーポイントで分ける運用を想定）
     const urlParams = new URLSearchParams(location.search);
     let role = urlParams.get("role") || "caddy";
     let mode = "login";
@@ -481,17 +481,8 @@
       });
     }
 
-    // ロール選択のイベントリスナー（URLに固定してログイン先を制御）
-    roleOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        role = option.dataset.role;
-        updateRoleSelection();
-        updateFormDisplay();
-        const params = new URLSearchParams(location.search);
-        params.set('role', role);
-        history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
-      });
-    });
+    // ロール選択UIは撤去し、URLのroleだけを使用（ロール不要・事故防止）
+    document.querySelector('.role-selector').style.display='none';
 
     // フォーム表示の更新
     function updateFormDisplay() {
@@ -647,12 +638,8 @@
             
             // ロールに応じてリダイレクト
             setTimeout(() => {
-              if (role === "golf") {
-                location.href = "golf_dashboard.html";
-              } else {
-                location.href = "caddy_dashboard.html";
-              }
-            }, 1000);
+              location.href = role === 'golf' ? 'golf_dashboard.html' : 'caddy_dashboard.html';
+            }, 600);
           }
         } else {
           // サインアップ（2ステップの必須項目チェック）
