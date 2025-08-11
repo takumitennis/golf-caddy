@@ -88,7 +88,7 @@
     .hero-content {
       position: relative;
       z-index: 2;
-      max-width: 800px;
+      max-width: 1100px;
       padding: 0 2rem;
       animation: fadeInUp 1s ease-out;
     }
@@ -472,7 +472,7 @@
 
     .benefits-header h2 {
       font-size: 3rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2.2rem;
       font-weight: 700;
       text-shadow: 0 4px 12px rgba(0,0,0,0.6);
       color: #ffffff;
@@ -598,6 +598,8 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
+      .hero-content{ max-width: 94%; padding: 0 1.2rem; }
+      .hero-bg{ background-position: center top; filter: brightness(0.9); }
       .hero-title {
         font-size: 2.5rem;
       }
@@ -656,6 +658,7 @@
 
       .benefits-header h2 {
         font-size: 2.2rem;
+        margin-bottom: 2rem;
       }
 
       .benefits-header p {
@@ -782,7 +785,7 @@
     <div class="hero-content">
       <h1 class="hero-title">ゴルフ場とキャディの<br>最適なマッチング</h1>
       <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、より良いゴルフ体験を提供します</p>
-      <div class="cta-buttons">
+      <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
       </div>
