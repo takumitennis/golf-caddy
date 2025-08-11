@@ -502,8 +502,32 @@
 
     const pm = document.getElementById('prevMonth');
     const nm = document.getElementById('nextMonth');
-    if (pm) pm.onclick=()=>{if(--calMonth<0){calMonth=11;calYear--;} renderCal();};
-    if (nm) nm.onclick=()=>{if(++calMonth>11){calMonth=0;calYear++;} renderCal();};
+    if (pm) pm.onclick=()=>{ if(--calMonth<0){calMonth=11;calYear--;} renderCal(); };
+    if (nm) nm.onclick=()=>{ if(++calMonth>11){calMonth=0;calYear++;} renderCal(); };
+
+    function isMonthLocked(y, m){
+      // y: 年, m: 月(0-11)。対象月の編集締切は「前月15日」
+      const deadline = new Date(y, m-1, 15);
+      const today = new Date();
+      return today > deadline;
+    }
+
+    function setInitialEditableMonth(){
+      const today = new Date();
+      let y = today.getFullYear();
+      let m = today.getMonth();
+      // 直近で編集可能な月（12か月先までを探索）
+      for(let i=0;i<12;i++){
+        const yy = y + Math.floor((m+i)/12);
+        const mm = (m+i)%12;
+        if(!isMonthLocked(yy, mm)){
+          calYear = yy; calMonth = mm; return;
+        }
+      }
+      // 全て締切済みなら今月にフォールバック
+      calYear = today.getFullYear();
+      calMonth = today.getMonth();
+    }
 
     let editMode = false; // 編集モード: trueの時だけカレンダーを変更可能
 
@@ -531,9 +555,9 @@
       const bookedMap = new Map(); // date -> golf course name
       (assigns||[]).forEach(a=>{ bookedMap.set(a.date, a.golf_courses?.name || '予約'); });
 
-      // 締切アラートは廃止
-      const locked = false;
-      if (lockInfo) lockInfo.textContent = '';
+      // 前月15日締切ルール（表示上はアラートを出さない）
+      const locked = isMonthLocked(calYear, calMonth);
+      if (lockInfo) { lockInfo.textContent = ''; lockInfo.style.display='none'; }
 
       calTable.innerHTML='';
       const headerRow=document.createElement('tr');
@@ -554,7 +578,7 @@
         } else {
         td.className=isAvail?'cal-ok':'cal-ng';
         td.innerHTML=`<small>${day}</small><br>${isAvail?'<span class="ok-circle"></span>':'❌'}`;
-          if(editMode){
+          if(editMode && !locked){
           td.onclick=()=>toggle(dateStr,isAvail);
         } else {
           td.classList.add('locked');
@@ -829,6 +853,8 @@
       if(k==='prof') btnMainProfEl?.classList.add('active');
       if(k==='shift'){
         btnMainShiftEl?.classList.add('active');
+        // 初回は編集可能な直近月をセットしてから描画
+        setInitialEditableMonth();
         editMode = false; // シフトタブ入場時は通常モード
         pendingInserts.clear(); pendingDeletes.clear();
         const saveBtn = document.getElementById('saveShiftBtn');
@@ -860,6 +886,11 @@
     const editBtn = document.getElementById('editShiftBtn');
     const saveBtn = document.getElementById('saveShiftBtn');
     if (editBtn) editBtn.onclick = ()=>{
+      // 締切チェック（現在表示中の年月）
+      if (isMonthLocked(calYear, calMonth)){
+        alert('編集締め切りを過ぎています');
+        return;
+      }
       editMode = true;
       if (saveBtn) saveBtn.disabled = false;
       editBtn.disabled = true;
