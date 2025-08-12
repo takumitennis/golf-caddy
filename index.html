@@ -279,7 +279,7 @@
     .auth-menu{ position:relative; margin-left:16px; }
     .auth-link{ color:#fff; text-decoration:none; font-weight:600; letter-spacing:.02em; }
     .auth-dropdown{ position:absolute; top:120%; right:0; background:transparent; border:0; border-radius:0; min-width:auto; padding:4px 0; opacity:0; visibility:hidden; transform: translateY(-6px); transition: var(--transition); z-index: 12; box-shadow:none; backdrop-filter:none; }
-    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:6px 8px; font-size:.95rem; border:none; }
+    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:6px 8px; font-size:1rem; border:none; text-align:center; }
     .auth-dropdown a:last-child{ border:none; }
     .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateY(0); }
 
@@ -321,9 +321,10 @@
       color: #fff;
       text-decoration: none;
       padding: 6px 8px;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 500;
       border: none;
+      text-align: center;
       transition: var(--transition);
     }
 
@@ -555,9 +556,9 @@
         min-width: auto !important;
         width: max-content;
         max-width: calc(100vw - 24px);
-        left: auto !important;
-        right: 0 !important;
-        transform: translateY(0) !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) translateY(0) !important;
         padding: 4px 0;
         background: transparent !important;
         border: 0 !important;
