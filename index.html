@@ -105,11 +105,11 @@
     }
 
     .hero-title {
-      font-size: 3.5rem;
+      font-size: 4rem;
       font-weight: 700;
       margin-bottom: 1.8rem; /* 主題と副題の間を少し広げる */
       text-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      letter-spacing: 0.02em; /* 文字の間隔をわずかに広げる */
+      letter-spacing: 0.25em; /* 文字感覚をフォントの約1/4程度に */
       line-height: 1.25; /* 行間も少しだけ広げる */
       text-wrap: balance;
       word-break: keep-all;
@@ -192,7 +192,7 @@
       left: 0;
       right: 0;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end; /* 右寄せ */
       align-items: center;
       padding: 1.25rem 2rem;
       background: transparent; /* モザイク除去 */
@@ -271,7 +271,7 @@
     }
 
     /* Auth dropdown (desktop) */
-    .auth-menu{ position:relative; margin-left:auto; }
+    .auth-menu{ position:relative; margin-left:16px; }
     .auth-link{ color:#fff; text-decoration:none; font-weight:600; letter-spacing:.02em; }
     .auth-dropdown{ position:absolute; top:120%; right:0; background:rgba(0,0,0,.92); border:1px solid rgba(255,255,255,.15); border-radius:8px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateY(-6px); transition: var(--transition); z-index: 12; }
     .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.95rem; border-bottom:1px solid rgba(255,255,255,.1); }
@@ -616,7 +616,7 @@
       .auth-menu{ display:none; }
       .hero-content{ max-width: 96%; padding: 0 1.6rem; }
       .hero-bg{ background-position: center top; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(2rem, 7vw, 2.6rem); letter-spacing: 0.01em; line-height: 1.28; }
+      .hero-title { font-size: clamp(2.2rem, 8vw, 3rem); letter-spacing: 0.18em; line-height: 1.3; }
       .hero-subtitle { font-size: clamp(1rem, 3.6vw, 1.2rem); line-height: 1.7; }
 
       .cta-buttons {
@@ -792,10 +792,8 @@
       <div class="auth-menu">
         <a class="auth-link" href="#">会員登録/ログイン</a>
         <div class="auth-dropdown">
-          <a href="login.html?role=golf">ゴルフ場でログイン</a>
-          <a href="login.html?role=golf&mode=signup">ゴルフ場で会員登録</a>
-          <a href="login.html?role=caddy">キャディでログイン</a>
-          <a href="login.html?role=caddy&mode=signup">キャディで会員登録</a>
+          <a href="login.html">ログイン</a>
+          <a href="login.html?mode=signup">会員登録</a>
         </div>
       </div>
     </nav>
@@ -806,7 +804,7 @@
 
     <div class="hero-content">
       <h1 class="hero-title">いつでもキャディをそばに</h1>
-      <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、より良いゴルフ体験を提供します</p>
+      <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
