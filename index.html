@@ -506,16 +506,18 @@
     /* Responsive Design */
     @media (max-width: 768px) {
       .hamburger{ display:none; }
-      .mobile-login{ display:inline-flex; position:absolute; right:12px; top:10px; padding:6px 10px; border:1px solid rgba(255,255,255,.35); border-radius:8px; background:rgba(0,0,0,.25); color:#fff; text-decoration:none; font-weight:700; z-index:20; font-size: 0.8rem; line-height: 1; }
+      /* モバイルはログインをナビと同列に表示 */
+      .nav-auth-mobile{ display:flex !important; }
+      #spLoginTab{ cursor:pointer; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
-      .top-nav { position:absolute; top:0; left:0; right:0; padding: 0.6rem 6.4rem 0.6rem 0.8rem; gap: 8px; z-index: 15; white-space: nowrap; }
+      .top-nav { position:absolute; top:0; left:0; right:0; padding: 0.6rem 0.8rem; gap: 8px; z-index: 15; white-space: nowrap; justify-content:center; }
       .nav-main { gap: 0.4rem; flex-wrap: nowrap; white-space: nowrap; }
       .nav-item { width:auto; max-width:none; }
       .nav-tab { padding: 0.3rem 0.4rem; font-size: 0.72rem; width:auto; border-radius: 8px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
-      .hero-content{ max-width: 96%; padding: 76px 1rem 0; }
+      .hero-content{ max-width: 96%; padding: 64px 1rem 0; }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(15px, 4.6vw, 18px); letter-spacing: 0; line-height: 1.05; white-space: nowrap; overflow: hidden; max-width: 92vw; margin: 0 auto 0.8rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+      .hero-title { font-size: clamp(16px, 4.2vw, 19px); letter-spacing: 0; line-height: 1.05; white-space: nowrap; overflow: hidden; max-width: 92vw; margin: 0 auto 0.8rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
       .hero-subtitle { font-size: clamp(0.85rem, 3.2vw, 0.95rem); line-height: 1.55; }
 
       .cta-buttons {
@@ -633,7 +635,6 @@
 </head>
 <body>
   <header>
-    <a href="login.html?role=golf" class="mobile-login" aria-label="login">ログイン</a>
     <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
@@ -655,6 +656,13 @@
             <a href="#caddy-benefits" class="dropdown-item">メリット</a>
             <a href="#features" class="dropdown-item">機能紹介</a>
             <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
+          </div>
+        </div>
+        <div class="nav-item nav-auth-mobile" style="display:none;">
+          <a href="#" class="nav-tab" id="spLoginTab">ログイン</a>
+          <div class="dropdown-menu" id="spLoginDropdown">
+            <a href="login.html?role=golf" class="dropdown-item">ゴルフ場</a>
+            <a href="login.html?role=caddy" class="dropdown-item">キャディ</a>
           </div>
         </div>
         
@@ -854,4 +862,5 @@
     }
   </script>
 </body>
+</html>
 </html>
