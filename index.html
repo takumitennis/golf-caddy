@@ -402,12 +402,10 @@
 
     /* Benefits sections with improved design */
     .benefits-section {
-      padding: 5rem 0;
+      padding: 3rem 0;
       margin: 0;
       position: relative;
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      background: #f2f1ee;
     }
 
     .benefits-section .container {
@@ -418,151 +416,46 @@
       padding: 0 2rem;
     }
 
-    .benefits-section.golf-course-benefits {
-      background: linear-gradient(135deg, #2d5a2d 0%, #4a8c4a 50%, #6bb76b 100%) !important;
-      background-image: url('images/ゴルフ場.jpg') !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      background-attachment: fixed !important;
-    }
+    .benefits-section.golf-course-benefits { background: #f2f1ee !important; }
 
-    .benefits-section.golf-course-benefits::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1;
-    }
+    .benefits-section.golf-course-benefits::after { display:none; }
 
-    .benefits-section.caddy-benefits {
-      background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%) !important;
-      background-image: url('images/キャディ.jpg') !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      background-attachment: fixed !important;
-    }
+    .benefits-section.caddy-benefits { background: #f2f1ee !important; }
 
-    .benefits-section.caddy-benefits::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1;
-    }
+    .benefits-section.caddy-benefits::after { display:none; }
 
-    .benefits-section.golfer-benefits {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%) !important;
-      background-image: url('images/ゴルファー.jpg') !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      background-attachment: fixed !important;
-    }
+    .benefits-section.golfer-benefits { display:none; }
 
-    .benefits-section.golfer-benefits::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1;
-    }
+    .benefits-section.golfer-benefits::after { display:none; }
 
     .benefits-header {
       text-align: center;
       margin-bottom: 4rem;
     }
 
-    .benefits-header h2 {
-      font-size: 3rem;
-      margin-bottom: 2.2rem;
-      font-weight: 700;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      color: #ffffff;
-      letter-spacing: -0.02em;
-    }
+    .benefits-header h2 { font-size:2rem; margin-bottom:1rem; font-weight:700; color:#111; text-shadow:none; letter-spacing:-0.02em; }
 
-    .benefits-header p {
-      font-size: 1.3rem;
-      color: #f8f9fa;
-      max-width: 700px;
-      margin: 0 auto;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-      line-height: 1.6;
-    }
+    .benefits-header p { font-size:1rem; color:#333; max-width:800px; margin:0 auto; text-shadow:none; line-height:1.8; }
 
-    .benefits-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2.5rem;
-      margin-top: 3rem;
-    }
+    .benefits-grid { display:block; margin-top:1.5rem; }
 
-    .benefit-card {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 3rem 2.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(10px);
-      text-align: center;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
+    .benefit-card { background: transparent; padding: 0 0 1.25rem; border:none; box-shadow:none; text-align:left; }
 
-    .benefit-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-      transform: scaleX(0);
-      transition: var(--transition);
-    }
+    .benefit-card::before { display:none; }
 
-    .benefit-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-hover);
-    }
+    .benefit-card:hover { transform:none; box-shadow:none; }
 
-    .benefit-card:hover::before {
-      transform: scaleX(1);
-    }
+    /* removed hover bar */
 
-    .benefit-title {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
-      line-height: 1.3;
-      color: #2d3748;
-    }
+    .benefit-title { font-size:1.25rem; font-weight:700; margin-bottom:.5rem; color:#111; }
 
-    .benefit-description {
-      color: #4a5568;
-      line-height: 1.7;
-      font-size: 1.05rem;
-      font-weight: 400;
-    }
+    .benefit-description { color:#222; line-height:1.8; font-size:1rem; font-weight:400; }
 
-    .golf-course-benefits .benefits-header h2 { color: #006aad; }
-    .golf-course-benefits .benefit-title { color: #006aad; }
+    .golf-course-benefits .benefits-header h2 { color:#111; }
+    .golf-course-benefits .benefit-title { color:#111; }
 
-    .caddy-benefits .benefits-header h2 { color: var(--primary-color); }
-    .caddy-benefits .benefit-title { color: var(--primary-color); }
+    .caddy-benefits .benefits-header h2 { color:#111; }
+    .caddy-benefits .benefit-title { color:#111; }
 
     .golfer-benefits .benefits-header h2 { color: #8b5cf6; }
     .golfer-benefits .benefit-title { color: #8b5cf6; }
@@ -795,35 +688,7 @@
   </header>
 
   <div class="content-wrapper">
-    <!-- Features Section -->
-    <section id="features" class="features">
-      <div class="container">
-        <div class="feature loading">
-          <h3>🎯 スマートマッチング</h3>
-          <p>AI技術を活用した最適なマッチングシステムで、ゴルフ場のニーズとキャディのスキルを自動でマッチングします。</p>
-        </div>
-        <div class="feature loading">
-          <h3>📅 効率的なスケジュール管理</h3>
-          <p>リアルタイムの空き状況確認と自動スケジュール調整で、キャディの配置を最適化します。</p>
-        </div>
-        <div class="feature loading">
-          <h3>💬 リアルタイムコミュニケーション</h3>
-          <p>内蔵メッセージングシステムで、ゴルフ場とキャディ間のスムーズなコミュニケーションを実現します。</p>
-        </div>
-        <div class="feature loading">
-          <h3>📊 詳細な分析レポート</h3>
-          <p>パフォーマンス分析とレポート機能で、サービスの品質向上と効率化をサポートします。</p>
-        </div>
-        <div class="feature loading">
-          <h3>🎓 研修プログラム</h3>
-          <p>キャディのスキル向上のための包括的な研修プログラムを提供し、サービスの質を向上させます。</p>
-        </div>
-        <div class="feature loading">
-          <h3>🔒 セキュアなシステム</h3>
-          <p>最新のセキュリティ技術で、お客様の情報と取引を安全に保護します。</p>
-        </div>
-      </div>
-    </section>
+    <!-- Features Section (removed per request) -->
 
     <!-- Golf Course Benefits -->
     <section id="golf-course-benefits" class="benefits-section golf-course-benefits">
