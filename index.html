@@ -105,23 +105,28 @@
     }
 
     .hero-title {
-      font-size: 4rem;
+      font-size: 3rem;
       font-weight: 700;
-      margin-bottom: 1.8rem; /* 主題と副題の間を少し広げる */
+      margin-bottom: 1.2rem;
       text-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      letter-spacing: 0.25em; /* 文字感覚をフォントの約1/4程度に */
-      line-height: 1.25; /* 行間も少しだけ広げる */
-      text-wrap: balance;
+      letter-spacing: 0.06em;
+      line-height: 1.2;
       word-break: keep-all;
     }
 
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    .hero-line1, .hero-line2 { display: block; opacity: 0; }
+    .hero-line1 { animation: slideInRight 0.7s ease-out 0s forwards; }
+    .hero-line2 { animation: slideInRight 0.7s ease-out 0.18s forwards; }
+
     .hero-subtitle {
-      font-size: 1.3rem;
-      margin-bottom: 2.5rem;
+      font-size: 1.2rem;
+      margin-bottom: 2.2rem;
       text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-      opacity: 0.95;
+      opacity: 0;
       font-weight: 400;
       text-wrap: pretty;
+      animation: slideInRight 0.7s ease-out 0.36s forwards;
     }
 
     .cta-buttons {
@@ -517,7 +522,7 @@
       .nav-tab { padding: 0.3rem 0.4rem; font-size: 0.72rem; width:auto; border-radius: 8px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
       .hero-content{ max-width: 96%; padding: 64px 1rem 0; }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(16px, 4.2vw, 19px); letter-spacing: 0; line-height: 1.05; white-space: nowrap; overflow: hidden; max-width: 92vw; margin: 0 auto 0.8rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+      .hero-title { font-size: clamp(18px, 5vw, 22px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
       .hero-subtitle { font-size: clamp(0.85rem, 3.2vw, 0.95rem); line-height: 1.55; }
 
       .cta-buttons {
@@ -682,8 +687,11 @@
     </nav>
 
     <div class="hero-content">
-      <h1 class="hero-title">いつでもキャディをそばに</h1>
-      <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+      <h1 class="hero-title">
+        <span class="hero-line1">ゴルフ場に</span>
+        <span class="hero-line2">いつでもキャディを</span>
+      </h1>
+      <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、より良いゴルフ体験を提供します</p>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
