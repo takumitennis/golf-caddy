@@ -436,16 +436,21 @@
 
     .benefits-header {
       text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 1.8rem; /* 余白を詰める */
     }
 
     .benefits-header h2 { font-size:2rem; margin-bottom:1rem; font-weight:700; color:#111; text-shadow:none; letter-spacing:-0.02em; }
 
     .benefits-header p { font-size:1rem; color:#333; max-width:800px; margin:0 auto; text-shadow:none; line-height:1.8; }
 
-    .benefits-grid { display:block; margin-top:1.5rem; }
+    .benefits-grid { display:block; margin-top:1rem; }
 
-    .benefit-card { background: transparent; padding: 0 0 1.25rem; border:none; box-shadow:none; text-align:left; }
+    .benefit-card { background: transparent; padding: 0 0 1.25rem; border:none; box-shadow:none; text-align:left; display:flex; gap:16px; align-items:flex-start; }
+
+    .benefit-thumb { width: 92px; height: 92px; border-radius: 10px; overflow: hidden; flex: 0 0 92px; background: #e9ecef; }
+    .benefit-thumb img { width:100%; height:100%; object-fit: cover; display:block; }
+
+    .benefit-content { flex: 1; text-align: right; }
 
     .benefit-card::before { display:none; }
 
@@ -735,16 +740,25 @@
         </div>
         <div class="benefits-grid">
           <div class="benefit-card loading">
+            <div class="benefit-thumb"><img src="images/ゴルフ場.jpg" alt="人材不足の解決"></div>
+            <div class="benefit-content">
             <h3 class="benefit-title">人材不足の解決</h3>
             <p class="benefit-description">登録キャディから最適な人材を選定し、人材不足の問題を解決します。経験豊富なキャディがいつでも利用可能です。</p>
+            </div>
           </div>
           <div class="benefit-card loading">
+            <div class="benefit-thumb"><img src="images/キャディ.jpg" alt="コスト削減"></div>
+            <div class="benefit-content">
             <h3 class="benefit-title">コスト削減</h3>
             <p class="benefit-description">固定費を削減し、需要に応じた柔軟な人材配置が可能になります。効率的な運営で収益性を向上させます。</p>
+            </div>
           </div>
           <div class="benefit-card loading">
+            <div class="benefit-thumb"><img src="images/ゴルフ場.jpg" alt="サービス品質向上"></div>
+            <div class="benefit-content">
             <h3 class="benefit-title">サービス品質向上</h3>
             <p class="benefit-description">厳選されたキャディが提供する高品質なサービスで、お客様満足度の向上とリピート率の向上を実現します。</p>
+            </div>
           </div>
         </div>
       </div>
