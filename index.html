@@ -450,7 +450,7 @@
     .benefit-thumb { width: 92px; height: 92px; border-radius: 0; overflow: hidden; flex: 0 0 92px; background: #e9ecef; }
     .benefit-thumb img { width:100%; height:100%; object-fit: cover; display:block; }
 
-    .benefit-content { flex: 1; text-align: right; }
+    .benefit-content { flex: 1; text-align: left; }
 
     .benefit-card::before { display:none; }
 
@@ -467,6 +467,11 @@
 
     .caddy-benefits .benefits-header h2 { color:#111; }
     .caddy-benefits .benefit-title { color:#111; }
+    /* キャディ向けにも同じ縮小・レイアウト適用 */
+    .caddy-benefits .benefits-header h2 { font-size: 1.35rem; }
+    .caddy-benefits .benefits-header p { font-size: 0.67rem; }
+    .caddy-benefits .benefit-title { font-size: 0.84rem; }
+    .caddy-benefits .benefit-description { font-size: 0.67rem; line-height: 1.6; }
 
     .golfer-benefits .benefits-header h2 { color: #8b5cf6; }
     .golfer-benefits .benefit-title { color: #8b5cf6; }
@@ -742,7 +747,7 @@
       <div class="container">
         <div class="benefits-header">
           <h2>ゴルフ場向けサービス</h2>
-          <p>経験豊富なキャディを効率的に確保し、お客様に最高のゴルフ体験を提供</p>
+          <p>経験豊富なキャディを効率的に確保し、<br>お客様に最高のゴルフ体験を提供</p>
         </div>
         <div class="benefits-grid">
           <div class="benefit-card loading">
@@ -775,20 +780,29 @@
       <div class="container">
         <div class="benefits-header">
           <h2>キャディ向けサービス</h2>
-          <p>自分のスケジュールに合わせて働き、スキル向上の機会を提供</p>
+            <p>自分のスケジュールに合わせて働き、<br>スキル向上の機会を提供</p>
         </div>
         <div class="benefits-grid">
           <div class="benefit-card loading">
-            <h3 class="benefit-title">柔軟な働き方</h3>
-            <p class="benefit-description">自分の都合に合わせてシフトを選択でき、ワークライフバランスを保ちながら働くことができます。</p>
+            <div class="benefit-thumb"><img src="https://picsum.photos/seed/flex/300/300" alt="柔軟な働き方"></div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">柔軟な働き方</h3>
+              <p class="benefit-description">自分の都合に合わせてシフトを選択でき、ワークライフバランスを保ちながら働くことができます。</p>
+            </div>
           </div>
           <div class="benefit-card loading">
-            <h3 class="benefit-title">収入向上</h3>
-            <p class="benefit-description">複数のゴルフ場で働くことで収入を増やし、スキルに応じた適正な報酬を得ることができます。</p>
+            <div class="benefit-thumb"><img src="https://picsum.photos/seed/income/300/300" alt="収入向上"></div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">収入向上</h3>
+              <p class="benefit-description">複数のゴルフ場で働くことで収入を増やし、スキルに応じた適正な報酬を得ることができます。</p>
+            </div>
           </div>
           <div class="benefit-card loading">
-            <h3 class="benefit-title">スキル開発</h3>
-            <p class="benefit-description">様々なゴルフ場での経験と研修プログラムを通じて、キャリアアップとスキル向上を実現します。</p>
+            <div class="benefit-thumb"><img src="https://picsum.photos/seed/skill/300/300" alt="スキル開発"></div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">スキル開発</h3>
+              <p class="benefit-description">様々なゴルフ場での経験と研修プログラムを通じて、キャリアアップとスキル向上を実現します。</p>
+            </div>
           </div>
         </div>
       </div>
