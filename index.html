@@ -614,10 +614,10 @@
       .hamburger{ display:block; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
-      .hero-content{ max-width: 96%; padding: 0 1.6rem; }
-      .hero-bg{ background-position: center top; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(2.2rem, 8vw, 3rem); letter-spacing: 0.18em; line-height: 1.3; }
-      .hero-subtitle { font-size: clamp(1rem, 3.6vw, 1.2rem); line-height: 1.7; }
+      .hero-content{ max-width: 96%; padding: 0 1rem; }
+      .hero-bg{ background-position: center center; filter: brightness(0.9); }
+      .hero-title { font-size: clamp(1.9rem, 7vw, 2.4rem); letter-spacing: 0.08em; line-height: 1.25; }
+      .hero-subtitle { font-size: clamp(0.95rem, 3.5vw, 1.1rem); line-height: 1.7; }
 
       .cta-buttons {
         flex-direction: column;
@@ -629,32 +629,10 @@
         max-width: 300px;
       }
 
-      .top-nav {
-        flex-direction: column;
-        align-items: center;
-        padding: 1rem;
-        gap: 1rem;
-      }
-
-      .nav-main {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        width: 100%;
-      }
-
-      .nav-item {
-        width: 100%;
-        text-align: center;
-        max-width: 200px;
-      }
-
-      .nav-tab {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-        width: 100%;
-        border-radius: var(--border-radius);
-      }
+      .top-nav { flex-direction: row; justify-content: center; gap: 10px; padding: 0.8rem 1rem; }
+      .nav-main { display:flex; flex-direction: row; align-items: center; gap: 0.8rem; width:auto; }
+      .nav-item { width:auto; max-width:none; }
+      .nav-tab { padding: 0.5rem 0.6rem; font-size: 0.9rem; width:auto; border-radius: 8px; }
 
       .login-section {
         flex-direction: column;
