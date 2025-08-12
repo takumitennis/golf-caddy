@@ -278,11 +278,12 @@
     .auth-dropdown a:last-child{ border-bottom:none; }
     .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateY(0); }
 
-    /* Hamburger (mobile) */
+    /* Mobile login button (replacing hamburger) */
+    .mobile-login{ display:none; }
     .hamburger{ display:none; position:absolute; right:12px; top:10px; width:44px; height:40px; border:1px solid rgba(255,255,255,.35); border-radius:8px; background:rgba(0,0,0,.25); z-index:11; }
     .hamburger span{ display:block; height:2px; background:#fff; margin:9px 8px; }
-    .nav-drawer{ display:none; position:absolute; top:0; right:0; width:78vw; max-width:320px; height:100vh; background:rgba(0,0,0,.92); padding:70px 16px 16px; z-index:12; }
-    .nav-drawer a{ display:block; color:#fff; text-decoration:none; padding:12px 8px; border-bottom:1px solid rgba(255,255,255,.2); }
+    .nav-drawer{ display:none; }
+    .nav-drawer a{ display:none; }
 
     .dropdown-menu {
       position: absolute;
@@ -504,13 +505,14 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
-      .hamburger{ display:block; }
+      .hamburger{ display:none; }
+      .mobile-login{ display:inline-flex; position:absolute; right:12px; top:10px; padding:8px 14px; border:1px solid rgba(255,255,255,.35); border-radius:8px; background:rgba(0,0,0,.25); color:#fff; text-decoration:none; font-weight:700; z-index:11; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
       .hero-content{ max-width: 96%; padding: 0 1rem; }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(1.9rem, 7vw, 2.4rem); letter-spacing: 0.08em; line-height: 1.25; }
-      .hero-subtitle { font-size: clamp(0.95rem, 3.5vw, 1.1rem); line-height: 1.7; }
+      .hero-title { font-size: clamp(1.6rem, 6vw, 2rem); letter-spacing: 0.02em; line-height: 1.1; white-space: nowrap; overflow: hidden; }
+      .hero-subtitle { font-size: clamp(0.9rem, 3.5vw, 1rem); line-height: 1.6; }
 
       .cta-buttons {
         flex-direction: column;
@@ -525,7 +527,7 @@
       .top-nav { flex-direction: row; justify-content: center; gap: 10px; padding: 0.8rem 1rem; }
       .nav-main { display:flex; flex-direction: row; align-items: center; gap: 0.8rem; width:auto; }
       .nav-item { width:auto; max-width:none; }
-      .nav-tab { padding: 0.5rem 0.6rem; font-size: 0.9rem; width:auto; border-radius: 8px; }
+      .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.82rem; width:auto; border-radius: 8px; white-space: nowrap; }
 
       .login-section {
         flex-direction: column;
@@ -627,12 +629,13 @@
 </head>
 <body>
   <header>
+    <a href="login.html?role=golf" class="mobile-login" aria-label="login">ログイン</a>
     <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
       <div class="nav-main">
         <div class="nav-item">
-          <a href="#features" class="nav-tab">サービス</a>
+          <a href="#golf-course-benefits" class="nav-tab">サービス</a>
         </div>
         <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">ゴルフ場向け</a>
@@ -650,14 +653,7 @@
             <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
           </div>
         </div>
-        <div class="nav-item">
-          <a href="#golfer-benefits" class="nav-tab">ゴルファー向け</a>
-          <div class="dropdown-menu">
-            <a href="#golfer-benefits" class="dropdown-item">メリット</a>
-            <a href="#features" class="dropdown-item">機能紹介</a>
-            <a href="training-program.html" class="dropdown-item">研修プログラム</a>
-          </div>
-        </div>
+        
       </div>
       <div class="login-section" style="display:none;"></div>
       <div class="auth-menu">
