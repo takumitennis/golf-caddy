@@ -6,10 +6,10 @@
   <title>Golf Dashboard</title>
   <style>
     body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa}
-    h1{margin:0;padding:20px 24px;background:#2c3e50;color:#fff;font-size:1.4rem}
+    h1{margin:0;padding:20px 24px;background:#2c3e50;color:#fff;font-size:1.4rem;text-wrap:balance}
     .container{padding:24px}
-    .tabs-main{display:flex;gap:8px;padding:0 24px;background:#ecf0f1}
-    .tabs-main button{background:#ecf0f1;border:none;padding:12px 16px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
+    .tabs-main{display:flex;gap:8px;padding:0 24px;background:#ecf0f1;flex-wrap:wrap}
+    .tabs-main button{background:#ecf0f1;border:none;padding:12px 16px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
     .tabs-main button.active{border-color:#3498db;background:#fff;border-radius:4px 4px 0 0;color:#3498db;font-weight:bold}
     table{background:#fff;border-radius:6px;overflow:hidden}
     .tabs button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#eaeaea;cursor:pointer}
@@ -17,6 +17,12 @@
     .hidden{display:none}
     form{margin-bottom:30px}
     input,button{padding:8px;margin-right:10px}
+    @media (max-width: 768px){
+      .tabs-main{padding:0 12px}
+      .tabs-main button{padding:10px 12px;font-size:.95rem}
+      table{font-size:.95rem}
+      th,td{padding:6px}
+    }
     th,td{border:1px solid #ccc;padding:8px;text-align:center}
     th{background:#f2f2f2}
     .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}

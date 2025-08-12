@@ -111,6 +111,8 @@
       text-shadow: 0 4px 12px rgba(0,0,0,0.6);
       letter-spacing: 0.02em; /* 文字の間隔をわずかに広げる */
       line-height: 1.25; /* 行間も少しだけ広げる */
+      text-wrap: balance;
+      word-break: keep-all;
     }
 
     .hero-subtitle {
@@ -119,6 +121,7 @@
       text-shadow: 0 2px 8px rgba(0,0,0,0.6);
       opacity: 0.95;
       font-weight: 400;
+      text-wrap: pretty;
     }
 
     .cta-buttons {
@@ -600,13 +603,8 @@
     @media (max-width: 768px) {
       .hero-content{ max-width: 96%; padding: 0 1.6rem; }
       .hero-bg{ background-position: center top; filter: brightness(0.9); }
-      .hero-title {
-        font-size: 2.5rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1.1rem;
-      }
+      .hero-title { font-size: clamp(2rem, 7vw, 2.6rem); letter-spacing: 0.01em; line-height: 1.28; }
+      .hero-subtitle { font-size: clamp(1rem, 3.6vw, 1.2rem); line-height: 1.7; }
 
       .cta-buttons {
         flex-direction: column;
