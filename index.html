@@ -270,6 +270,14 @@
       transform: translateY(-1px);
     }
 
+    /* Auth dropdown (desktop) */
+    .auth-menu{ position:relative; margin-left:auto; }
+    .auth-link{ color:#fff; text-decoration:none; font-weight:600; letter-spacing:.02em; }
+    .auth-dropdown{ position:absolute; top:120%; right:0; background:rgba(0,0,0,.92); border:1px solid rgba(255,255,255,.15); border-radius:8px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateY(-6px); transition: var(--transition); z-index: 12; }
+    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.95rem; border-bottom:1px solid rgba(255,255,255,.1); }
+    .auth-dropdown a:last-child{ border-bottom:none; }
+    .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateY(0); }
+
     /* Hamburger (mobile) */
     .hamburger{ display:none; position:absolute; right:12px; top:10px; width:44px; height:40px; border:1px solid rgba(255,255,255,.35); border-radius:8px; background:rgba(0,0,0,.25); z-index:11; }
     .hamburger span{ display:block; height:2px; background:#fff; margin:9px 8px; }
@@ -605,6 +613,7 @@
     @media (max-width: 768px) {
       .hamburger{ display:block; }
       .login-section{ display:none; }
+      .auth-menu{ display:none; }
       .hero-content{ max-width: 96%; padding: 0 1.6rem; }
       .hero-bg{ background-position: center top; filter: brightness(0.9); }
       .hero-title { font-size: clamp(2rem, 7vw, 2.6rem); letter-spacing: 0.01em; line-height: 1.28; }
@@ -779,9 +788,15 @@
           </div>
         </div>
       </div>
-      <div class="login-section">
-        <button class="nav-login-btn golf-login-btn" onclick="location.href='login.html?role=golf'">ゴルフ場ログイン</button>
-        <button class="nav-login-btn caddy-login-btn" onclick="location.href='login.html?role=caddy'">キャディログイン</button>
+      <div class="login-section" style="display:none;"></div>
+      <div class="auth-menu">
+        <a class="auth-link" href="#">会員登録/ログイン</a>
+        <div class="auth-dropdown">
+          <a href="login.html?role=golf">ゴルフ場でログイン</a>
+          <a href="login.html?role=golf&mode=signup">ゴルフ場で会員登録</a>
+          <a href="login.html?role=caddy">キャディでログイン</a>
+          <a href="login.html?role=caddy&mode=signup">キャディで会員登録</a>
+        </div>
       </div>
     </nav>
     <nav id="drawer" class="nav-drawer" aria-hidden="true">
