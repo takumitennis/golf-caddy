@@ -447,7 +447,7 @@
 
     .benefit-card { background: transparent; padding: 0 0 1.25rem; border:none; box-shadow:none; text-align:left; display:flex; gap:16px; align-items:flex-start; }
 
-    .benefit-thumb { width: 92px; height: 92px; border-radius: 10px; overflow: hidden; flex: 0 0 92px; background: #e9ecef; }
+    .benefit-thumb { width: 92px; height: 92px; border-radius: 0; overflow: hidden; flex: 0 0 92px; background: #e9ecef; }
     .benefit-thumb img { width:100%; height:100%; object-fit: cover; display:block; }
 
     .benefit-content { flex: 1; text-align: right; }
@@ -470,6 +470,12 @@
 
     .golfer-benefits .benefits-header h2 { color: #8b5cf6; }
     .golfer-benefits .benefit-title { color: #8b5cf6; }
+
+    /* ゴルフ場向けメリット：フォントを約2/3に縮小 */
+    .golf-course-benefits .benefits-header h2 { font-size: 1.35rem; }
+    .golf-course-benefits .benefits-header p { font-size: 0.67rem; }
+    .golf-course-benefits .benefit-title { font-size: 0.84rem; }
+    .golf-course-benefits .benefit-description { font-size: 0.67rem; line-height: 1.6; }
 
     /* Footer with improved design */
     footer {
@@ -740,21 +746,21 @@
         </div>
         <div class="benefits-grid">
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="images/ゴルフ場.jpg" alt="人材不足の解決"></div>
+            <div class="benefit-thumb"><img src="https://picsum.photos/seed/staffing/300/300" alt="人材不足の解決"></div>
             <div class="benefit-content">
             <h3 class="benefit-title">人材不足の解決</h3>
             <p class="benefit-description">登録キャディから最適な人材を選定し、人材不足の問題を解決します。経験豊富なキャディがいつでも利用可能です。</p>
             </div>
           </div>
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="images/キャディ.jpg" alt="コスト削減"></div>
+            <div class="benefit-thumb"><img src="https://picsum.photos/seed/cost/300/300" alt="コスト削減"></div>
             <div class="benefit-content">
             <h3 class="benefit-title">コスト削減</h3>
             <p class="benefit-description">固定費を削減し、需要に応じた柔軟な人材配置が可能になります。効率的な運営で収益性を向上させます。</p>
             </div>
           </div>
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="images/ゴルフ場.jpg" alt="サービス品質向上"></div>
+            <div class="benefit-thumb"><img src="https://picsum.photos/seed/quality/300/300" alt="サービス品質向上"></div>
             <div class="benefit-content">
             <h3 class="benefit-title">サービス品質向上</h3>
             <p class="benefit-description">厳選されたキャディが提供する高品質なサービスで、お客様満足度の向上とリピート率の向上を実現します。</p>
