@@ -29,12 +29,8 @@
 
     body {
       font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
-      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
-      background-image: 
-          url("https://images.unsplash.com/photo-1535131749006-b7f58c99034b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%), url('/golf-background.jpg');
+      background-size: cover; background-position: center; background-repeat: no-repeat;
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -481,8 +477,9 @@
       });
     }
 
-    // ロール選択UIは撤去し、URLのroleだけを使用（ロール不要・事故防止）
-    document.querySelector('.role-selector').style.display='none';
+    // ロール選択UIは撤去し、URLのroleだけを使用（事故防止）
+    const rs = document.querySelector('.role-selector'); if (rs) rs.style.display='none';
+    if (role !== 'golf' && role !== 'caddy') { role = 'caddy'; }
 
     // フォーム表示の更新
     function updateFormDisplay() {
