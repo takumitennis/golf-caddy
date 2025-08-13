@@ -114,6 +114,16 @@
       word-break: keep-all;
     }
 
+    .hero-logo {
+      width: clamp(140px, 22vw, 280px);
+      height: auto;
+      display: block;
+      margin: 0 auto 0.8rem;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45));
+      opacity: 0;
+      animation: fadeInUp 0.8s ease-out 0.05s forwards;
+    }
+
     @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
     .hero-line1, .hero-line2 { display: block; opacity: 0; }
     .hero-line1 { animation: slideInRight 0.7s ease-out 0s forwards; }
@@ -730,6 +740,7 @@
     </nav>
 
     <div class="hero-content">
+      <img class="hero-logo" src="images/caddyplus-logo.png" alt="キャディプラス ロゴ">
       <h1 class="hero-title">
         <span class="hero-line1">ゴルフ場に</span>
         <span class="hero-line2">いつでもキャディを</span>
@@ -931,5 +942,4 @@
     }
   </script>
 </body>
-</html>
 </html>
