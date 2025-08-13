@@ -75,12 +75,12 @@
     }
 
     header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
       background: rgba(0, 0, 0, 0.4);
       z-index: 0; /* 背景画像の上、テキストの下 */
     }
@@ -105,7 +105,7 @@
     }
 
     .hero-title {
-      font-size: 3rem;
+      font-size: 2rem; /* およそ2/3 */
       font-weight: 700;
       margin-bottom: 1.2rem;
       text-shadow: 0 4px 12px rgba(0,0,0,0.6);
@@ -120,7 +120,7 @@
     .hero-line2 { animation: slideInRight 0.7s ease-out 0.18s forwards; }
 
     .hero-subtitle {
-      font-size: 1.2rem;
+      font-size: 0.8rem;
       margin-bottom: 2.2rem;
       text-shadow: 0 2px 8px rgba(0,0,0,0.6);
       opacity: 0;
@@ -224,7 +224,7 @@
       padding: 0.75rem 1.5rem;
       border-radius: var(--border-radius);
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 0.66rem; /* 2/3縮小 */
       transition: var(--transition);
       display: block;
       letter-spacing: 0.02em;
@@ -277,9 +277,9 @@
 
     /* Auth dropdown (desktop) */
     .auth-menu{ position:relative; margin-left:16px; }
-    .auth-link{ color:#fff; text-decoration:none; font-weight:600; letter-spacing:.02em; }
+    .auth-link{ color:#fff; text-decoration:none; font-weight:600; letter-spacing:.02em; font-size: .66rem; }
     .auth-dropdown{ position:absolute; top:120%; right:0; background:transparent; border:0; border-radius:0; min-width:auto; padding:4px 0; opacity:0; visibility:hidden; transform: translateY(-6px); transition: var(--transition); z-index: 12; box-shadow:none; backdrop-filter:none; }
-    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:6px 8px; font-size:1rem; border:none; text-align:center; }
+    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:6px 8px; font-size:.72rem; border:none; text-align:center; }
     .auth-dropdown a:last-child{ border:none; }
     .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateY(0); }
 
@@ -321,7 +321,7 @@
       color: #fff;
       text-decoration: none;
       padding: 6px 8px;
-      font-size: 1rem;
+      font-size: .72rem;
       font-weight: 500;
       border: none;
       text-align: center;
@@ -503,8 +503,8 @@
     .footer-section h3 {
       color: #fff;
       margin-bottom: 1rem;
-      font-size: 1.2rem;
-    }
+        font-size: 1.2rem;
+      }
 
     .footer-section p, .footer-section a {
       color: #aaa;
@@ -521,7 +521,7 @@
       margin-top: 2rem;
       padding-top: 2rem;
       border-top: 1px solid #444;
-      text-align: center;
+        text-align: center;
     }
 
     /* Responsive Design */
@@ -538,8 +538,8 @@
       .nav-tab { padding: 0.3rem 0.4rem; font-size: 0.72rem; width:auto; border-radius: 8px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
       .hero-content{ max-width: 96%; padding: 64px 1rem 0; }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(18px, 5vw, 22px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-      .hero-subtitle { font-size: clamp(0.85rem, 3.2vw, 0.95rem); line-height: 1.55; }
+      .hero-title { font-size: clamp(14px, 3.4vw, 16px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+      .hero-subtitle { font-size: clamp(0.7rem, 2.1vw, 0.8rem); line-height: 1.55; }
 
       .cta-buttons {
         flex-direction: column;
@@ -679,34 +679,34 @@
     <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
-      <div class="nav-main">
-        <div class="nav-item">
+        <div class="nav-main">
+            <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">サービス</a>
-        </div>
-        <div class="nav-item">
+            </div>
+            <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">ゴルフ場向け</a>
-          <div class="dropdown-menu">
+                <div class="dropdown-menu">
             <a href="#golf-course-benefits" class="dropdown-item">メリット</a>
             <a href="#features" class="dropdown-item">機能紹介</a>
             <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
-          </div>
-        </div>
-        <div class="nav-item">
+                </div>
+            </div>
+            <div class="nav-item">
           <a href="#caddy-benefits" class="nav-tab">キャディ向け</a>
-          <div class="dropdown-menu">
+                <div class="dropdown-menu">
             <a href="#caddy-benefits" class="dropdown-item">メリット</a>
             <a href="#features" class="dropdown-item">機能紹介</a>
             <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
-          </div>
-        </div>
+                </div>
+            </div>
         <div class="nav-item nav-auth-mobile" style="display:none;">
           <a href="#" class="nav-tab" id="spLoginTab">ログイン</a>
           <div class="dropdown-menu" id="spLoginDropdown">
             <a href="login.html?role=golf" class="dropdown-item">ゴルフ場</a>
             <a href="login.html?role=caddy" class="dropdown-item">キャディ</a>
-          </div>
+            </div>
         </div>
-        
+
       </div>
       <div class="login-section" style="display:none;"></div>
       <div class="auth-menu">
@@ -715,7 +715,7 @@
           <a href="login.html?role=golf">ゴルフ場</a>
           <a href="login.html?role=caddy">キャディ</a>
         </div>
-      </div>
+        </div>
     </nav>
     <nav id="drawer" class="nav-drawer" aria-hidden="true">
       <a href="login.html?role=golf">ゴルフ場ログイン</a>
@@ -731,12 +731,12 @@
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
-      </div>
     </div>
+            </div>
 
     <div class="scroll-indicator">
       <span>↓ スクロールして詳細を見る</span>
-    </div>
+            </div>
   </header>
 
   <div class="content-wrapper">
@@ -819,7 +819,7 @@
           <div class="benefit-card loading">
             <h3 class="benefit-title">高品質なサービス</h3>
             <p class="benefit-description">厳選された経験豊富なキャディが、お客様一人ひとりに合わせた最高のサービスを提供します。</p>
-          </div>
+            </div>
           <div class="benefit-card loading">
             <h3 class="benefit-title">安心の保証</h3>
             <p class="benefit-description">登録キャディは全て審査を通過しており、安心してサービスをご利用いただけます。</p>
@@ -855,7 +855,7 @@
         <p>&copy; 2024 Golf-Caddy Matching Service. All rights reserved.</p>
       </div>
     </footer>
-  </div>
+</div>
 
   <script>
     // Smooth scrolling for navigation links
