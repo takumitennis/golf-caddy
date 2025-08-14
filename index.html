@@ -1059,6 +1059,10 @@
             </div>
             <div style="margin-bottom:1rem; color:#666; font-size:0.9rem;">マッチングサービス</div>
             
+            <div id="roleChip" style="margin-bottom:1rem; font-size:1.2rem; font-weight:bold; letter-spacing:0.1em;">
+              GOLF
+            </div>
+            
             <div id="loginForm">
               <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333;">ログイン</h3>
               
@@ -1092,12 +1096,23 @@
       const loginHeading = document.getElementById('loginHeading');
       const signupLink = document.getElementById('modalSignupLink');
       const loginBtn = document.getElementById('modalLoginBtn');
+      const roleChip = document.getElementById('roleChip');
       let currentRole = '';
       
       // モーダルを開く関数
       const openModal = (role) => {
         currentRole = role;
         const roleText = role === 'golf' ? 'ゴルフ場' : 'キャディ';
+        
+        // 役割チップの更新
+        if (role === 'golf') {
+          roleChip.textContent = 'GOLF';
+          roleChip.style.color = '#2e7d32';
+        } else {
+          roleChip.textContent = 'CADDY';
+          roleChip.style.color = '#1976d2';
+        }
+        
         loginHeading.textContent = roleText + 'ログイン';
         signupLink.href = `login.html?role=${role}&mode=signup`;
         modal.style.display = 'flex';
