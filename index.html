@@ -277,11 +277,11 @@
 
     /* Auth dropdown (desktop) */
     .auth-menu{ position:relative; margin-left:16px; }
-    .auth-link{ color:#fff; text-decoration:none; font-weight:600; letter-spacing:.02em; font-size: .66rem; }
-    .auth-dropdown{ position:absolute; top:120%; right:0; background:transparent; border:0; border-radius:0; min-width:auto; padding:4px 0; opacity:0; visibility:hidden; transform: translateY(-6px); transition: var(--transition); z-index: 12; box-shadow:none; backdrop-filter:none; }
+    .auth-link{ color:#fff; text-decoration:none; font-weight:500; letter-spacing:.02em; font-size: .66rem; padding: 0.75rem 1.5rem; display:inline-block; }
+    .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background:transparent; border:0; border-radius:0; min-width:auto; padding:4px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow:none; backdrop-filter:none; }
     .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:6px 8px; font-size:.72rem; border:none; text-align:center; }
     .auth-dropdown a:last-child{ border:none; }
-    .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateY(0); }
+    .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateX(-50%) translateY(0); }
 
     /* Mobile login button (replacing hamburger) */
     .mobile-login{ display:none; }
@@ -522,7 +522,7 @@
       margin-top: 0.7rem;
       padding-top: 0.7rem;
       border-top: 1px solid #444;
-      text-align: center;
+        text-align: center;
     }
 
     /* Desktop (Web) scaling: 1.5x */
