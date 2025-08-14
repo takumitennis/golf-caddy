@@ -62,7 +62,7 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      filter: brightness(0.82);
+      filter: brightness(1.06) saturate(1.05);
       transform: scale(1.06);
       opacity: 0;
       animation: heroReveal 1200ms ease-out forwards;
@@ -75,14 +75,11 @@
     }
 
     header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 0; /* 背景画像の上、テキストの下 */
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.18); /* 全体を明るく */
+      z-index: 0;
     }
 
     .hero-content {
@@ -93,22 +90,8 @@
       animation: fadeInUp 1s ease-out;
     }
 
-    /* 背景白ぼかし（ロゴ/タイトルの後ろを明るく） */
-    .hero-spot {
-      position: absolute;
-      top: 42%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: clamp(260px, 60vw, 760px);
-      height: clamp(180px, 42vw, 480px);
-      background: radial-gradient(ellipse at center,
-        rgba(255,255,255,0.42) 0%,
-        rgba(255,255,255,0.28) 55%,
-        rgba(255,255,255,0.0) 100%);
-      filter: blur(8px);
-      z-index: 1;
-      pointer-events: none;
-    }
+    /* ロゴ背後のスポットは不要になったため無効化 */
+    .hero-spot { display:none; }
 
     @keyframes fadeInUp {
       from {
