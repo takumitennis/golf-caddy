@@ -221,7 +221,7 @@
       left: 0;
       right: 0;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       padding: 1rem 2rem;
       height: 80px;
@@ -235,12 +235,16 @@
     .top-nav.scrolled { background: rgba(0,0,0,0.7); }
 
     .brand {
+      position: absolute;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
     }
 
     .brand-logo {
-      height: 50px;
+      height: 75px;
       width: auto;
       filter: brightness(1.1);
     }
@@ -584,7 +588,7 @@
       #spLoginTab{ cursor:pointer; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
-      .top-nav { position:absolute; top:0; left:0; right:0; padding: 0.6rem 0.8rem; gap: 8px; z-index: 15; white-space: nowrap; justify-content:space-between; height: 64px; }
+      .top-nav { position:absolute; top:0; left:0; right:0; padding: 0.6rem 0.8rem; gap: 8px; z-index: 15; white-space: nowrap; justify-content:flex-end; height: 64px; }
       .nav-main { gap: 0.4rem; flex-wrap: nowrap; white-space: nowrap; }
       .nav-item { width:auto; max-width:none; }
       .nav-tab { padding: 0.3rem 0.4rem; font-size: 0.72rem; width:auto; border-radius: 8px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
@@ -592,7 +596,11 @@
       
       /* モバイル版ではブランドロゴを小さく */
       .brand-logo {
-        height: 36px;
+        height: 54px;
+      }
+      
+      .brand {
+        left: 0.8rem;
       }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
       .hero-title { font-size: clamp(14px, 3.4vw, 16px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
@@ -770,9 +778,9 @@
               <div class="dropdown-menu auth-dropdown">
                 <a href="login.html?role=golf" class="dropdown-item">ゴルフ場</a>
                 <a href="login.html?role=caddy" class="dropdown-item">キャディ</a>
-              </div>
             </div>
-      </div>
+        </div>
+        </div>
       <div class="login-section" style="display:none;"></div>
     </nav>
     <nav id="drawer" class="nav-drawer" aria-hidden="true">
@@ -788,18 +796,18 @@
             <span class="hero-line2">いつでもキャディを</span>
           </h1>
           <p class="hero-subtitle" style="margin-left:2px;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
-        </div>
-      </div>
-      <div class="hero-nav" id="heroDots" aria-label="slides" style="position:absolute; bottom: calc(2rem + 16px); left:50%; transform:translateX(-50%); display:flex; gap:10px; z-index:3;"></div>
+    </div>
+            </div>
+      <div class="hero-nav" id="heroDots" aria-label="slides" style="position:absolute; bottom: calc(3rem + 32px); left:50%; transform:translateX(-50%); display:flex; gap:10px; z-index:3;"></div>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
-    </div>
+            </div>
             </div>
 
     <div class="scroll-indicator">
       <span>↓ スクロールして詳細を見る</span>
-            </div>
+        </div>
   </header>
 
   <div class="content-wrapper">
