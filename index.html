@@ -93,6 +93,23 @@
       animation: fadeInUp 1s ease-out;
     }
 
+    /* 背景白ぼかし（ロゴ/タイトルの後ろを明るく） */
+    .hero-spot {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(260px, 60vw, 760px);
+      height: clamp(180px, 42vw, 480px);
+      background: radial-gradient(ellipse at center,
+        rgba(255,255,255,0.42) 0%,
+        rgba(255,255,255,0.28) 55%,
+        rgba(255,255,255,0.0) 100%);
+      filter: blur(8px);
+      z-index: 1;
+      pointer-events: none;
+    }
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -752,6 +769,7 @@
 
     <div class="hero-content">
       <img src="images/caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='images/caddy-plus.svg'; this.onerror=null;" />
+      <div class="hero-spot" aria-hidden="true"></div>
       <h1 class="hero-title">
         <span class="hero-line1">ゴルフ場に</span>
         <span class="hero-line2">いつでもキャディを</span>
