@@ -117,7 +117,7 @@
 
     /* ロゴを少し上げ、左寄せ配置（PC） */
     @media (min-width: 769px) {
-      .hero-logo { margin-left: 0; margin-right: 0; margin-top: -6px; }
+      .hero-logo { margin-left: 0; margin-right: 0; margin-top: -2px; }
     }
 
     @keyframes logoFade {
@@ -218,10 +218,10 @@
       left: 0;
       right: 0;
       display: flex;
-      justify-content: flex-end; /* 右寄せ */
+      justify-content: flex-start;
       align-items: center;
-      padding: 0.6rem 2rem; /* 少し上寄せに見えるよう上下余白縮小 */
-      background: rgba(0,0,0,0.28); /* 常時わずかに暗幕 */
+      padding: 0.6rem 2rem;
+      background: rgba(0,0,0,0.28);
       backdrop-filter: blur(2px);
       border-bottom: 1px solid rgba(255,255,255,0.08);
       z-index: 10;
@@ -234,6 +234,7 @@
       display: flex;
       gap: 2rem;
       align-items: center;
+      margin-left: auto; /* 左ロゴの右側にメニューを並べる */
     }
 
     .nav-item {
@@ -714,6 +715,7 @@
     <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
+        <div class="brand"><img src="images/caddy-plus.png" alt="CaddyPlus" class="brand-logo" /></div>
         <div class="nav-main">
             <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">サービス</a>
