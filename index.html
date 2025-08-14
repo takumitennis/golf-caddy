@@ -594,12 +594,12 @@
       .nav-tab { padding: 0.25rem 0.35rem; font-size: 0.65rem; width:auto; border-radius: 6px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
       .hero-content{ max-width: 96%; padding: 88px 1rem 0; }
       
-      /* モバイル版ではブランドロゴを「ゴルフ場に〜」テキストの直前に配置 */
+      /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
       .brand {
         position: absolute;
         left: 50%;
         top: 50%;
-        transform: translate(-50%, -120px);
+        transform: translate(-50%, -60px);
         height: auto;
         display: flex;
         align-items: center;
@@ -609,7 +609,7 @@
       }
       
       .brand-logo {
-        height: 100px;
+        height: 90px;
         width: auto;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
       }
@@ -785,7 +785,7 @@
             </div>
         </div>
             <div class="nav-item">
-              <a class="auth-link nav-tab" href="#" id="loginModalTrigger">会員登録/ログイン</a>
+              <a class="auth-link nav-tab" href="#" id="loginModalTrigger">ログイン</a>
               <div class="dropdown-menu auth-dropdown">
                 <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
                 <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
