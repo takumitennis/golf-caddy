@@ -934,9 +934,9 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   
   <script>
-    // Supabase configuration
-    const SUPABASE_URL = 'https://oaqvmqckkyaekrumlakr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hcXZtcWNra3lhZWtydW1sYWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEwNjA1MzgsImV4cCI6MjA0NjYzNjUzOH0.VX2g0tJpYYHUAcWnl_eSxJHD8fVG7aJFIXt6a-JYJHE';
+    // Supabase configuration (既存のlogin.htmlと同じ設定)
+    const SUPABASE_URL = 'https://vqjxajzaasuqfgvhvxci.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
   
@@ -1160,59 +1160,24 @@
           return;
         }
         
-        // 実際のSupabase認証処理
+        // 既存のlogin.htmlを利用したログイン処理
         try {
           loginBtn.textContent = 'ログイン中...';
           loginBtn.disabled = true;
           
-          // Supabaseログイン
-          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          // Supabaseログイン（既存のlogin.htmlと同じ処理）
+          const { data, error } = await supabase.auth.signInWithPassword({ 
             email: email,
-            password: password
+            password: password 
           });
           
-          if (authError) {
-            throw authError;
-          }
-          
-          // ユーザーデータ取得
-          const { data: userData, error: userError } = await supabase.auth.getUser();
-          if (userError) {
-            throw userError;
-          }
-          
-          const userEmail = userData.user?.email;
-          if (!userEmail) {
-            throw new Error('ユーザー情報が取得できませんでした');
-          }
-          
-          // 役割に応じてプロフィール確認とリダイレクト
-          if (currentRole === 'golf') {
-            const { data: profile } = await supabase
-              .from('golf_courses')
-              .select('*')
-              .eq('email', userEmail)
-              .maybeSingle();
-            
-            if (profile) {
-              window.location.href = 'golf_dashboard.html';
-            } else {
-              // プロフィール未登録の場合
-              window.location.href = 'profile.html?role=golf';
-            }
+          if (error) {
+            throw error;
           } else {
-            const { data: profile } = await supabase
-              .from('caddies')
-              .select('*')
-              .eq('email', userEmail)
-              .maybeSingle();
-            
-            if (profile) {
-              window.location.href = 'caddy_dashboard.html';
-            } else {
-              // プロフィール未登録の場合
-              window.location.href = 'profile.html?role=caddy';
-            }
+            // ログイン成功時の処理（既存のlogin.htmlと同じ）
+            setTimeout(() => {
+              location.href = currentRole === 'golf' ? 'golf_dashboard.html' : 'caddy_dashboard.html';
+            }, 600);
           }
         } catch (error) {
           console.error('Login error:', error);
