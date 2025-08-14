@@ -930,6 +930,16 @@
     </footer>
 </div>
 
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
+  <script>
+    // Supabase configuration
+    const SUPABASE_URL = 'https://oaqvmqckkyaekrumlakr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hcXZtcWNra3lhZWtydW1sYWtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEwNjA1MzgsImV4cCI6MjA0NjYzNjUzOH0.VX2g0tJpYYHUAcWnl_eSxJHD8fVG7aJFIXt6a-JYJHE';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  
   <script>
     // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1150,16 +1160,65 @@
           return;
         }
         
-        // ログイン処理（実際のSupabase認証に置き換え可能）
+        // 実際のSupabase認証処理
         try {
-          // 仮のログイン処理
+          loginBtn.textContent = 'ログイン中...';
+          loginBtn.disabled = true;
+          
+          // Supabaseログイン
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+          
+          if (authError) {
+            throw authError;
+          }
+          
+          // ユーザーデータ取得
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (userError) {
+            throw userError;
+          }
+          
+          const userEmail = userData.user?.email;
+          if (!userEmail) {
+            throw new Error('ユーザー情報が取得できませんでした');
+          }
+          
+          // 役割に応じてプロフィール確認とリダイレクト
           if (currentRole === 'golf') {
-            window.location.href = 'golf_dashboard.html';
+            const { data: profile } = await supabase
+              .from('golf_courses')
+              .select('*')
+              .eq('email', userEmail)
+              .maybeSingle();
+            
+            if (profile) {
+              window.location.href = 'golf_dashboard.html';
+            } else {
+              // プロフィール未登録の場合
+              window.location.href = 'profile.html?role=golf';
+            }
           } else {
-            window.location.href = 'caddy_dashboard.html';
+            const { data: profile } = await supabase
+              .from('caddies')
+              .select('*')
+              .eq('email', userEmail)
+              .maybeSingle();
+            
+            if (profile) {
+              window.location.href = 'caddy_dashboard.html';
+            } else {
+              // プロフィール未登録の場合
+              window.location.href = 'profile.html?role=caddy';
+            }
           }
         } catch (error) {
+          console.error('Login error:', error);
           alert('ログインに失敗しました: ' + error.message);
+          loginBtn.textContent = 'ログイン';
+          loginBtn.disabled = false;
         }
       });
       

@@ -351,13 +351,13 @@
 </head>
 <body>
   <div class="login-container">
-    <form id="authForm" class="card" novalidate>
+  <form id="authForm" class="card" novalidate>
       <div class="logo">
         <h1 style="letter-spacing:-0.02em;color:#2f8f2f;font-weight:800;">Golf-Caddy</h1>
         <p>マッチングサービス</p>
       </div>
       
-      <h2 id="title">ログイン</h2>
+    <h2 id="title">ログイン</h2>
       
       <div class="role-selector">
         <button type="button" class="role-option" data-role="golf">ゴルフ場</button>
@@ -367,7 +367,7 @@
       <div class="form-group">
         <label id="emailLabel">ログインID</label>
         <input id="email" type="email" required placeholder="メールアドレスを入力" />
-        <span class="err" id="errEmail">ログインIDを入力してください。</span>
+      <span class="err" id="errEmail">ログインIDを入力してください。</span>
       </div>
 
       <div id="signupStep2" style="display:none;">
@@ -444,7 +444,7 @@
       <a href="#" class="toggle" id="toggle">新規登録はこちら</a>
       <a href="#" class="toggle" id="nextStep" style="display:none;">次へ</a>
       <div id="stepNote" style="display:none;color:#666;font-size:.9rem;margin-top:6px;text-align:center;">次へを押して詳細を入力してください</div>
-    </form>
+  </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -621,10 +621,10 @@
       }
 
       try {
-        if (mode === "login") {
+      if (mode === "login") {
           // ログイン処理
           const { data, error } = await supabase.auth.signInWithPassword({ 
-            email, 
+    email,
             password 
           });
           
