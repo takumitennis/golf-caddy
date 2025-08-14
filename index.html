@@ -588,27 +588,28 @@
       #spLoginTab{ cursor:pointer; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
-      .top-nav { position:absolute; top:90px; left:0; right:0; padding: 0.6rem 0.8rem; gap: 8px; z-index: 15; white-space: nowrap; justify-content:center; height: 60px; }
+      .top-nav { position:absolute; top:0; left:0; right:0; padding: 0.6rem 0.8rem; gap: 8px; z-index: 15; white-space: nowrap; justify-content:flex-end; height: 83px; }
       .nav-main { gap: 0.4rem; flex-wrap: nowrap; white-space: nowrap; }
       .nav-item { width:auto; max-width:none; }
       .nav-tab { padding: 0.3rem 0.4rem; font-size: 0.72rem; width:auto; border-radius: 8px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
-      .hero-content{ max-width: 96%; padding: 160px 1rem 0; }
+      .hero-content{ max-width: 96%; padding: 88px 1rem 0; }
       
-      /* モバイル版ではブランドロゴを中央上部に配置 */
+      /* モバイル版ではブランドロゴをヘッダーから独立させ、中央の文字の少し上に配置 */
       .brand {
         position: absolute;
         left: 50%;
-        top: 10px;
-        transform: translateX(-50%);
+        top: 50%;
+        transform: translate(-50%, -80%);
         height: auto;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 20;
+        pointer-events: none;
       }
       
       .brand-logo {
-        height: 80px;
+        height: 104px;
         width: auto;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
       }
@@ -626,7 +627,7 @@
         max-width: 300px;
       }
 
-      .top-nav { flex-direction: row; justify-content: center; gap: 10px; padding: 0.8rem 1rem; }
+
       .nav-main { display:flex; flex-direction: row; align-items: center; gap: 0.8rem; width:auto; }
       .nav-item { width:auto; max-width:none; }
       .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.82rem; width:auto; border-radius: 8px; white-space: nowrap; }
