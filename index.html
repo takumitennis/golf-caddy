@@ -466,10 +466,10 @@
 
     .benefits-header p { font-size:1rem; color:#333; max-width:800px; margin:0 auto; text-shadow:none; line-height:1.8; }
 
-    /* セクション識別チップ */
-    .section-chip { display:inline-block; padding:4px 10px; border-radius:9999px; font-size:.7rem; font-weight:700; letter-spacing:.08em; margin-bottom:10px; }
-    .section-chip.gc { background: rgba(46,125,50,.12); color:#2e7d32; }
-    .section-chip.cd { background: rgba(0,106,173,.12); color:#006aad; }
+    /* セクション識別チップ: 背景なしのテキストのみ、少し大きく太く、わずかに影 */
+    .section-chip { display:inline-block; padding:0; border-radius:0; font-size:.95rem; font-weight:800; letter-spacing:.08em; margin-bottom:10px; text-shadow: 2px 2px 6px rgba(0,0,0,0.18); }
+    .section-chip.gc { color:#2e7d32; background: transparent; }
+    .section-chip.cd { color:#006aad; background: transparent; }
 
     .benefits-grid { display:block; margin-top:1rem; }
 
@@ -966,5 +966,4 @@
     }
   </script>
 </body>
-</html>
 </html>
