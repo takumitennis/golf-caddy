@@ -133,6 +133,7 @@
       letter-spacing: 0.06em;
       line-height: 1.2;
       word-break: keep-all;
+      text-align: center;
     }
 
     @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
@@ -147,6 +148,7 @@
       opacity: 0;
       font-weight: 400;
       text-wrap: pretty;
+      text-align: center;
       animation: slideInRight 0.7s ease-out 0.36s forwards;
     }
 
@@ -764,17 +766,16 @@
     </nav>
 
     <div class="hero-content">
-      <div class="hero-row hero-slider">
-        <img src="images/caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='images/caddy-plus.svg'; this.onerror=null;" />
+      <div class="hero-row hero-slider" style="display:flex; flex-direction:column; align-items:center;">
         <div class="hero-text">
-          <h1 class="hero-title" style="margin-bottom:.4rem; text-align:left;">
+          <h1 class="hero-title" style="margin-bottom:.4rem;">
             <span class="hero-line1">ゴルフ場に</span>
             <span class="hero-line2">いつでもキャディを</span>
           </h1>
-          <p class="hero-subtitle" style="margin-left:2px; text-align:left;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+          <p class="hero-subtitle" style="margin-left:2px;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
         </div>
       </div>
-      <div class="hero-nav"><button class="hero-btn" id="nextHero">次へ</button></div>
+      <div class="hero-nav" id="heroDots" aria-label="slides"></div>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
@@ -972,26 +973,47 @@
       }));
     }
 
-    // Hero slider (2スライド: 既存 + 新コピー)
-    const nextBtn = document.getElementById('nextHero');
-    if (nextBtn){
-      let alt = false;
-      nextBtn.addEventListener('click', ()=>{
-        const title = document.querySelector('.hero-title');
-        const subtitle = document.querySelector('.hero-subtitle');
-        if (!title || !subtitle) return;
-        if (!alt){
-          title.innerHTML = '<span class="hero-line1">新しいキャディとしての</span><span class="hero-line2">働き方</span>';
-          subtitle.innerHTML = '柔軟なシフト、スキルアップ、<br>自分らしい働き方をサポートします';
-          nextBtn.textContent = '戻る';
-        } else {
-          title.innerHTML = '<span class="hero-line1">ゴルフ場に</span><span class="hero-line2">いつでもキャディを</span>';
-          subtitle.innerHTML = '経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します';
-          nextBtn.textContent = '次へ';
+    // Hero slider (auto + dots)
+    (function(){
+      const title = document.querySelector('.hero-title');
+      const subtitle = document.querySelector('.hero-subtitle');
+      const dotsWrap = document.getElementById('heroDots');
+      if (!title || !subtitle || !dotsWrap) return;
+      const slides = [
+        {
+          t: '<span class="hero-line1">ゴルフ場に</span><span class="hero-line2">いつでもキャディを</span>',
+          s: '経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します'
+        },
+        {
+          t: '<span class="hero-line1">新しいキャディとしての</span><span class="hero-line2">働き方</span>',
+          s: '柔軟なシフト、スキルアップ、<br>自分らしい働き方をサポートします'
         }
-        alt = !alt;
-      });
-    }
+      ];
+      let idx = 0; let timer=null;
+
+      const renderDots = () => {
+        dotsWrap.innerHTML = '';
+        slides.forEach((_,i)=>{
+          const d=document.createElement('button'); d.className='dot'+(i===idx?' active':''); d.setAttribute('aria-label','slide '+(i+1));
+          d.addEventListener('click',()=>{ idx=i; apply(); restart(); });
+          dotsWrap.appendChild(d);
+        });
+      };
+
+      const apply = () => {
+        title.innerHTML = slides[idx].t;
+        subtitle.innerHTML = slides[idx].s;
+        renderDots();
+      };
+
+      const restart = () => {
+        if (timer) clearInterval(timer);
+        timer = setInterval(()=>{ idx = (idx+1)%slides.length; apply(); }, 10000);
+      };
+
+      apply();
+      restart();
+    })();
   </script>
 </body>
 </html>
