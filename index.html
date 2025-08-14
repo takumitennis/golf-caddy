@@ -104,6 +104,22 @@
       }
     }
 
+    /* Hero logo (centered above title) */
+    .hero-logo {
+      display: block;
+      margin: 0 auto 12px;
+      width: clamp(140px, 26vw, 260px);
+      height: auto;
+      opacity: 0;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
+      animation: logoFade 700ms ease-out 120ms forwards;
+    }
+
+    @keyframes logoFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     .hero-title {
       font-size: 2rem; /* およそ2/3 */
       font-weight: 700;
@@ -730,6 +746,7 @@
     </nav>
 
     <div class="hero-content">
+      <img src="caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='caddy-plus.svg'; this.onerror=null;" />
       <h1 class="hero-title">
         <span class="hero-line1">ゴルフ場に</span>
         <span class="hero-line2">いつでもキャディを</span>
