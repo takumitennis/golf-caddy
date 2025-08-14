@@ -438,11 +438,11 @@
       padding: 0 2rem;
     }
 
-    .benefits-section.golf-course-benefits { background: #f2f1ee !important; }
+    .benefits-section.golf-course-benefits { background: #eef7f1 !important; border-top: 1px solid #e4efe8; border-bottom: 1px solid #e4efe8; }
 
     .benefits-section.golf-course-benefits::after { display:none; }
 
-    .benefits-section.caddy-benefits { background: #f2f1ee !important; }
+    .benefits-section.caddy-benefits { background: #f7f1ee !important; border-top: 1px solid #efe4e0; border-bottom: 1px solid #efe4e0; }
 
     .benefits-section.caddy-benefits::after { display:none; }
 
@@ -458,6 +458,11 @@
     .benefits-header h2 { font-size:2rem; margin-bottom:1rem; font-weight:700; color:#111; text-shadow: 3px 3px 10px rgba(0,0,0,0.25); letter-spacing:-0.02em; }
 
     .benefits-header p { font-size:1rem; color:#333; max-width:800px; margin:0 auto; text-shadow:none; line-height:1.8; }
+
+    /* セクション識別チップ */
+    .section-chip { display:inline-block; padding:4px 10px; border-radius:9999px; font-size:.7rem; font-weight:700; letter-spacing:.08em; margin-bottom:10px; }
+    .section-chip.gc { background: rgba(46,125,50,.12); color:#2e7d32; }
+    .section-chip.cd { background: rgba(0,106,173,.12); color:#006aad; }
 
     .benefits-grid { display:block; margin-top:1rem; }
 
@@ -770,6 +775,7 @@
     <section id="golf-course-benefits" class="benefits-section golf-course-benefits">
       <div class="container">
         <div class="benefits-header">
+          <span class="section-chip gc">GOLF</span>
           <h2>ゴルフ場向けサービス</h2>
           <p>経験豊富なキャディを効率的に確保し、<br>お客様に最高のゴルフ体験を提供</p>
         </div>
@@ -803,6 +809,7 @@
     <section id="caddy-benefits" class="benefits-section caddy-benefits">
       <div class="container">
         <div class="benefits-header">
+          <span class="section-chip cd">CADDY</span>
           <h2>キャディ向けサービス</h2>
             <p>自分のスケジュールに合わせて働き、<br>スキル向上の機会を提供</p>
         </div>
