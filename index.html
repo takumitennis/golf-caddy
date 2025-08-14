@@ -220,7 +220,8 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      padding: 0.6rem 2rem;
+      padding: 0 2rem;
+      height: 56px;
       background: rgba(0,0,0,0.28);
       backdrop-filter: blur(2px);
       border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -258,6 +259,9 @@
       background: rgba(255,255,255,0.1);
       transform: translateY(-1px);
     }
+
+    .brand { position:absolute; left: 12px; top: 50%; transform: translateY(-50%); height: 100%; display:flex; align-items:center; }
+    .brand-logo { height: calc(100% - 10px); width:auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); }
 
     .login-section {
       display: flex;
@@ -715,6 +719,7 @@
     <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
+        <div class="brand"><img src="images/caddy-plus.png" alt="CaddyPlus" class="brand-logo" /></div>
         <div class="nav-main">
             <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">サービス</a>
@@ -759,7 +764,7 @@
     </nav>
 
     <div class="hero-content">
-      <div class="hero-row">
+      <div class="hero-row hero-slider">
         <img src="images/caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='images/caddy-plus.svg'; this.onerror=null;" />
         <div class="hero-text">
           <h1 class="hero-title" style="margin-bottom:.4rem; text-align:left;">
@@ -769,6 +774,7 @@
           <p class="hero-subtitle" style="margin-left:2px; text-align:left;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
         </div>
       </div>
+      <div class="hero-nav"><button class="hero-btn" id="nextHero">次へ</button></div>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
@@ -964,6 +970,27 @@
       drawer.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>{
         drawer.style.display='none'; drawer.setAttribute('aria-hidden','true');
       }));
+    }
+
+    // Hero slider (2スライド: 既存 + 新コピー)
+    const nextBtn = document.getElementById('nextHero');
+    if (nextBtn){
+      let alt = false;
+      nextBtn.addEventListener('click', ()=>{
+        const title = document.querySelector('.hero-title');
+        const subtitle = document.querySelector('.hero-subtitle');
+        if (!title || !subtitle) return;
+        if (!alt){
+          title.innerHTML = '<span class="hero-line1">新しいキャディとしての</span><span class="hero-line2">働き方</span>';
+          subtitle.innerHTML = '柔軟なシフト、スキルアップ、<br>自分らしい働き方をサポートします';
+          nextBtn.textContent = '戻る';
+        } else {
+          title.innerHTML = '<span class="hero-line1">ゴルフ場に</span><span class="hero-line2">いつでもキャディを</span>';
+          subtitle.innerHTML = '経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します';
+          nextBtn.textContent = '次へ';
+        }
+        alt = !alt;
+      });
     }
   </script>
 </body>
