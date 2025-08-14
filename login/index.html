@@ -101,6 +101,32 @@
           document.getElementById("email").classList.add("error");
           document.getElementById("pass").classList.add("error");
         } else {
+          // ログイン成功後、ユーザータイプを確認
+          const table = role === "golf" ? "golf_courses" : "caddies";
+          const { data: profile, error: profileError } = await supabase
+            .from(table)
+            .select('email')
+            .eq('email', email)
+            .maybeSingle();
+
+          if (profileError) {
+            console.error("Profile check error:", profileError);
+            await supabase.auth.signOut();
+            alert("ログイン確認中にエラーが発生しました。");
+            return;
+          }
+
+          if (!profile) {
+            // 該当するテーブルにユーザーが存在しない場合
+            await supabase.auth.signOut();
+            const userType = role === "golf" ? "ゴルフ場" : "キャディ";
+            const wrongType = role === "golf" ? "キャディ" : "ゴルフ場";
+            alert(`IDまたはパスワードが違います。${userType}のログイン画面で${wrongType}のIDでログインすることはできません。`);
+            document.getElementById("email").classList.add("error");
+            document.getElementById("pass").classList.add("error");
+            return;
+          }
+
           alert("ログインしました");
           // 絶対パスでダッシュボードハブへ
           window.location.href = "/dashboard.html";

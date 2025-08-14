@@ -814,7 +814,7 @@
         const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const td=document.createElement('td');
         const cnt=countMap[dateStr]||0;
-        const labelHtml = cnt===0 ? '×' : `<span class="avail-count" data-date="${dateStr}" style="color:#27ae60;font-weight:600">${cnt}</span>`;
+        const labelHtml = cnt===0 ? '×' : `<span class="avail-count" data-date="${dateStr}" style="color:#3498db;font-weight:600">${cnt}人</span>`;
         if(cnt===0){td.className='cal-red';}
         else{td.className='';}
         td.innerHTML = `<small>${day}</small><br>${labelHtml}`;

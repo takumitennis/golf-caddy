@@ -631,6 +631,32 @@
           if (error) {
             showMessage("ログインに失敗しました: " + error.message, 'error');
           } else {
+            // ログイン成功後、ユーザータイプを確認
+            const table = role === "golf" ? "golf_courses" : "caddies";
+            const { data: profile, error: profileError } = await supabase
+              .from(table)
+              .select('email')
+              .eq('email', email)
+              .maybeSingle();
+
+            if (profileError) {
+              console.error("Profile check error:", profileError);
+              await supabase.auth.signOut();
+              showMessage("ログイン確認中にエラーが発生しました。", 'error');
+              setLoading(false);
+              return;
+            }
+
+            if (!profile) {
+              // 該当するテーブルにユーザーが存在しない場合
+              await supabase.auth.signOut();
+              const userType = role === "golf" ? "ゴルフ場" : "キャディ";
+              const wrongType = role === "golf" ? "キャディ" : "ゴルフ場";
+              showMessage(`IDまたはパスワードが違います。${userType}のログイン画面で${wrongType}のIDでログインすることはできません。`, 'error');
+              setLoading(false);
+              return;
+            }
+
             showMessage("ログインに成功しました！", 'success');
             
             // ロールに応じてリダイレクト
