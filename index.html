@@ -776,7 +776,7 @@
           <p class="hero-subtitle" style="margin-left:2px;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
         </div>
       </div>
-      <div class="hero-nav" id="heroDots" aria-label="slides" style="position:absolute; bottom:18px; left:50%; transform:translateX(-50%); display:flex; gap:12px; z-index:3;"></div>
+      <div class="hero-nav" id="heroDots" aria-label="slides" style="position:absolute; bottom: calc(2rem + 16px); left:50%; transform:translateX(-50%); display:flex; gap:10px; z-index:3;"></div>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
@@ -999,9 +999,9 @@
         slides.forEach((_,i)=>{
           const d=document.createElement('button');
           d.className='dot'+(i===idx?' active':'');
-          d.style.width='14px'; d.style.height='14px'; d.style.borderRadius='50%';
+          d.style.width='10px'; d.style.height='10px'; d.style.borderRadius='50%';
           d.style.border='2px solid rgba(255,255,255,.9)'; d.style.boxShadow='0 0 6px rgba(0,0,0,.35)'; d.style.background= i===idx? '#fff':'transparent';
-          if(i===idx){ d.style.transform='scale(1.1)'; }
+          if(i===idx){ d.style.transform='scale(1.05)'; }
           d.setAttribute('aria-label','slide '+(i+1));
           d.addEventListener('click',()=>{ idx=i; apply(); restart(); });
           dotsWrap.appendChild(d);
@@ -1018,7 +1018,7 @@
 
       const restart = () => {
         if (timer) clearInterval(timer);
-        timer = setInterval(()=>{ idx = (idx+1)%slides.length; apply(); }, 10000);
+        timer = setInterval(()=>{ idx = (idx+1)%slides.length; apply(); }, 6000);
       };
 
       apply();
