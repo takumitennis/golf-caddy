@@ -115,9 +115,9 @@
       animation: logoFade 700ms ease-out 120ms forwards;
     }
 
-    /* ロゴを左寄せ（サイズはそのまま） */
+    /* ロゴを少し上げ、左寄せ配置（PC） */
     @media (min-width: 769px) {
-      .hero-logo { margin-left: 0; margin-right: auto; }
+      .hero-logo { margin-left: 0; margin-right: 0; margin-top: -6px; }
     }
 
     @keyframes logoFade {
@@ -299,7 +299,8 @@
 
     /* Auth dropdown (desktop) */
     .auth-menu{ position:relative; margin-left:16px; }
-    .auth-link{ color:#fff; text-decoration:none; font-weight:500; letter-spacing:.02em; display:inline-block; font-size: inherit; padding: 0; }
+    .auth-link{ color:#fff; text-decoration:none; font-weight:500; letter-spacing:.02em; display:block; padding: 0.75rem 1.5rem; border-radius: var(--border-radius); font-size: 0.66rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: var(--transition); }
+    .auth-link:hover{ background: rgba(255,255,255,0.1); transform: translateY(-1px); }
     .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background: rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow: 0 10px 30px rgba(0,0,0,.3); backdrop-filter: blur(4px); }
     .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.86rem; border:none; text-align:center; }
     .auth-dropdown a:last-child{ border:none; }
@@ -350,7 +351,7 @@
       transition: var(--transition);
     }
 
-    .dropdown-item:hover { text-decoration: underline; }
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
 
     .dropdown-item:last-child {
       border-bottom: none;
@@ -757,14 +758,14 @@
     </nav>
 
     <div class="hero-content">
-      <div style="display:flex; align-items:flex-start; gap:14px; justify-content:center;">
+      <div class="hero-row">
         <img src="images/caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='images/caddy-plus.svg'; this.onerror=null;" />
-        <div>
-          <h1 class="hero-title" style="margin-bottom:.4rem;">
+        <div class="hero-text">
+          <h1 class="hero-title" style="margin-bottom:.4rem; text-align:left;">
             <span class="hero-line1">ゴルフ場に</span>
             <span class="hero-line2">いつでもキャディを</span>
           </h1>
-          <p class="hero-subtitle" style="margin-left:2px;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+          <p class="hero-subtitle" style="margin-left:2px; text-align:left;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
         </div>
       </div>
       <div class="cta-buttons" style="display:none;">
