@@ -299,9 +299,9 @@
 
     /* Auth dropdown (desktop) */
     .auth-menu{ position:relative; margin-left:16px; }
-    .auth-link{ color:#fff; text-decoration:none; font-weight:500; letter-spacing:.02em; font-size: .66rem; padding: 0.75rem 1.5rem; display:inline-block; }
-    .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background:transparent; border:0; border-radius:0; min-width:auto; padding:4px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow:none; backdrop-filter:none; }
-    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:6px 8px; font-size:.72rem; border:none; text-align:center; }
+    .auth-link{ color:#fff; text-decoration:none; font-weight:500; letter-spacing:.02em; display:inline-block; font-size: inherit; padding: 0; }
+    .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background: rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow: 0 10px 30px rgba(0,0,0,.3); backdrop-filter: blur(4px); }
+    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.86rem; border:none; text-align:center; }
     .auth-dropdown a:last-child{ border:none; }
     .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateX(-50%) translateY(0); }
 
@@ -317,19 +317,19 @@
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      background: transparent;
-      backdrop-filter: none;
-      border-radius: 0;
-      min-width: auto;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 10px;
+      min-width: 220px;
       opacity: 0;
       visibility: hidden;
-      box-shadow: none;
-      border: 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3);
+      border: 1px solid rgba(255,255,255,0.12);
       z-index: 10;
       white-space: nowrap;
       transition: var(--transition);
       margin-top: 0.25rem;
-      padding: 4px 0;
+      padding: 6px 0;
     }
 
     .nav-item:hover .dropdown-menu {
@@ -342,8 +342,8 @@
       display: block;
       color: #fff;
       text-decoration: none;
-      padding: 6px 8px;
-      font-size: .72rem;
+      padding: 10px 14px;
+      font-size: .86rem;
       font-weight: 500;
       border: none;
       text-align: center;
@@ -757,13 +757,16 @@
     </nav>
 
     <div class="hero-content">
-      <img src="images/caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='images/caddy-plus.svg'; this.onerror=null;" />
-      <div class="hero-spot" aria-hidden="true"></div>
-      <h1 class="hero-title">
-        <span class="hero-line1">ゴルフ場に</span>
-        <span class="hero-line2">いつでもキャディを</span>
-      </h1>
-      <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+      <div style="display:flex; align-items:flex-start; gap:14px; justify-content:center;">
+        <img src="images/caddy-plus.png" alt="キャディプラス ロゴ" class="hero-logo" onerror="this.src='images/caddy-plus.svg'; this.onerror=null;" />
+        <div>
+          <h1 class="hero-title" style="margin-bottom:.4rem;">
+            <span class="hero-line1">ゴルフ場に</span>
+            <span class="hero-line2">いつでもキャディを</span>
+          </h1>
+          <p class="hero-subtitle" style="margin-left:2px;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+        </div>
+      </div>
       <div class="cta-buttons" style="display:none;">
         <a href="#features" class="cta-btn primary">サービス詳細</a>
         <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
