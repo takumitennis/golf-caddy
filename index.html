@@ -244,13 +244,9 @@
     }
 
     .brand-logo {
-      height: 127px;
+      height: 190px;
       width: auto;
       filter: brightness(1.1);
-      background: rgba(255, 255, 255, 0.9);
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .nav-main {
@@ -600,8 +596,7 @@
       
       /* モバイル版ではブランドロゴを小さく */
       .brand-logo {
-        height: 92px;
-        padding: 6px 10px;
+        height: 138px;
       }
       
       .brand {
@@ -774,15 +769,15 @@
         <div class="nav-item nav-auth-mobile" style="display:none;">
           <a href="#" class="nav-tab" id="spLoginTab">ログイン</a>
           <div class="dropdown-menu" id="spLoginDropdown">
-            <a href="login.html?role=golf" class="dropdown-item">ゴルフ場</a>
-            <a href="login.html?role=caddy" class="dropdown-item">キャディ</a>
+            <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
+            <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
             </div>
         </div>
             <div class="nav-item">
-              <a class="auth-link nav-tab" href="#">会員登録/ログイン</a>
+              <a class="auth-link nav-tab" href="#" id="loginModalTrigger">会員登録/ログイン</a>
               <div class="dropdown-menu auth-dropdown">
-                <a href="login.html?role=golf" class="dropdown-item">ゴルフ場</a>
-                <a href="login.html?role=caddy" class="dropdown-item">キャディ</a>
+                <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
+                <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
             </div>
         </div>
         </div>
@@ -1051,7 +1046,115 @@
       apply();
       restart();
     })();
+
+    // Login Modal
+    (function(){
+      // ログインモーダルのHTML作成
+      const modalHTML = `
+        <div id="loginModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000;">
+          <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:400px; text-align:center; position:relative;">
+            <button id="closeModal" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
+            <div style="margin-bottom:1rem; color:#2e7d32; font-size:1.5rem; font-weight:bold;">
+              <span id="modalTitle">Golf-Caddy</span>
+            </div>
+            <div style="margin-bottom:1rem; color:#666; font-size:0.9rem;">マッチングサービス</div>
+            
+            <div id="loginForm">
+              <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333;">ログイン</h3>
+              
+              <div style="margin-bottom:1rem; text-align:left;">
+                <label style="display:block; margin-bottom:0.5rem; font-weight:500;">ログインID</label>
+                <input id="modalEmail" type="email" placeholder="メールアドレスを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
+              </div>
+              
+              <div style="margin-bottom:1.5rem; text-align:left;">
+                <label style="display:block; margin-bottom:0.5rem; font-weight:500;">パスワード</label>
+                <input id="modalPassword" type="password" placeholder="パスワードを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
+              </div>
+              
+              <button id="modalLoginBtn" style="width:100%; background:#2e7d32; color:white; border:none; padding:0.875rem; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1rem;">
+                ログイン
+              </button>
+              
+              <a href="#" id="modalSignupLink" style="color:#2e7d32; text-decoration:none; font-size:0.9rem;">
+                新規登録はこちら
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // モーダルをbodyに追加
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      const modal = document.getElementById('loginModal');
+      const closeBtn = document.getElementById('closeModal');
+      const loginHeading = document.getElementById('loginHeading');
+      const signupLink = document.getElementById('modalSignupLink');
+      const loginBtn = document.getElementById('modalLoginBtn');
+      let currentRole = '';
+      
+      // モーダルを開く関数
+      const openModal = (role) => {
+        currentRole = role;
+        const roleText = role === 'golf' ? 'ゴルフ場' : 'キャディ';
+        loginHeading.textContent = roleText + 'ログイン';
+        signupLink.href = `login.html?role=${role}&mode=signup`;
+        modal.style.display = 'flex';
+      };
+      
+      // モーダルを閉じる関数
+      const closeModal = () => {
+        modal.style.display = 'none';
+        document.getElementById('modalEmail').value = '';
+        document.getElementById('modalPassword').value = '';
+      };
+      
+      // イベントリスナー設定
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      
+      // ドロップダウンクリック処理
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-role]')) {
+          e.preventDefault();
+          const role = e.target.getAttribute('data-role');
+          openModal(role);
+        }
+      });
+      
+      // ログインボタン処理
+      loginBtn.addEventListener('click', async () => {
+        const email = document.getElementById('modalEmail').value;
+        const password = document.getElementById('modalPassword').value;
+        
+        if (!email || !password) {
+          alert('メールアドレスとパスワードを入力してください');
+          return;
+        }
+        
+        // ログイン処理（実際のSupabase認証に置き換え可能）
+        try {
+          // 仮のログイン処理
+          if (currentRole === 'golf') {
+            window.location.href = 'golf_dashboard.html';
+          } else {
+            window.location.href = 'caddy_dashboard.html';
+          }
+        } catch (error) {
+          alert('ログインに失敗しました: ' + error.message);
+        }
+      });
+      
+      // Enterキーでログイン
+      document.getElementById('modalPassword').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          loginBtn.click();
+        }
+      });
+    })();
   </script>
 </body>
-</html>
 </html>
