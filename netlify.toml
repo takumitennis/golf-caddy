@@ -1,0 +1,26 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# リダイレクト設定
+[[redirects]]
+  from = "/api/line-webhook"
+  to = "/.netlify/functions/line-webhook"
+  status = 200
+
+# ヘッダー設定
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, x-line-signature"
+
+# 環境変数の例（実際の値は Netlify の設定画面で入力）
+# LINE_CHANNEL_ACCESS_TOKEN = "YOUR_CHANNEL_ACCESS_TOKEN"
+# LINE_CHANNEL_SECRET = "YOUR_CHANNEL_SECRET"
+# SUPABASE_URL = "YOUR_SUPABASE_URL"
+# SUPABASE_SERVICE_KEY = "YOUR_SUPABASE_SERVICE_KEY"
