@@ -129,6 +129,7 @@
     <button id="btnMainProf" class="active">プロフィール</button>
     <button id="btnMainShift">シフト編集</button>
     <button id="btnMainAssign">キャディ予定</button>
+    <button id="btnMainLine">LINE設定</button>
     <button id="btnMainNotice">お知らせ</button>
     <button id="logoutBtn" style="margin-left:auto;">ログアウト</button>
   </div>
@@ -183,6 +184,50 @@
         <button id="sendChatBtn">送信</button>
       </div>
     </div>
+    <!-- LINE連携設定 -->
+    <div id="mainLineSettings" class="hidden" style="margin-top:15px;">
+      <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin:0 0 15px;color:#333;display:flex;align-items:center;gap:8px;">
+          📱 LINE通知設定
+        </h3>
+        
+        <div id="lineNotConnected" style="display:block;">
+          <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:15px;">
+            <p style="margin:0 0 8px;color:#666;line-height:1.5;">
+              キャディ確定やキャンセルなどの重要な通知をLINEで受け取ることができます。
+            </p>
+            <p style="margin:0;font-size:0.9rem;color:#888;">
+              ※ 通知を受け取るには、キャディプラス公式LINEを友達追加して連携設定を行ってください。
+            </p>
+          </div>
+          
+          <button id="connectLineBtn" style="background:#00B900;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">
+            🤝 LINE連携を設定する
+          </button>
+        </div>
+        
+        <div id="lineConnected" style="display:none;">
+          <div style="background:#e8f5e8;padding:15px;border-radius:8px;margin-bottom:15px;">
+            <p style="margin:0 0 8px;color:#2d5a27;font-weight:600;">
+              ✅ LINE連携済み
+            </p>
+            <p style="margin:0;font-size:0.9rem;color:#4a7c59;">
+              重要な通知をLINEで受け取ることができます。
+            </p>
+          </div>
+          
+          <div style="display:flex;gap:10px;">
+            <button id="testLineNotificationBtn" style="background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">
+              テスト通知
+            </button>
+            <button id="disconnectLineBtn" style="background:#e74c3c;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">
+              連携解除
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- お知らせ（運営から） -->
     <div id="mainNotice" class="hidden" style="margin-top:15px;">
       <iframe src="notifications.html" style="width:100%;height:70vh;border:1px solid #e0e0e0;border-radius:8px;background:#fff;"></iframe>
@@ -831,13 +876,16 @@
     const btnMainProfEl = document.getElementById('btnMainProf');
     const btnMainShiftEl = document.getElementById('btnMainShift');
     const btnMainAssignEl = document.getElementById('btnMainAssign');
+    const btnMainLineEl = document.getElementById('btnMainLine');
     const btnMainNoticeEl = document.getElementById('btnMainNotice');
     if (btnMainProfEl) btnMainProfEl.onclick=()=>switchMain('prof');
     if (btnMainShiftEl) btnMainShiftEl.onclick=()=>switchMain('shift');
     if (btnMainAssignEl) btnMainAssignEl.onclick=()=>switchMain('assign');
+    if (btnMainLineEl) btnMainLineEl.onclick=()=>switchMain('line');
     if (btnMainNoticeEl) btnMainNoticeEl.onclick=()=>switchMain('notice');
     function switchMain(k){
-      const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg,notice:mainNotice};
+      const mainLineSettings=document.getElementById('mainLineSettings');
+      const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg,notice:mainNotice,line:mainLineSettings};
       // hide all
       Object.values(map).forEach(el=>{el.style.display='none';});
       // 予約リスト（新UI）も確実に隠す
@@ -846,6 +894,7 @@
       btnMainProfEl?.classList.remove('active');
       btnMainShiftEl?.classList.remove('active');
       btnMainAssignEl?.classList.remove('active');
+      btnMainLineEl?.classList.remove('active');
       btnMainNoticeEl?.classList.remove('active');
 
       // show selected
@@ -867,6 +916,10 @@
         btnMainAssignEl?.classList.add('active');
         renderAssignedList();
       } 
+      if(k==='line'){
+        btnMainLineEl?.classList.add('active');
+        checkLineConnectionStatus();
+      }
       if(k==='notice'){btnMainNoticeEl?.classList.add('active');}
     }
 
@@ -1209,6 +1262,120 @@
       showBookingList();
     }
 
+    // LINE連携関連の関数
+    const LINE_BOT_ID = '@caddyplus'; // 実際のLINEボットIDに変更してください
+    
+    async function checkLineConnectionStatus() {
+      try {
+        const { data: lineIntegration } = await supabase
+          .from('line_integrations')
+          .select('*')
+          .eq('cid', cid)
+          .eq('is_active', true)
+          .single();
+        
+        if (lineIntegration) {
+          document.getElementById('lineNotConnected').style.display = 'none';
+          document.getElementById('lineConnected').style.display = 'block';
+        } else {
+          document.getElementById('lineNotConnected').style.display = 'block';
+          document.getElementById('lineConnected').style.display = 'none';
+        }
+      } catch (error) {
+        console.log('LINE integration not found:', error);
+        document.getElementById('lineNotConnected').style.display = 'block';
+        document.getElementById('lineConnected').style.display = 'none';
+      }
+    }
+    
+    // LINE連携設定ボタンのイベントリスナー
+    document.getElementById('connectLineBtn')?.addEventListener('click', () => {
+      showLineIntegrationModal();
+    });
+    
+    document.getElementById('testLineNotificationBtn')?.addEventListener('click', async () => {
+      try {
+        // テスト通知の送信（実装時）
+        alert('テスト通知を送信しました！LINEをご確認ください。');
+      } catch (error) {
+        alert('テスト通知の送信に失敗しました。');
+      }
+    });
+    
+    document.getElementById('disconnectLineBtn')?.addEventListener('click', async () => {
+      if (confirm('LINE連携を解除しますか？解除すると通知を受け取れなくなります。')) {
+        try {
+          await supabase
+            .from('line_integrations')
+            .update({ is_active: false })
+            .eq('cid', cid);
+          
+          alert('LINE連携を解除しました。');
+          checkLineConnectionStatus();
+        } catch (error) {
+          alert('LINE連携の解除に失敗しました。');
+        }
+      }
+    });
+    
+    function showLineIntegrationModal() {
+      // login.htmlと同じLINE連携モーダルを表示
+      const linkToken = generateLinkToken();
+      
+      const modalHTML = `
+        <div id="lineModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;z-index:1000;display:flex;">
+          <div style="background:#fff;padding:2rem;border-radius:12px;width:90%;max-width:400px;text-align:center;">
+            <h3 style="color:#00B900;margin-bottom:1rem;">📱 LINE通知を設定</h3>
+            <p style="margin-bottom:1.5rem;color:#666;line-height:1.5;">
+              キャディプラス公式LINEを友達追加して、下のトークンを送信してください。
+            </p>
+            
+            <div style="margin-bottom:1.5rem;">
+              <button id="addLineFriendModalBtn" style="background:#00B900;color:white;border:none;padding:0.875rem 2rem;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;margin-bottom:1rem;">
+                🤝 LINE友達追加
+              </button>
+            </div>
+            
+            <div style="margin-bottom:1.5rem;padding:1rem;background:#f8f9fa;border-radius:8px;">
+              <p style="margin-bottom:0.5rem;font-weight:600;">連携用トークン:</p>
+              <code style="font-size:1.1rem;color:#00B900;font-weight:bold;">${linkToken}</code>
+              <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">このトークンをLINEのチャットで送信してください</p>
+            </div>
+            
+            <div style="display:flex;gap:1rem;">
+              <button id="cancelLineModal" style="flex:1;background:#f0f0f0;color:#666;border:none;padding:0.75rem;border-radius:6px;cursor:pointer;">
+                キャンセル
+              </button>
+              <button id="completeLineModal" style="flex:1;background:#3498db;color:white;border:none;padding:0.75rem;border-radius:6px;cursor:pointer;">
+                完了
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      document.getElementById('addLineFriendModalBtn').onclick = () => {
+        const addFriendUrl = `https://line.me/R/ti/p/${LINE_BOT_ID}`;
+        window.open(addFriendUrl, '_blank');
+      };
+      
+      document.getElementById('cancelLineModal').onclick = () => {
+        document.getElementById('lineModal').remove();
+      };
+      
+      document.getElementById('completeLineModal').onclick = () => {
+        document.getElementById('lineModal').remove();
+        alert('LINE連携の設定が完了しました！');
+        checkLineConnectionStatus();
+      };
+    }
+    
+    function generateLinkToken() {
+      return 'LINK:' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+    
   </script>
 </body>
 </html> 

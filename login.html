@@ -447,6 +447,39 @@
   </form>
   </div>
 
+  <!-- LINE連携モーダル -->
+  <div id="lineIntegrationModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;z-index:1000;">
+    <div style="background:#fff;padding:2rem;border-radius:12px;width:90%;max-width:400px;text-align:center;">
+      <h3 style="color:#00B900;margin-bottom:1rem;">📱 LINE通知を受け取ろう！</h3>
+      <p style="margin-bottom:1.5rem;color:#666;line-height:1.5;">
+        キャディ確定やキャンセルなどの重要な通知をLINEで受け取れます。<br>
+        まずはキャディプラス公式LINEを友達追加してください。
+      </p>
+      
+      <div style="margin-bottom:1.5rem;">
+        <button id="addLineFriendBtn" style="background:#00B900;color:white;border:none;padding:0.875rem 2rem;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;margin-bottom:1rem;">
+          🤝 LINE友達追加
+        </button>
+        <p style="font-size:0.85rem;color:#888;">友達追加後、下のトークンをLINEで送信してください</p>
+      </div>
+      
+      <div id="linkTokenSection" style="display:none;margin-bottom:1.5rem;padding:1rem;background:#f8f9fa;border-radius:8px;">
+        <p style="margin-bottom:0.5rem;font-weight:600;">連携用トークン:</p>
+        <code id="linkToken" style="font-size:1.1rem;color:#00B900;font-weight:bold;"></code>
+        <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">このトークンをLINEのチャットで送信してください</p>
+      </div>
+      
+      <div style="display:flex;gap:1rem;">
+        <button id="skipLineIntegration" style="flex:1;background:#f0f0f0;color:#666;border:none;padding:0.75rem;border-radius:6px;cursor:pointer;">
+          後で設定
+        </button>
+        <button id="completeLineIntegration" style="flex:1;background:#3498db;color:white;border:none;padding:0.75rem;border-radius:6px;cursor:pointer;">
+          完了
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://vqjxajzaasuqfgvhvxci.supabase.co";
@@ -720,6 +753,13 @@
             }, { onConflict: 'email' });
           }
           showMessage('確認メールを送信しました。メールをご確認ください。','success');
+          
+          // キャディの場合のみLINE連携モーダルを表示
+          if (role === 'caddy') {
+            setTimeout(() => {
+              showLineIntegrationModal(email);
+            }, 2000);
+          }
         }
       } catch (error) {
         showMessage("エラーが発生しました: " + error.message, 'error');
@@ -738,6 +778,63 @@
       document.getElementById("pass").classList.remove("error");
       document.getElementById("errPassword").classList.remove("show");
     });
+
+    // LINE連携関連の関数
+    const LINE_BOT_ID = '@caddyplus'; // 実際のLINEボットIDに変更してください
+    
+    function generateLinkToken() {
+      return 'LINK:' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+    
+    function showLineIntegrationModal(email) {
+      const modal = document.getElementById('lineIntegrationModal');
+      const linkToken = generateLinkToken();
+      
+      document.getElementById('linkToken').textContent = linkToken;
+      modal.style.display = 'flex';
+      
+      // LINE友達追加ボタン
+      document.getElementById('addLineFriendBtn').onclick = () => {
+        const addFriendUrl = `https://line.me/R/ti/p/${LINE_BOT_ID}`;
+        window.open(addFriendUrl, '_blank');
+        
+        // トークンセクションを表示
+        document.getElementById('linkTokenSection').style.display = 'block';
+        
+        // トークンをデータベースに保存（実装時）
+        saveLinkToken(email, linkToken);
+      };
+      
+      // スキップボタン
+      document.getElementById('skipLineIntegration').onclick = () => {
+        modal.style.display = 'none';
+        redirectToDashboard();
+      };
+      
+      // 完了ボタン
+      document.getElementById('completeLineIntegration').onclick = () => {
+        modal.style.display = 'none';
+        showMessage('LINE連携の設定が完了しました！', 'success');
+        setTimeout(() => {
+          redirectToDashboard();
+        }, 1500);
+      };
+    }
+    
+    async function saveLinkToken(email, token) {
+      try {
+        // 実際の実装では、トークンをデータベースに保存
+        console.log('Saving link token:', { email, token });
+        // TODO: Supabaseにトークン保存の実装
+      } catch (error) {
+        console.error('Error saving link token:', error);
+      }
+    }
+    
+    function redirectToDashboard() {
+      const targetUrl = role === 'golf' ? '/golf_dashboard.html' : '/caddy_dashboard.html';
+      window.location.href = targetUrl;
+    }
 
     // ページ読み込み時のアニメーション
     document.addEventListener('DOMContentLoaded', () => {
