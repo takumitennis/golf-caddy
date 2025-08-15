@@ -105,34 +105,7 @@
       }
     }
 
-    /* Hero logo (centered above title) */
-    .hero-logo {
-      display: block;
-      margin: 60px auto 12px;
-      width: clamp(210px, 45vw, 390px);
-      height: auto;
-      opacity: 0;
-      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
-      animation: logoFade 700ms ease-out 120ms forwards;
-    }
-
-    /* モバイル版でのロゴ調整 */
-    @media (max-width: 768px) {
-      .hero-logo { 
-        margin-top: 80px; 
-        width: clamp(210px, 50vw, 300px);
-      }
-    }
-
-    /* ロゴを少し上げ、左寄せ配置（PC） */
-    @media (min-width: 769px) {
-      .hero-logo { margin-left: 0; margin-right: 0; margin-top: 40px; }
-    }
-
-    @keyframes logoFade {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    /* Hero logo removed */
 
     .hero-title {
       font-size: 2rem; /* およそ2/3 */
@@ -285,8 +258,8 @@
       transform: translateY(-1px);
     }
 
-    .brand { position:absolute; left: 12px; top: 50%; transform: translateY(-50%); height: 100%; display:flex; align-items:center; }
-    .brand-logo { height: calc(100% - 10px); width:auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); }
+    .brand { display: none !important; } /* ブランドロゴを完全に非表示 */
+    .brand-logo { display: none !important; } /* ブランドロゴを完全に非表示 */
 
     .login-section {
       display: flex;
@@ -602,24 +575,9 @@
       .nav-tab { padding: 0.19rem 0.26rem; font-size: 0.65rem; width:auto; border-radius: 5px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
       .hero-content{ max-width: 96%; padding: 88px 1rem 0; }
       
-      /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
+      /* モバイル版ではブランドロゴを非表示にする */
       .brand {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, +110px);
-        height: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 20;
-        pointer-events: none;
-      }
-      
-      .brand-logo {
-        height: 120px;
-        width: auto;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+        display: none;
       }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
       .hero-title { font-size: clamp(14px, 3.4vw, 16px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
@@ -764,7 +722,7 @@
     <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
-        <div class="brand"><img src="images/caddy-plus.png" alt="CaddyPlus" class="brand-logo" /></div>
+        <!-- ブランドロゴを削除 -->
         <div class="nav-main">
             <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">サービス</a>
