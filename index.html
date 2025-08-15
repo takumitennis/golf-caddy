@@ -602,24 +602,9 @@
       .nav-tab { padding: 0.19rem 0.26rem; font-size: 0.65rem; width:auto; border-radius: 5px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
       .hero-content{ max-width: 96%; padding: 88px 1rem 0; }
       
-      /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
+      /* モバイル版ではブランドロゴを非表示にする */
       .brand {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, +110px);
-        height: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 20;
-        pointer-events: none;
-      }
-      
-      .brand-logo {
-        height: 120px;
-        width: auto;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+        display: none;
       }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
       .hero-title { font-size: clamp(14px, 3.4vw, 16px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
