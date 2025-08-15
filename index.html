@@ -108,17 +108,25 @@
     /* Hero logo (centered above title) */
     .hero-logo {
       display: block;
-      margin: 0 auto 12px;
-      width: clamp(140px, 26vw, 260px);
+      margin: 60px auto 12px;
+      width: clamp(210px, 45vw, 390px);
       height: auto;
       opacity: 0;
       filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
       animation: logoFade 700ms ease-out 120ms forwards;
     }
 
+    /* モバイル版でのロゴ調整 */
+    @media (max-width: 768px) {
+      .hero-logo { 
+        margin-top: 80px; 
+        width: clamp(210px, 50vw, 300px);
+      }
+    }
+
     /* ロゴを少し上げ、左寄せ配置（PC） */
     @media (min-width: 769px) {
-      .hero-logo { margin-left: 0; margin-right: 0; margin-top: 0; }
+      .hero-logo { margin-left: 0; margin-right: 0; margin-top: 40px; }
     }
 
     @keyframes logoFade {
@@ -471,7 +479,7 @@
 
     .benefits-section.golf-course-benefits::after { display:none; }
 
-    .benefits-section.caddy-benefits { background: #f7f1ee !important; border-top: 1px solid #efe4e0; border-bottom: 1px solid #efe4e0; }
+    .benefits-section.caddy-benefits { background: #e3f2fd !important; border-top: 1px solid #bbdefb; border-bottom: 1px solid #bbdefb; }
 
     .benefits-section.caddy-benefits::after { display:none; }
 
@@ -489,9 +497,9 @@
     .benefits-header p { font-size:1rem; color:#333; max-width:800px; margin:0 auto; text-shadow:none; line-height:1.8; }
 
     /* セクション識別チップ */
-    .section-chip { display:inline-block; padding:4px 10px; border-radius:9999px; font-size:.7rem; font-weight:700; letter-spacing:.08em; margin-bottom:10px; }
-    .section-chip.gc { background: rgba(46,125,50,.12); color:#2e7d32; }
-    .section-chip.cd { background: rgba(0,106,173,.12); color:#006aad; }
+    .section-chip { display:inline-block; padding:4px 10px; font-size:1.2rem; font-weight:700; letter-spacing:.08em; margin-bottom:10px; }
+    .section-chip.gc { color:#2e7d32; }
+    .section-chip.cd { color:#006aad; }
 
     .benefits-grid { display:block; margin-top:1rem; }
 
@@ -553,7 +561,7 @@
     .footer-section h3 {
       color: #fff;
       margin-bottom: 0.35rem;
-      font-size: 0.4rem; /* 約1/3 */
+      font-size: 0.67rem; /* 他の文字と同じサイズに統一 */
     }
 
     .footer-section p, .footer-section a {
@@ -828,21 +836,21 @@
         </div>
         <div class="benefits-grid">
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="https://picsum.photos/seed/staffing/300/300" alt="人材不足の解決"></div>
+            <div class="benefit-thumb"><img src="images/人材不足の解決.png" alt="人材不足の解決"></div>
             <div class="benefit-content">
             <h3 class="benefit-title">人材不足の解決</h3>
             <p class="benefit-description">登録キャディから最適な人材を選定し、人材不足の問題を解決します。経験豊富なキャディがいつでも利用可能です。</p>
             </div>
           </div>
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="https://picsum.photos/seed/cost/300/300" alt="コスト削減"></div>
+            <div class="benefit-thumb"><img src="images/売上向上.png" alt="売り上げ向上"></div>
             <div class="benefit-content">
-            <h3 class="benefit-title">コスト削減</h3>
-            <p class="benefit-description">固定費を削減し、需要に応じた柔軟な人材配置が可能になります。効率的な運営で収益性を向上させます。</p>
+            <h3 class="benefit-title">売り上げ向上</h3>
+            <p class="benefit-description">高品質なキャディサービスによりお客様満足度が向上し、リピート率増加と新規顧客獲得を実現。売り上げの大幅な向上を期待できます。</p>
             </div>
           </div>
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="https://picsum.photos/seed/quality/300/300" alt="サービス品質向上"></div>
+            <div class="benefit-thumb"><img src="images/サービス品質向上.png" alt="サービス品質向上"></div>
             <div class="benefit-content">
             <h3 class="benefit-title">サービス品質向上</h3>
             <p class="benefit-description">厳選されたキャディが提供する高品質なサービスで、お客様満足度の向上とリピート率の向上を実現します。</p>
@@ -862,24 +870,24 @@
         </div>
         <div class="benefits-grid">
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="https://picsum.photos/seed/flex/300/300" alt="柔軟な働き方"></div>
+            <div class="benefit-thumb"><img src="images/柔軟な働き方.png" alt="柔軟な働き方"></div>
             <div class="benefit-content">
               <h3 class="benefit-title">柔軟な働き方</h3>
               <p class="benefit-description">自分の都合に合わせてシフトを選択でき、ワークライフバランスを保ちながら働くことができます。</p>
             </div>
           </div>
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="https://picsum.photos/seed/income/300/300" alt="収入向上"></div>
+            <div class="benefit-thumb"><img src="images/収入向上.png" alt="収入向上"></div>
             <div class="benefit-content">
               <h3 class="benefit-title">収入向上</h3>
               <p class="benefit-description">複数のゴルフ場で働くことで収入を増やし、スキルに応じた適正な報酬を得ることができます。</p>
             </div>
           </div>
           <div class="benefit-card loading">
-            <div class="benefit-thumb"><img src="https://picsum.photos/seed/skill/300/300" alt="スキル開発"></div>
+            <div class="benefit-thumb"><img src="images/キャリア＆スキルアップ.png" alt="キャリア&スキルアップ"></div>
             <div class="benefit-content">
-              <h3 class="benefit-title">スキル開発</h3>
-              <p class="benefit-description">様々なゴルフ場での経験と研修プログラムを通じて、キャリアアップとスキル向上を実現します。</p>
+              <h3 class="benefit-title">キャリア&スキルアップ</h3>
+              <p class="benefit-description">多様なゴルフ場での豊富な経験と専門研修プログラムを通じて、プロフェッショナルなキャディとしてのキャリア形成とスキル向上を実現します。</p>
             </div>
           </div>
         </div>
@@ -919,8 +927,7 @@
         </div>
         <div class="footer-section">
           <h3>お問い合わせ</h3>
-          <p>Email: info@golf-caddy-matching.com</p>
-          <p>Tel: 03-1234-5678</p>
+          <p>Email: caddytas@gmail.com</p>
         </div>
         <div class="footer-section">
           <h3>リンク</h3>
