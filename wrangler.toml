@@ -1,0 +1,17 @@
+# Cloudflare Pages Configuration
+name = "golf-caddy"
+compatibility_date = "2024-01-01"
+
+# 環境変数（実際の値はCloudflare Pages設定画面で入力）
+[env.production]
+vars = { }
+
+# Secrets（実際の値はCloudflare Pages設定画面で入力）
+# LINE_CHANNEL_ACCESS_TOKEN = "JB6aJjelKtMtZW/1BjktWYqr..."
+# LINE_CHANNEL_SECRET = "3ce27edf5017d7a8ba1af8d3e14fb4d8"
+# SUPABASE_URL = "https://your-project.supabase.co"
+# SUPABASE_SERVICE_KEY = "your-service-key"
+
+[build]
+command = "echo 'Build completed'"
+publish = "."
