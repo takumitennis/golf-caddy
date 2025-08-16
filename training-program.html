@@ -406,8 +406,77 @@
       <div class="cta-description">
         質の高いサービスを提供し、お客様に喜ばれるキャディを目指しましょう
       </div>
-      <a href="/login/?role=caddy" class="cta-button">キャディとして登録する</a>
+      <button id="caddyRegistrationBtn" class="cta-button">キャディとして登録する</button>
     </div>
   </div>
+
+  <!-- ログインポップアップ -->
+  <div id="loginModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:1000;">
+    <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:400px; text-align:center; position:relative;">
+      <button id="closeModal" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
+      
+      <div id="loginForm">
+        <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333; font-size:1.8rem; font-weight:bold;">ログイン</h3>
+        
+        <div style="margin-bottom:1rem; text-align:left;">
+          <label for="modalEmail" style="display:block; margin-bottom:0.5rem; color:#555; font-weight:500;">ログインID</label>
+          <input type="email" id="modalEmail" placeholder="メールアドレスを入力" style="width:100%; padding:0.75rem; border:1px solid #ddd; border-radius:6px; font-size:1rem;">
+        </div>
+        
+        <div style="margin-bottom:1.5rem; text-align:left;">
+          <label for="modalPassword" style="display:block; margin-bottom:0.5rem; color:#555; font-weight:500;">パスワード</label>
+          <input type="password" id="modalPassword" placeholder="パスワードを入力" style="width:100%; padding:0.75rem; border:1px solid #ddd; border-radius:6px; font-size:1rem;">
+        </div>
+        
+        <button id="modalLoginBtn" style="width:100%; padding:0.875rem; background:#ff6b35; color:white; border:none; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1rem;">ログイン</button>
+        
+        <div style="text-align:center; font-size:0.9rem; color:#666;">
+          <span>アカウントをお持ちでない方は</span>
+          <a href="#" id="modalSignupLink" style="color:#3182ce; text-decoration:none; font-weight:500;">新規登録はこちら</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // キャディ登録ボタンのイベントリスナー
+    document.getElementById('caddyRegistrationBtn').addEventListener('click', function() {
+      document.getElementById('loginModal').style.display = 'flex';
+      // キャディログインとして設定
+      document.getElementById('loginHeading').textContent = 'キャディログイン';
+    });
+
+    // モーダルを閉じる
+    document.getElementById('closeModal').addEventListener('click', function() {
+      document.getElementById('loginModal').style.display = 'none';
+    });
+
+    // モーダル外をクリックして閉じる
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+      if (e.target === document.getElementById('loginModal')) {
+        document.getElementById('loginModal').style.display = 'none';
+      }
+    });
+
+    // ログインボタンの処理
+    document.getElementById('modalLoginBtn').addEventListener('click', function() {
+      const email = document.getElementById('modalEmail').value;
+      const password = document.getElementById('modalPassword').value;
+      
+      if (!email || !password) {
+        alert('ログインIDとパスワードを入力してください。');
+        return;
+      }
+      
+      // ここでログイン処理を実装
+      alert('ログイン処理が実装されていません。');
+    });
+
+    // 新規登録リンクの処理
+    document.getElementById('modalSignupLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      alert('新規登録機能は実装されていません。');
+    });
+  </script>
 </body>
 </html> 
