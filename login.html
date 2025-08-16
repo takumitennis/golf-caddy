@@ -354,7 +354,6 @@
   <form id="authForm" class="card" novalidate>
       <div class="logo">
         <img src="images/caddy-plus.png" alt="CaddyPlus" style="height: 80px; width: auto; margin-bottom: 10px;" />
-        <p>マッチングサービス</p>
       </div>
       
     <h2 id="title">ログイン</h2>
@@ -523,7 +522,12 @@
         passwordGroup.style.display = "none";
         toggle.textContent = "ログインはこちら";
       } else {
-        title.textContent = "ログイン";
+        // ロールに応じてシンプルなタイトルに変更
+        if (role === "golf") {
+          title.textContent = "ゴルフ場ログイン";
+        } else {
+          title.textContent = "キャディログイン";
+        }
         submitText.textContent = "ログイン";
         emailLabel.textContent = "ログインID";
         passwordGroup.style.display = "block";
