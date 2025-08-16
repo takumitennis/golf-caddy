@@ -116,11 +116,13 @@
       animation: logoFade 700ms ease-out 120ms forwards;
     }
 
-    /* モバイル版でのロゴ調整 */
+    /* モバイル版でのロゴ非表示 */
     @media (max-width: 768px) {
       .hero-logo { 
-        margin-top: 80px; 
-        width: clamp(210px, 50vw, 300px);
+        display: none; /* モバイル版ではロゴを非表示 */
+      }
+      .brand-logo {
+        display: none; /* モバイル版ではヘッダーロゴも非表示 */
       }
     }
 
