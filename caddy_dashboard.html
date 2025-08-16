@@ -1428,9 +1428,45 @@
     }
     
     function generateLinkToken() {
-      return 'LINK:' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      // トークンを生成
+      const token = 'LINK:' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      
+      // データベースにトークンを保存
+      saveLinkTokenToDatabase(token);
+      
+      return token;
     }
     
+    async function saveLinkTokenToDatabase(token) {
+      try {
+        // LINK:プレフィックスを除去
+        const cleanToken = token.replace('LINK:', '');
+        
+        // 有効期限を24時間後に設定
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 24);
+        
+        // line_link_tokensテーブルに保存
+        const { error } = await supabase
+          .from('line_link_tokens')
+          .insert({
+            cid: cid,
+            token: cleanToken,
+            expires_at: expiresAt.toISOString()
+          });
+        
+        if (error) {
+          console.error('Failed to save link token:', error);
+          throw error;
+        }
+        
+        console.log('Link token saved to database:', cleanToken);
+        
+      } catch (error) {
+        console.error('Error saving link token:', error);
+        alert('トークンの保存に失敗しました。再度お試しください。');
+      }
+    }
   </script>
 </body>
 </html> 

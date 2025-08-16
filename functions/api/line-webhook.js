@@ -152,7 +152,8 @@ async function handleTextMessage(event, env) {
 // アカウント紐付け処理
 async function handleAccountLinking(event, token, lineUserId, env) {
   try {
-    console.log(`Attempting to link account with token: ${token}`);
+    console.log(`=== ACCOUNT LINKING START ===`);
+    console.log(`Full token received: "${token}"`);
     console.log(`Line User ID: ${lineUserId}`);
 
     // 環境変数の確認
@@ -163,7 +164,8 @@ async function handleAccountLinking(event, token, lineUserId, env) {
 
     // トークンからLINK:プレフィックスを除去
     const cleanToken = token.replace('LINK:', '').trim();
-    console.log(`Clean token: ${cleanToken}`);
+    console.log(`Clean token: "${cleanToken}"`);
+    console.log(`Token length: ${cleanToken.length}`);
 
     // Supabase クライアント初期化
     const tokenQueryUrl = `${env.SUPABASE_URL}/rest/v1/line_link_tokens?token=eq.${cleanToken}&select=cid,expires_at,used_at`;
@@ -178,20 +180,43 @@ async function handleAccountLinking(event, token, lineUserId, env) {
     });
 
     console.log(`Supabase response status: ${supabaseResponse.status}`);
+    console.log(`Supabase response headers:`, Object.fromEntries(supabaseResponse.headers.entries()));
     
     if (!supabaseResponse.ok) {
       const errorText = await supabaseResponse.text();
       console.error('Supabase API error:', errorText);
-      throw new Error(`Supabase API error: ${supabaseResponse.status}`);
+      throw new Error(`Supabase API error: ${supabaseResponse.status} - ${errorText}`);
     }
 
     const tokenData = await supabaseResponse.json();
     console.log('Token data response:', JSON.stringify(tokenData, null, 2));
+    console.log('Token data length:', tokenData ? tokenData.length : 'null');
 
     if (!tokenData || tokenData.length === 0) {
       console.error('Token not found in database');
+      console.error('Searched for token:', cleanToken);
+      
+      // データベース内のトークンを確認（デバッグ用）
+      try {
+        const allTokensResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/line_link_tokens?select=token,cid,created_at&limit=5`, {
+          headers: {
+            'apikey': env.SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (allTokensResponse.ok) {
+          const allTokens = await allTokensResponse.json();
+          console.log('Recent tokens in database:', allTokens);
+        }
+      } catch (debugError) {
+        console.error('Debug query failed:', debugError);
+      }
+      
       await sendReplyMessage(event.replyToken, 
-        '❌ 無効なトークンです。\nアプリで新しいトークンを取得してください。',
+        '❌ 無効なトークンです。\nアプリで新しいトークンを取得してください。\n\n' +
+        '💡 トークンは24時間で期限切れになります。',
         env
       );
       return;
@@ -202,7 +227,7 @@ async function handleAccountLinking(event, token, lineUserId, env) {
 
     // 既に使用済みかチェック
     if (token_info.used_at) {
-      console.log('Token already used');
+      console.log('Token already used at:', token_info.used_at);
       await sendReplyMessage(event.replyToken, 
         '⚠️ このトークンは既に使用済みです。\nアプリで新しいトークンを取得してください。',
         env
@@ -211,7 +236,13 @@ async function handleAccountLinking(event, token, lineUserId, env) {
     }
 
     // 有効期限チェック
-    if (new Date() > new Date(token_info.expires_at)) {
+    const now = new Date();
+    const expiresAt = new Date(token_info.expires_at);
+    console.log('Current time:', now.toISOString());
+    console.log('Token expires at:', expiresAt.toISOString());
+    console.log('Is expired:', now > expiresAt);
+    
+    if (now > expiresAt) {
       console.log('Token expired');
       await sendReplyMessage(event.replyToken, 
         '⏰ トークンの有効期限が切れています。\nアプリで新しいトークンを取得してください。',
@@ -247,7 +278,7 @@ async function handleAccountLinking(event, token, lineUserId, env) {
     if (!integrationResponse.ok) {
       const errorText = await integrationResponse.text();
       console.error('Integration save error:', errorText);
-      throw new Error(`Integration save failed: ${integrationResponse.status}`);
+      throw new Error(`Integration save failed: ${integrationResponse.status} - ${errorText}`);
     }
 
     // トークンを使用済みにマーク
@@ -272,6 +303,7 @@ async function handleAccountLinking(event, token, lineUserId, env) {
     }
 
     console.log(`Account linked successfully: CID ${token_info.cid} ↔ LINE ${lineUserId}`);
+    console.log(`=== ACCOUNT LINKING SUCCESS ===`);
 
     // 成功メッセージを送信
     await sendReplyMessage(event.replyToken, 
@@ -285,6 +317,7 @@ async function handleAccountLinking(event, token, lineUserId, env) {
     );
 
   } catch (error) {
+    console.error('=== ACCOUNT LINKING ERROR ===');
     console.error('Account linking error:', error);
     console.error('Error details:', {
       message: error.message,
