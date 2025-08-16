@@ -128,17 +128,13 @@ async function handleTextMessage(event, env) {
   // トークンによる紐付け処理
   if (messageText.startsWith('LINK:')) {
     await handleAccountLinking(event, messageText, lineUserId, env);
-  } else if (messageText.toLowerCase() === 'token' || messageText.toLowerCase() === 'トークン') {
-    // トークン生成要求への対応
-    await handleTokenGeneration(event, lineUserId, env);
   } else if (messageText.toLowerCase() === 'help' || messageText.toLowerCase() === 'ヘルプ') {
     // ヘルプメッセージ
     await sendReplyMessage(event.replyToken, 
       '📱 キャディプラスLINE連携ヘルプ\n\n' +
-      '🔑 テスト用トークン生成: 「トークン」と送信\n' +
       '🔗 アカウント連携: 「LINK:トークン」の形式で送信\n' +
       '❓ このヘルプ: 「ヘルプ」と送信\n\n' +
-      '💡 実際の連携を行うには、キャディプラスアプリでログインして連携用トークンを取得してください。',
+      '💡 連携用トークンは、キャディプラスアプリのLINE設定画面で取得できます。',
       env
     );
   } else {
@@ -147,37 +143,7 @@ async function handleTextMessage(event, env) {
       'キャディプラスをご利用いただきありがとうございます！🎉\n\n' +
       '📱 アカウント連携をご希望の場合は、アプリで表示される連携用トークンを送信してください。\n\n' +
       '例: LINK:abc123def456\n\n' +
-      '🔑 または「トークン」と送信すると、テスト用トークンを生成できます。\n' +
       '❓ 「ヘルプ」と送信すると、詳しい使い方が表示されます。',
-      env
-    );
-  }
-}
-
-// トークン生成処理（テスト用）
-async function handleTokenGeneration(event, lineUserId, env) {
-  try {
-    console.log(`Generating test token for LINE user: ${lineUserId}`);
-
-    // テスト用のトークンを生成（データベース保存なし）
-    const testToken = 'TEST_' + Math.random().toString(36).substring(2, 15);
-    console.log(`Test token generated: ${testToken}`);
-
-    // トークンを送信（データベース保存は行わない）
-    await sendReplyMessage(event.replyToken, 
-      '🔑 テスト用トークンを生成しました！\n\n' +
-      `トークン: ${testToken}\n\n` +
-      'このトークンを送信して連携をテストできます：\n' +
-      `LINK:${testToken}\n\n` +
-      '⚠️ このトークンはテスト用です。実際の連携には有効なトークンが必要です。\n\n' +
-      '💡 実際の連携を行うには、キャディプラスアプリでログインして連携用トークンを取得してください。',
-      env
-    );
-
-  } catch (error) {
-    console.error('Token generation error:', error);
-    await sendReplyMessage(event.replyToken, 
-      '❌ トークン生成中にエラーが発生しました。\n少し時間をおいて再度お試しください。',
       env
     );
   }
@@ -346,7 +312,6 @@ async function handleFollow(event, env) {
     '1. キャディプラスアプリにログイン\n' +
     '2. LINE設定画面を開く\n' +
     '3. 表示されるトークンをこちらに送信\n\n' +
-    '🔑 または「トークン」と送信すると、テスト用トークンを生成できます。\n\n' +
     '連携完了後、重要な通知をお送りします！',
     env
   );
