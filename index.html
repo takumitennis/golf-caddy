@@ -1077,17 +1077,9 @@
         <div id="loginModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000;">
           <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:400px; text-align:center; position:relative;">
             <button id="closeModal" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
-            <div style="margin-bottom:1rem; color:#2e7d32; font-size:1.5rem; font-weight:bold;">
-              <span id="modalTitle">Golf-Caddy</span>
-            </div>
-            <div style="margin-bottom:1rem; color:#666; font-size:0.9rem;">マッチングサービス</div>
-            
-            <div id="roleChip" style="margin-bottom:1rem; font-size:1.2rem; font-weight:bold; letter-spacing:0.1em;">
-              GOLF
-            </div>
             
             <div id="loginForm">
-              <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333;">ログイン</h3>
+              <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333; font-size:1.8rem; font-weight:bold;">ログイン</h3>
               
               <div style="margin-bottom:1rem; text-align:left;">
                 <label style="display:block; margin-bottom:0.5rem; font-weight:500;">ログインID</label>
@@ -1119,22 +1111,12 @@
       const loginHeading = document.getElementById('loginHeading');
       const signupLink = document.getElementById('modalSignupLink');
       const loginBtn = document.getElementById('modalLoginBtn');
-      const roleChip = document.getElementById('roleChip');
       let currentRole = '';
       
       // モーダルを開く関数
       const openModal = (role) => {
         currentRole = role;
         const roleText = role === 'golf' ? 'ゴルフ場' : 'キャディ';
-        
-        // 役割チップの更新
-        if (role === 'golf') {
-          roleChip.textContent = 'GOLF';
-          roleChip.style.color = '#2e7d32';
-        } else {
-          roleChip.textContent = 'CADDY';
-          roleChip.style.color = '#1976d2';
-        }
         
         loginHeading.textContent = roleText + 'ログイン';
         signupLink.href = `login.html?role=${role}&mode=signup`;
