@@ -129,6 +129,7 @@
     <button id="btnMainProf" class="active">プロフィール</button>
     <button id="btnMainShift">シフト編集</button>
     <button id="btnMainAssign">キャディ予定</button>
+    <button id="btnMainTraining">研修について</button>
     <button id="btnMainLine">LINE設定</button>
     <button id="btnMainNotice">お知らせ</button>
     <button id="logoutBtn" style="margin-left:auto;">ログアウト</button>
@@ -876,11 +877,13 @@
     const btnMainProfEl = document.getElementById('btnMainProf');
     const btnMainShiftEl = document.getElementById('btnMainShift');
     const btnMainAssignEl = document.getElementById('btnMainAssign');
+    const btnMainTrainingEl = document.getElementById('btnMainTraining');
     const btnMainLineEl = document.getElementById('btnMainLine');
     const btnMainNoticeEl = document.getElementById('btnMainNotice');
     if (btnMainProfEl) btnMainProfEl.onclick=()=>switchMain('prof');
     if (btnMainShiftEl) btnMainShiftEl.onclick=()=>switchMain('shift');
     if (btnMainAssignEl) btnMainAssignEl.onclick=()=>switchMain('assign');
+    if (btnMainTrainingEl) btnMainTrainingEl.onclick=()=>window.open('/training-program.html', '_blank');
     if (btnMainLineEl) btnMainLineEl.onclick=()=>switchMain('line');
     if (btnMainNoticeEl) btnMainNoticeEl.onclick=()=>switchMain('notice');
     function switchMain(k){
@@ -894,6 +897,7 @@
       btnMainProfEl?.classList.remove('active');
       btnMainShiftEl?.classList.remove('active');
       btnMainAssignEl?.classList.remove('active');
+      btnMainTrainingEl?.classList.remove('active');
       btnMainLineEl?.classList.remove('active');
       btnMainNoticeEl?.classList.remove('active');
 
