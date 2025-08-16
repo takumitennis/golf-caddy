@@ -262,8 +262,8 @@
     let cid;
     let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
     // キャディ予定用の独立した月状態
-    let assignedCalMonth = calMonth;
-    let assignedCalYear = calYear;
+    let assignedCalMonth = new Date().getMonth();
+    let assignedCalYear = new Date().getFullYear();
     const calTable=document.getElementById('calTable');
     const pendingInserts = new Set();
     const pendingDeletes = new Set();
@@ -547,8 +547,60 @@
 
     const pm = document.getElementById('prevMonth');
     const nm = document.getElementById('nextMonth');
-    if (pm) pm.onclick=()=>{ if(--calMonth<0){calMonth=11;calYear--;} renderCal(); };
-    if (nm) nm.onclick=()=>{ if(++calMonth>11){calMonth=0;calYear++;} renderCal(); };
+    if (pm) pm.onclick=()=>{ 
+      try {
+        calMonth--;
+        if(calMonth < 0){calMonth=11;calYear--;}
+        renderCal(); 
+      } catch (error) {
+        console.error('シフト編集の前月遷移でエラーが発生しました:', error);
+      }
+    };
+    if (nm) nm.onclick=()=>{ 
+      try {
+        calMonth++;
+        if(calMonth > 11){calMonth=0;calYear++;}
+        renderCal(); 
+      } catch (error) {
+        console.error('シフト編集の次月遷移でエラーが発生しました:', error);
+      }
+    };
+
+    // キャディ予定用の独立した月遷移ボタン
+    const apm = document.getElementById('aPrevMonth');
+    const anm = document.getElementById('aNextMonth');
+    if (apm) apm.onclick=()=>{ 
+      try {
+        assignedCalMonth--;
+        if(assignedCalMonth < 0){
+          assignedCalMonth = 11;
+          assignedCalYear--;
+        }
+        renderAssignedCalendar(); 
+      } catch (error) {
+        console.error('前月への遷移でエラーが発生しました:', error);
+        // エラー時は現在月に戻す
+        assignedCalMonth = new Date().getMonth();
+        assignedCalYear = new Date().getFullYear();
+        renderAssignedCalendar();
+      }
+    };
+    if (anm) anm.onclick=()=>{ 
+      try {
+        assignedCalMonth++;
+        if(assignedCalMonth > 11){
+          assignedCalMonth = 0;
+          assignedCalYear++;
+        }
+        renderAssignedCalendar(); 
+      } catch (error) {
+        console.error('次月への遷移でエラーが発生しました:', error);
+        // エラー時は現在月に戻す
+        assignedCalMonth = new Date().getMonth();
+        assignedCalYear = new Date().getFullYear();
+        renderAssignedCalendar();
+      }
+    };
 
     function isMonthLocked(y, m){
       // y: 年, m: 月(0-11)。対象月の編集締切は「前月15日」
@@ -634,11 +686,8 @@
       }
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
 
-      // 「キャディ予定」タブ側のカレンダーも同月で更新
-      if(document.getElementById('mainAssigned')){
-        document.getElementById('aCalTitle').textContent = `${calYear}年 ${calMonth+1}月`;
-        renderAssignedCal(first, last);
-      }
+      // シフト編集のレンダリングではキャディ予定タブを更新しない
+      // キャディ予定タブは独立した状態を持つため
     }
 
     async function toggle(dateStr,isAvail){
@@ -662,6 +711,43 @@
         td.className = nowAvail ? 'cal-ok' : 'cal-ng';
         td.innerHTML=`<small>${day}</small><br>${nowAvail?'<span class="ok-circle"></span>':'❌'}`;
       });
+    }
+
+    // キャディ予定専用のカレンダーレンダリング関数
+    async function renderAssignedCalendar(){
+      try {
+        // 日付の有効性をチェック
+        if (isNaN(assignedCalYear) || isNaN(assignedCalMonth) || 
+            assignedCalMonth < 0 || assignedCalMonth > 11 ||
+            assignedCalYear < 1900 || assignedCalYear > 2100) {
+          console.warn('無効な日付状態を検出しました。現在月にリセットします。');
+          assignedCalMonth = new Date().getMonth();
+          assignedCalYear = new Date().getFullYear();
+        }
+        
+        const firstDate = new Date(assignedCalYear, assignedCalMonth, 1);
+        const lastDate = new Date(assignedCalYear, assignedCalMonth + 1, 0);
+        
+        // 作成された日付オブジェクトの有効性をチェック
+        if (isNaN(firstDate.getTime()) || isNaN(lastDate.getTime())) {
+          throw new Error(`無効な日付が作成されました: ${assignedCalYear}年${assignedCalMonth + 1}月`);
+        }
+        
+        // タイトルを更新
+        const titleEl = document.getElementById('aCalTitle');
+        if (titleEl) {
+          titleEl.textContent = `${assignedCalYear}年 ${assignedCalMonth + 1}月`;
+        }
+        
+        await renderAssignedCal(firstDate, lastDate);
+      } catch (error) {
+        console.error('キャディ予定カレンダーのレンダリング中にエラーが発生しました:', error);
+        // エラー時はタイトルだけでも表示を試行
+        const titleEl = document.getElementById('aCalTitle');
+        if (titleEl) {
+          titleEl.textContent = 'カレンダー表示エラー';
+        }
+      }
     }
 
     // キャディ予定（予約確定分）を右側カレンダーに描画
@@ -726,13 +812,25 @@
     let alYear = new Date().getFullYear();
     // 月移動を常に利用可能に（グローバル関数）
     window.alNav = (delta)=>{
-      alMonth += delta;
-      if (alMonth < 0) { alMonth = 11; alYear--; }
-      if (alMonth > 11) { alMonth = 0; alYear++; }
-      // タブがキャディ予定の時のみ反映
-      const container = document.getElementById('assignedListContainer');
-      if (container && container.style.display !== 'none') {
-        renderAssignedList();
+      try {
+        alMonth += delta;
+        if (alMonth < 0) { alMonth = 11; alYear--; }
+        if (alMonth > 11) { alMonth = 0; alYear++; }
+        
+        // 年の境界チェック
+        if (alYear < 1900 || alYear > 2100) {
+          console.warn('無効な年を検出しました。現在月にリセットします。');
+          alMonth = new Date().getMonth();
+          alYear = new Date().getFullYear();
+        }
+        
+        // タブがキャディ予定の時のみ反映
+        const container = document.getElementById('assignedListContainer');
+        if (container && container.style.display !== 'none') {
+          renderAssignedList();
+        }
+      } catch (error) {
+        console.error('予約リストの月遷移でエラーが発生しました:', error);
       }
     };
     async function renderAssignedList(){
@@ -828,11 +926,29 @@
       const nextBtn = document.getElementById('alNextMonth');
       if (prevBtn) {
         prevBtn.onclick = null;
-        prevBtn.addEventListener('click', (ev)=>{ ev.preventDefault(); if(--alMonth<0){alMonth=11;alYear--;} renderAssignedList(); });
+        prevBtn.addEventListener('click', (ev)=>{ 
+          ev.preventDefault(); 
+          try {
+            alMonth--;
+            if(alMonth < 0){alMonth=11;alYear--;}
+            renderAssignedList(); 
+          } catch (error) {
+            console.error('予約リストの前月遷移でエラーが発生しました:', error);
+          }
+        });
       }
       if (nextBtn) {
         nextBtn.onclick = null;
-        nextBtn.addEventListener('click', (ev)=>{ ev.preventDefault(); if(++alMonth>11){alMonth=0;alYear++;} renderAssignedList(); });
+        nextBtn.addEventListener('click', (ev)=>{ 
+          ev.preventDefault(); 
+          try {
+            alMonth++;
+            if(alMonth > 11){alMonth=0;alYear++;}
+            renderAssignedList(); 
+          } catch (error) {
+            console.error('予約リストの次月遷移でエラーが発生しました:', error);
+          }
+        });
       }
     }
 
@@ -914,6 +1030,8 @@
       }
       if(k==='assign'){
         btnMainAssignEl?.classList.add('active');
+        // カレンダー表示とリスト表示を両方初期化
+        renderAssignedCalendar();
         renderAssignedList();
       } 
       if(k==='line'){
@@ -925,6 +1043,13 @@
 
     // 初期表示（プロフィールが描画済みであればprof、それ以外はshiftにフォールバック）
     try { switchMain('prof'); } catch(e) { switchMain('shift'); }
+    
+    // キャディ予定カレンダーの初期化（非表示状態でも準備）
+    if (typeof renderAssignedCalendar === 'function') {
+      renderAssignedCalendar().catch(error => {
+        console.log('キャディ予定カレンダーの初期化に失敗しました:', error);
+      });
+    }
     // タブボタン初期状態
     const b1 = document.getElementById('btnMainProf');
     const b2 = document.getElementById('btnMainShift');
