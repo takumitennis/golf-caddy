@@ -5,16 +5,206 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>プロフィール登録</title>
   <style>
-    body{font-family:Helvetica,Arial,sans-serif;padding:30px}
-    form{max-width:400px;margin:auto}
-    label{display:block;margin:12px 0 4px}
-    input{width:100%;padding:8px}
-    button{margin-top:20px;padding:10px 24px;border:none;border-radius:6px;background:#006aad;color:#fff;cursor:pointer}
+    body{
+      font-family:Helvetica,Arial,sans-serif;
+      padding:30px;
+      background:#f7fafc;
+      margin:0;
+    }
+    .container{
+      max-width:800px;
+      margin:0 auto;
+      background:white;
+      border-radius:12px;
+      box-shadow:0 4px 6px rgba(0,0,0,0.1);
+      overflow:hidden;
+    }
+    .header{
+      background:linear-gradient(135deg, #2e7d32, #388e3c);
+      color:white;
+      padding:2rem;
+      text-align:center;
+    }
+    .header h1{
+      margin:0;
+      font-size:2rem;
+      font-weight:600;
+    }
+    .header p{
+      margin:0.5rem 0 0 0;
+      opacity:0.9;
+    }
+    .content{
+      padding:2rem;
+    }
+    .profile-section{
+      margin-bottom:2rem;
+      padding:1.5rem;
+      border:1px solid #e2e8f0;
+      border-radius:8px;
+      background:#f8f9fa;
+    }
+    .profile-section h2{
+      margin:0 0 1rem 0;
+      color:#2e7d32;
+      font-size:1.5rem;
+      border-bottom:2px solid #e2e8f0;
+      padding-bottom:0.5rem;
+    }
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+      gap:1rem;
+      margin-bottom:1.5rem;
+    }
+    .stat-card{
+      background:white;
+      padding:1rem;
+      border-radius:6px;
+      border:1px solid #e2e8f0;
+      text-align:center;
+    }
+    .stat-number{
+      font-size:2rem;
+      font-weight:bold;
+      color:#2e7d32;
+      margin-bottom:0.5rem;
+    }
+    .stat-label{
+      color:#666;
+      font-size:0.9rem;
+    }
+    .golf-courses-list{
+      background:white;
+      border-radius:6px;
+      border:1px solid #e2e8f0;
+      overflow:hidden;
+    }
+    .golf-course-item{
+      padding:1rem;
+      border-bottom:1px solid #e2e8f0;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .golf-course-item:last-child{
+      border-bottom:none;
+    }
+    .golf-course-name{
+      font-weight:600;
+      color:#2e7d32;
+    }
+    .golf-course-status{
+      background:#e8f5e8;
+      color:#2e7d32;
+      padding:0.25rem 0.75rem;
+      border-radius:20px;
+      font-size:0.8rem;
+    }
+    form{
+      max-width:400px;
+      margin:auto;
+    }
+    label{
+      display:block;
+      margin:12px 0 4px;
+      font-weight:600;
+      color:#333;
+    }
+    input{
+      width:100%;
+      padding:12px;
+      border:2px solid #e2e8f0;
+      border-radius:6px;
+      font-size:1rem;
+      box-sizing:border-box;
+    }
+    input:focus{
+      outline:none;
+      border-color:#2e7d32;
+    }
+    button{
+      margin-top:20px;
+      padding:12px 24px;
+      border:none;
+      border-radius:6px;
+      background:#2e7d32;
+      color:#fff;
+      cursor:pointer;
+      font-size:1rem;
+      font-weight:600;
+      width:100%;
+    }
+    button:hover{
+      background:#1b5e20;
+    }
+    .back-link{
+      display:inline-block;
+      margin-bottom:1rem;
+      color:#2e7d32;
+      text-decoration:none;
+      font-weight:500;
+    }
+    .back-link:hover{
+      text-decoration:underline;
+    }
+    @media (max-width: 768px) {
+      .container{
+        margin:1rem;
+        border-radius:8px;
+      }
+      .header{
+        padding:1.5rem;
+      }
+      .content{
+        padding:1.5rem;
+      }
+      .stats-grid{
+        grid-template-columns:1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2 id="title">プロフィール入力</h2>
-  <form id="profForm"></form>
+  <div class="container">
+    <div class="header">
+      <h1 id="title">プロフィール登録</h1>
+      <p>あなたの情報を登録して、サービスをご利用ください</p>
+    </div>
+    
+    <div class="content">
+      <a href="/" class="back-link">← ホームに戻る</a>
+      
+      <!-- プロフィール登録フォーム -->
+      <div class="profile-section">
+        <h2>基本情報</h2>
+        <form id="profForm"></form>
+      </div>
+      
+      <!-- 統計情報（ログイン済みユーザーのみ表示） -->
+      <div id="statsSection" class="profile-section" style="display: none;">
+        <h2>統計情報</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="roundsCount">0</div>
+            <div class="stat-label">ラウンド回数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="totalEarnings">¥0</div>
+            <div class="stat-label">稼いだ合計金額</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 登録済みゴルフ場リスト（ゴルフ場ユーザーのみ表示） -->
+      <div id="golfCoursesSection" class="profile-section" style="display: none;">
+        <h2>登録済みゴルフ場</h2>
+        <div id="golfCoursesList" class="golf-courses-list">
+          <!-- ゴルフ場リストがここに表示されます -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -28,6 +218,8 @@
 
     const form  = document.getElementById("profForm");
     const title = document.getElementById("title");
+    const statsSection = document.getElementById("statsSection");
+    const golfCoursesSection = document.getElementById("golfCoursesSection");
 
     /* ==== 項目定義 ==== */
     const FIELDS = {
@@ -45,6 +237,19 @@
         {id:"caddy_years", label:"キャディ歴(年)", type:"number"}
       ]
     };
+
+    /* ==== 初期化 ==== */
+    async function initialize() {
+      // ユーザーの認証状態を確認
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // ログイン済みの場合、統計情報を表示
+        await loadUserStats();
+        if (role === 'golf') {
+          await loadGolfCourses();
+        }
+      }
+    }
 
     /* ==== 1. フォーム描画 ==== */
     title.textContent = role === "golf" ? "ゴルフ場プロフィール登録" : "キャディプロフィール登録";
@@ -66,7 +271,7 @@
       const data = Object.fromEntries(
         FIELDS[role].map(f => [f.id, document.getElementById(f.id).value])
       );
-      data.email = user.email;                // 👈 ここでメールを追加
+      data.email = user.email;
 
       /* 主キーを自動発行（g123456 / c123456） */
       if (role === "golf")  data.gid = "g" + user.id.slice(0,6);
@@ -81,6 +286,80 @@
       // 絶対パスでダッシュボードハブへ
       location.href = "/dashboard.html";
     };
+
+    /* ==== 3. ユーザー統計情報の読み込み ==== */
+    async function loadUserStats() {
+      try {
+        // モックデータを使用（実際のAPIに置き換え可能）
+        const mockStats = {
+          roundsCount: 15,
+          totalEarnings: 45000
+        };
+        
+        document.getElementById('roundsCount').textContent = mockStats.roundsCount;
+        document.getElementById('totalEarnings').textContent = `¥${mockStats.totalEarnings.toLocaleString()}`;
+        
+        statsSection.style.display = 'block';
+        
+      } catch (error) {
+        console.error('Error loading user stats:', error);
+      }
+    }
+
+    /* ==== 4. 登録済みゴルフ場の読み込み ==== */
+    async function loadGolfCourses() {
+      try {
+        // モックデータを使用（実際のAPIに置き換え可能）
+        const mockGolfCourses = [
+          {
+            id: 'g001',
+            name: '○○ゴルフ場',
+            status: 'アクティブ',
+            registeredDate: '2025-01-15'
+          },
+          {
+            id: 'g002',
+            name: '△△ゴルフクラブ',
+            status: 'アクティブ',
+            registeredDate: '2025-03-20'
+          }
+        ];
+        
+        renderGolfCoursesList(mockGolfCourses);
+        golfCoursesSection.style.display = 'block';
+        
+      } catch (error) {
+        console.error('Error loading golf courses:', error);
+      }
+    }
+
+    /* ==== 5. ゴルフ場リストの表示 ==== */
+    function renderGolfCoursesList(golfCourses) {
+      const golfCoursesList = document.getElementById('golfCoursesList');
+      
+      if (!golfCourses || golfCourses.length === 0) {
+        golfCoursesList.innerHTML = '<div style="padding:1rem; text-align:center; color:#666;">登録済みのゴルフ場はありません。</div>';
+        return;
+      }
+      
+      let html = '';
+      golfCourses.forEach(course => {
+        html += `
+          <div class="golf-course-item">
+            <div>
+              <div class="golf-course-name">${course.name}</div>
+              <small style="color:#666;">登録日: ${course.registeredDate}</small>
+            </div>
+            <span class="golf-course-status">${course.status}</span>
+          </div>
+        `;
+      });
+      
+      golfCoursesList.innerHTML = html;
+    }
+
+    // 初期化を実行
+    initialize();
   </script>
 </body>
 </html>
