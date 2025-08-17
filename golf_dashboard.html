@@ -1948,9 +1948,13 @@
     // LINE通知送信関数
     async function sendLineNotification(cid, dateStr, timeSlot) {
       try {
-        console.log(`Sending LINE notification for CID: ${cid}, Date: ${dateStr}, Time: ${timeSlot}`);
+        console.log(`=== LINE NOTIFICATION START ===`);
+        console.log(`CID: ${cid}`);
+        console.log(`Date: ${dateStr}`);
+        console.log(`Time: ${timeSlot}`);
         
         // キャディのLINE連携情報を取得
+        console.log('Fetching LINE integration for caddy...');
         const { data: lineIntegration, error: lineError } = await supabase
           .from('line_integrations')
           .select('line_user_id')
@@ -1958,7 +1962,12 @@
           .eq('is_active', true)
           .single();
         
-        if (lineError || !lineIntegration) {
+        if (lineError) {
+          console.error('Error fetching LINE integration:', lineError);
+          return;
+        }
+        
+        if (!lineIntegration) {
           console.log('No active LINE integration found for caddy:', cid);
           return;
         }
@@ -1966,16 +1975,24 @@
         console.log('Found LINE integration:', lineIntegration);
         
         // ゴルフ場情報を取得
+        console.log('Fetching golf course info...');
         const { data: golfCourse, error: golfError } = await supabase
           .from('golf_courses')
           .select('name')
           .eq('gid', gid)
           .single();
         
-        if (golfError || !golfCourse) {
+        if (golfError) {
+          console.error('Error fetching golf course info:', golfError);
+          return;
+        }
+        
+        if (!golfCourse) {
           console.log('Golf course info not found');
           return;
         }
+        
+        console.log('Golf course info:', golfCourse);
         
         // 日付を日本語形式に変換
         const date = new Date(dateStr);
@@ -1988,7 +2005,10 @@
           `⏰ 時間: ${timeSlot}\n\n` +
           `キャディプラスをご利用いただき、ありがとうございます！`;
         
+        console.log('Notification message:', message);
+        
         // LINE通知を送信（Cloudflare Functions経由）
+        console.log('Sending LINE notification via Cloudflare Functions...');
         const response = await fetch('/api/send-line-notification', {
           method: 'POST',
           headers: {
@@ -2000,14 +2020,23 @@
           })
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
         if (response.ok) {
-          console.log('LINE notification sent successfully');
+          const responseText = await response.text();
+          console.log('LINE notification sent successfully. Response:', responseText);
         } else {
-          console.error('Failed to send LINE notification:', response.status);
+          const errorText = await response.text();
+          console.error('Failed to send LINE notification. Status:', response.status, 'Error:', errorText);
         }
         
+        console.log(`=== LINE NOTIFICATION END ===`);
+        
       } catch (error) {
+        console.error('=== LINE NOTIFICATION ERROR ===');
         console.error('Error sending LINE notification:', error);
+        console.error('Error stack:', error.stack);
       }
     }
   </script>
