@@ -1007,6 +1007,10 @@
         if(delErr) throw delErr;
 
         alert('予約が完了しました！');
+        
+        // LINE通知を送信
+        await sendLineNotification(randomCid, dateStr, timeSlot);
+        
         // UI 更新
         await loadBookings();
         await renderCal();
@@ -1941,6 +1945,71 @@
     if (_confNext) _confNext.onclick=()=>{ if(++confMonth>11){confMonth=0;confYear++;} renderConfirm(); };
     if (_confReload) _confReload.onclick=()=>{ renderConfirm(); };
 
+    // LINE通知送信関数
+    async function sendLineNotification(cid, dateStr, timeSlot) {
+      try {
+        console.log(`Sending LINE notification for CID: ${cid}, Date: ${dateStr}, Time: ${timeSlot}`);
+        
+        // キャディのLINE連携情報を取得
+        const { data: lineIntegration, error: lineError } = await supabase
+          .from('line_integrations')
+          .select('line_user_id')
+          .eq('cid', cid)
+          .eq('is_active', true)
+          .single();
+        
+        if (lineError || !lineIntegration) {
+          console.log('No active LINE integration found for caddy:', cid);
+          return;
+        }
+        
+        console.log('Found LINE integration:', lineIntegration);
+        
+        // ゴルフ場情報を取得
+        const { data: golfCourse, error: golfError } = await supabase
+          .from('golf_courses')
+          .select('name')
+          .eq('gid', gid)
+          .single();
+        
+        if (golfError || !golfCourse) {
+          console.log('Golf course info not found');
+          return;
+        }
+        
+        // 日付を日本語形式に変換
+        const date = new Date(dateStr);
+        const japaneseDate = `${date.getMonth() + 1}月${date.getDate()}日`;
+        
+        // 通知メッセージを作成
+        const message = `🎯 キャディ依頼が確定しました！\n\n` +
+          `🏌️ ゴルフ場: ${golfCourse.name}\n` +
+          `📅 日付: ${japaneseDate}\n` +
+          `⏰ 時間: ${timeSlot}\n\n` +
+          `キャディプラスをご利用いただき、ありがとうございます！`;
+        
+        // LINE通知を送信（Cloudflare Functions経由）
+        const response = await fetch('/api/send-line-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lineUserId: lineIntegration.line_user_id,
+            message: message
+          })
+        });
+        
+        if (response.ok) {
+          console.log('LINE notification sent successfully');
+        } else {
+          console.error('Failed to send LINE notification:', response.status);
+        }
+        
+      } catch (error) {
+        console.error('Error sending LINE notification:', error);
+      }
+    }
   </script>
 </body>
 </html> 
