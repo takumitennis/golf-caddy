@@ -1096,9 +1096,10 @@
           console.log('=== 予約完了時のLINE通知開始 ===');
           console.log('キャディID:', randomCid);
           console.log('予約日:', dateStr);
-          console.log('時間:', timeSlot);
+          console.log('時間: 未指定（全日予約）');
           
-          await sendLineNotification(randomCid, dateStr, timeSlot);
+          // 時間が指定されていない場合は全日予約として処理
+          await sendLineNotification(randomCid, dateStr, '全日');
           console.log('LINE通知送信完了');
         } catch (notificationError) {
           console.error('LINE通知送信エラー:', notificationError);
@@ -2040,7 +2041,7 @@
         console.log(`=== LINE NOTIFICATION START ===`);
         console.log(`CID: ${cid}`);
         console.log(`Date: ${dateStr}`);
-        console.log(`Time: ${timeSlot}`);
+        console.log(`Time: ${timeSlot || '未指定'}`);
         
 
         
@@ -2090,10 +2091,11 @@
         const japaneseDate = `${date.getMonth() + 1}月${date.getDate()}日`;
         
         // 通知メッセージを作成
+        const timeDisplay = timeSlot || '全日';
         const message = `🎯 キャディ依頼が確定しました！\n\n` +
           `🏌️ ゴルフ場: ${golfCourse.name}\n` +
           `📅 日付: ${japaneseDate}\n` +
-          `⏰ 時間: ${timeSlot}\n\n` +
+          `⏰ 時間: ${timeDisplay}\n\n` +
           `キャディプラスをご利用いただき、ありがとうございます！`;
         
         console.log('Notification message:', message);
