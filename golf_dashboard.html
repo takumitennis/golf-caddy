@@ -1147,14 +1147,15 @@
         const maxSlots = availabilityMap.get(dateStr);
         const isAvailable = maxSlots !== undefined;
 
-        td.innerHTML = `<div style="padding:8px;text-align:center;">
-            <div style="font-weight:bold;">${day}</div>
-            ${isAvailable ? `<small>${maxSlots}人</small>` : ''}
-          </div>`;
+                td.innerHTML = `<div style="padding:8px;text-align:center;">
+          <div style="font-weight:bold;">${day}</div>
+          ${isAvailable ? `<small>${maxSlots}人</small>` : ''}
+        </div>`;
         td.style.cursor = 'pointer';
         td.style.backgroundColor = isAvailable ? '#3498db' : '#fff';
         td.style.color = isAvailable ? '#fff' : '#000';
         td.style.border = '1px solid #ccc';
+        td.style.width = '14%'; /* 空きキャディ確認カレンダーと同じ幅設定 */
 
         td.onclick = () => {
           if (!gid) { alert('ゴルフ場情報が読み込まれていません。ページを再読み込みしてください。'); return; }
