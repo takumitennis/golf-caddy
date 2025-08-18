@@ -8,9 +8,64 @@
     body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa}
     h1{margin:0;padding:20px 24px;background:#2c3e50;color:#fff;font-size:1.4rem;text-wrap:balance}
     .container{padding:24px}
-    .tabs-main{display:flex;gap:8px;padding:0 24px;background:#ecf0f1;flex-wrap:wrap}
-    .tabs-main button{background:#ecf0f1;border:none;padding:12px 16px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
-    .tabs-main button.active{border-color:#3498db;background:#fff;border-radius:4px 4px 0 0;color:#3498db;font-weight:bold}
+    .tabs-main{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 12px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      margin: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .tabs-main button{
+      background: #fff;
+      border: 1px solid #e9ecef;
+      padding: 16px 12px;
+      font-weight: 500;
+      font-size: 0.8rem;
+      line-height: 1.3;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .tabs-main button.active{
+      background: #27ae60;
+      color: #fff;
+      border-color: #27ae60;
+      box-shadow: 0 4px 12px rgba(39,174,96,0.25);
+      transform: translateY(-2px);
+    }
+    .tabs-main button:hover:not(.active){
+      background: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    }
+    .tabs-main button.active:hover{
+      background: #229954;
+      box-shadow: 0 6px 16px rgba(39,174,96,0.3);
+    }
+    #logoutBtn{
+      grid-column: 4;
+      grid-row: 2;
+      background: #dc3545 !important;
+      color: #fff !important;
+      border-color: #dc3545 !important;
+      box-shadow: 0 2px 4px rgba(220,53,69,0.15) !important;
+    }
+    #logoutBtn:hover{
+      background: #c82333 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(220,53,69,0.25) !important;
+    }
     table{background:#fff;border-radius:6px;overflow:hidden}
     .tabs button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#eaeaea;cursor:pointer}
     .tabs button.active{border-bottom-color:#0077cc;background:#fff}
@@ -29,8 +84,6 @@
     .cal-green{background:#c8e6c9}
     .cal-yellow{background:#fff9c4}
     .cal-red{background:#ffcdd2}
-    .tabs-main button{padding:10px 16px;margin-right:8px;border:none;border-bottom:2px solid transparent;background:#e0e0e0;cursor:pointer}
-    .tabs-main button.active{border-bottom-color:#0077cc;background:#fff}
     /* --- LINE風チャットUI --- */
     #mainMessages {
       display: flex;
@@ -161,6 +214,7 @@
   <div class="tabs-main">
     <button id="btnMainProf">プロフィール</button>
     <button id="btnMainStat" class="active">予約管理</button>
+    <button id="btnMainTraining">研修日を設定</button>
     <button id="btnMainMsg" style="display:none;">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">Logout</button>
   </div>
@@ -175,6 +229,45 @@
   </div>
   <!-- Profile Tab -->
   <div id="mainProfile" class="hidden" style="margin-top:15px;"></div>
+  
+  <!-- Training Tab -->
+  <div id="mainTraining" class="hidden" style="margin-top:15px;">
+    <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:8px;padding:24px;box-shadow:0 2px 6px rgba(0,0,0,.08)">
+      <h3 style="margin-top:0;color:#2c3e50;border-bottom:2px solid #ecf0f1;padding-bottom:12px;">研修日設定</h3>
+      <p style="color:#666;margin-bottom:24px;">キャディ研修を実施する日を設定してください。設定した日は、キャディが研修申込時に選択できるようになります。</p>
+      
+      <div style="margin-bottom:24px;">
+        <h4 style="color:#34495e;margin-bottom:16px;">研修日カレンダー</h4>
+        <div id="trainingCalendar" class="calendar" style="border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff;">
+          <!-- カレンダーがここに表示されます -->
+        </div>
+      </div>
+      
+      <div style="margin-bottom:24px;">
+        <h4 style="color:#34495e;margin-bottom:16px;">研修日追加</h4>
+        <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+          <div>
+            <label style="display:block;margin-bottom:4px;color:#666;">研修日</label>
+            <input type="date" id="trainingDate" style="padding:10px;border:1px solid #ddd;border-radius:6px;font-size:1rem;" />
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:4px;color:#666;">定員</label>
+            <input type="number" id="trainingCapacity" min="1" max="20" value="5" style="padding:10px;border:1px solid #ddd;border-radius:6px;font-size:1rem;width:80px;" />
+          </div>
+          <button id="addTrainingDate" style="background:#27ae60;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;">
+            追加
+          </button>
+        </div>
+      </div>
+      
+      <div>
+        <h4 style="color:#34495e;margin-bottom:16px;">設定済み研修日一覧</h4>
+        <div id="trainingDatesList" style="background:#f8f9fa;border-radius:6px;padding:16px;">
+          <!-- 研修日一覧がここに表示されます -->
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     function renderCreateProfile(email){
       const el = document.getElementById('mainProfile');
@@ -904,20 +997,28 @@
       // Query fresh elements in case DOM changed
       const mainProfileDiv=document.getElementById('mainProfile');
       const mainStatusDiv=document.getElementById('mainStatus');
+      const mainTrainingDiv=document.getElementById('mainTraining');
       const mainMessagesDiv=document.getElementById('mainMessages');
       const btnMainProf=document.getElementById('btnMainProf');
       const btnMainStat=document.getElementById('btnMainStat');
+      const btnMainTraining=document.getElementById('btnMainTraining');
       const btnMainMsg=document.getElementById('btnMainMsg');
 
       // hide all
-      [mainProfileDiv, mainStatusDiv, mainMessagesDiv].forEach(el=>el && el.classList.add('hidden'));
-      [btnMainProf, btnMainStat, btnMainMsg].forEach(btn=>btn && btn.classList.remove('active'));
+      [mainProfileDiv, mainStatusDiv, mainTrainingDiv, mainMessagesDiv].forEach(el=>el && el.classList.add('hidden'));
+      [btnMainProf, btnMainStat, btnMainTraining, btnMainMsg].forEach(btn=>btn && btn.classList.remove('active'));
       if(mode==='prof'){
         if (mainProfileDiv) mainProfileDiv.classList.remove('hidden');
         if (btnMainProf) btnMainProf.classList.add('active');
       } else if(mode==='stat'){
         if (mainStatusDiv) mainStatusDiv.classList.remove('hidden');
         if (btnMainStat) btnMainStat.classList.add('active');
+      } else if(mode==='training'){
+        if (mainTrainingDiv) mainTrainingDiv.classList.remove('hidden');
+        if (btnMainTraining) btnMainTraining.classList.add('active');
+        // 研修日カレンダーを初期化
+        renderTrainingCalendar();
+        renderTrainingDatesList();
       } else if(mode==='msg'){
         if (mainMessagesDiv) mainMessagesDiv.classList.remove('hidden');
         if (btnMainMsg) btnMainMsg.classList.add('active');
@@ -927,9 +1028,11 @@
     // Main tab buttons (guarded)
     const _btnMainProf = document.getElementById('btnMainProf');
     const _btnMainStat = document.getElementById('btnMainStat');
+    const _btnMainTraining = document.getElementById('btnMainTraining');
     const _btnMainMsg = document.getElementById('btnMainMsg');
     if (_btnMainProf) _btnMainProf.onclick=(e)=>{ e.preventDefault?.(); switchMain('prof'); };
     if (_btnMainStat) _btnMainStat.onclick=(e)=>{ e.preventDefault?.(); switchMain('stat'); };
+    if (_btnMainTraining) _btnMainTraining.onclick=(e)=>{ e.preventDefault?.(); switchMain('training'); };
     if (_btnMainMsg) _btnMainMsg.onclick=(e)=>{ e.preventDefault?.(); /* hidden */ };
 
     // 予約バー制御
@@ -2039,6 +2142,206 @@
         console.error('Error stack:', error.stack);
       }
     }
+
+    // 研修日設定タブの機能
+    let trainingDates = [];
+    let currentTrainingMonth = new Date().getMonth();
+    let currentTrainingYear = new Date().getFullYear();
+
+    // 研修日カレンダーの表示
+    function renderTrainingCalendar() {
+      const calendar = document.getElementById('trainingCalendar');
+      if (!calendar) return;
+
+      const firstDay = new Date(currentTrainingYear, currentTrainingMonth, 1);
+      const lastDay = new Date(currentTrainingYear, currentTrainingMonth + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+      let html = `
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f8f9fa;">
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">日</th>
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">月</th>
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">火</th>
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">水</th>
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">木</th>
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">金</th>
+              <th style="padding:12px;border:1px solid #ddd;text-align:center;color:#666;">土</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (let week = 0; week < 6; week++) {
+        html += '<tr>';
+        for (let day = 0; day < 7; day++) {
+          const currentDate = new Date(startDate);
+          currentDate.setDate(startDate.getDate() + week * 7 + day);
+          
+          const isCurrentMonth = currentDate.getMonth() === currentTrainingMonth;
+          const isTrainingDate = trainingDates.some(td => td.date === currentDate.toISOString().split('T')[0]);
+          const isPast = currentDate < new Date();
+          
+          let cellClass = '';
+          let cellContent = currentDate.getDate();
+          
+          if (!isCurrentMonth) {
+            cellClass = 'style="color:#ccc;background:#f9f9f9;"';
+          } else if (isTrainingDate) {
+            cellClass = 'style="background:#d4edda;color:#155724;font-weight:bold;"';
+            cellContent = `✓ ${currentDate.getDate()}`;
+          } else if (isPast) {
+            cellClass = 'style="color:#999;background:#f8f9fa;"';
+          }
+          
+          html += `<td ${cellClass} style="padding:12px;border:1px solid #ddd;text-align:center;cursor:pointer;" onclick="toggleTrainingDate('${currentDate.toISOString().split('T')[0]}')">${cellContent}</td>`;
+        }
+        html += '</tr>';
+      }
+
+      html += `
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:#f8f9fa;border-top:1px solid #ddd;">
+          <button onclick="changeTrainingMonth(-1)" style="background:#6c757d;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">← 前月</button>
+          <span style="font-weight:bold;color:#495057;">${currentTrainingYear}年${currentTrainingMonth + 1}月</span>
+          <button onclick="changeTrainingMonth(1)" style="background:#6c757d;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">次月 →</button>
+        </div>
+      `;
+
+      calendar.innerHTML = html;
+    }
+
+    // 研修日の追加・削除
+    function toggleTrainingDate(dateStr) {
+      const existingIndex = trainingDates.findIndex(td => td.date === dateStr);
+      
+      if (existingIndex >= 0) {
+        // 研修日を削除
+        trainingDates.splice(existingIndex, 1);
+        alert(`${dateStr}の研修日を削除しました`);
+      } else {
+        // 研修日を追加
+        const capacity = prompt('定員を入力してください（1-20人）:', '5');
+        if (capacity && !isNaN(capacity) && capacity >= 1 && capacity <= 20) {
+          trainingDates.push({
+            date: dateStr,
+            capacity: parseInt(capacity),
+            created_at: new Date().toISOString()
+          });
+          alert(`${dateStr}の研修日を追加しました（定員: ${capacity}人）`);
+        }
+      }
+      
+      renderTrainingCalendar();
+      renderTrainingDatesList();
+    }
+
+    // 研修月の変更
+    function changeTrainingMonth(delta) {
+      currentTrainingMonth += delta;
+      if (currentTrainingMonth > 11) {
+        currentTrainingMonth = 0;
+        currentTrainingYear++;
+      } else if (currentTrainingMonth < 0) {
+        currentTrainingMonth = 11;
+        currentTrainingYear--;
+      }
+      renderTrainingCalendar();
+    }
+
+    // 研修日一覧の表示
+    function renderTrainingDatesList() {
+      const list = document.getElementById('trainingDatesList');
+      if (!list) return;
+
+      if (trainingDates.length === 0) {
+        list.innerHTML = '<p style="color:#666;text-align:center;margin:0;">設定済みの研修日はありません</p>';
+        return;
+      }
+
+      // 日付順にソート
+      trainingDates.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      let html = '';
+      trainingDates.forEach(td => {
+        const date = new Date(td.date);
+        const japaneseDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日}`;
+        
+        html += `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fff;border:1px solid #e9ecef;border-radius:6px;margin-bottom:8px;">
+            <div>
+              <span style="font-weight:bold;color:#495057;">${japaneseDate}</span>
+              <span style="color:#6c757d;margin-left:12px;">定員: ${td.capacity}人</span>
+            </div>
+            <button onclick="removeTrainingDate('${td.date}')" style="background:#dc3545;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.9rem;">
+              削除
+            </button>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+    }
+
+    // 研修日の削除
+    function removeTrainingDate(dateStr) {
+      if (confirm('この研修日を削除しますか？')) {
+        trainingDates = trainingDates.filter(td => td.date !== dateStr);
+        renderTrainingCalendar();
+        renderTrainingDatesList();
+        alert('研修日を削除しました');
+      }
+    }
+
+    // 研修日追加ボタンのイベント
+    document.addEventListener('DOMContentLoaded', function() {
+      const addTrainingDateBtn = document.getElementById('addTrainingDate');
+      if (addTrainingDateBtn) {
+        addTrainingDateBtn.addEventListener('click', function() {
+          const dateInput = document.getElementById('trainingDate');
+          const capacityInput = document.getElementById('trainingCapacity');
+          
+          if (!dateInput.value) {
+            alert('研修日を選択してください');
+            return;
+          }
+          
+          const capacity = parseInt(capacityInput.value);
+          if (isNaN(capacity) || capacity < 1 || capacity > 20) {
+            alert('定員は1-20人の間で入力してください');
+            return;
+          }
+          
+          const dateStr = dateInput.value;
+          const existingIndex = trainingDates.findIndex(td => td.date === dateStr);
+          
+          if (existingIndex >= 0) {
+            alert('この日は既に研修日として設定されています');
+            return;
+          }
+          
+          trainingDates.push({
+            date: dateStr,
+            capacity: capacity,
+            created_at: new Date().toISOString()
+          });
+          
+          dateInput.value = '';
+          capacityInput.value = '5';
+          
+          renderTrainingCalendar();
+          renderTrainingDatesList();
+          alert(`${dateStr}の研修日を追加しました（定員: ${capacity}人）`);
+        });
+      }
+
+      // 研修日設定タブの初期化
+      renderTrainingCalendar();
+      renderTrainingDatesList();
+    });
   </script>
 </body>
 </html> 
