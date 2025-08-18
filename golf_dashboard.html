@@ -231,7 +231,7 @@
     <button id="btnMainMsg" style="display:none;">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">ログアウト</button>
   </div>
-      <div id="welcome" style="margin-top:10px; font-size: 1.2rem; font-weight: 600; color: #2c3e50; padding: 0 24px;"></div>
+      <div id="welcome" style="position: absolute; top: 20px; left: 24px; font-size: 1.2rem; font-weight: 600; color: #2c3e50; z-index: 10;"></div>
   <!-- 予約バー -->
   <div id="reserveBar">
     <div class="reserve-info"><span id="reserveDateText"></span> を予約しますか？</div>
@@ -884,8 +884,12 @@
         const labelHtml = cnt===0 ? '×' : `<span class="avail-count" data-date="${dateStr}" style="color:#3498db;font-weight:600">${cnt}人</span>`;
         if(cnt===0){td.className='cal-red';}
         else{td.className='';}
-        td.innerHTML = `<small>${day}</small><br>${labelHtml}`;
+        td.innerHTML = `<div style="padding:8px;text-align:center;">
+            <div style="font-weight:bold;">${day}</div>
+            ${labelHtml}
+          </div>`;
         td.style.cursor='default';
+        td.style.border = '1px solid #ccc';
         row.appendChild(td);
         if((startWeekDay+day)%7===0){table.appendChild(row);row=document.createElement('tr');}
       }
