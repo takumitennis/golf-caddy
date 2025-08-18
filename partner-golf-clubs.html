@@ -2,16 +2,24 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>提携ゴルフ部 - Golf-Caddy Matching Service</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary-color: #2f8f2f;
+      --primary-dark: #1e5f1e;
+      --primary-light: #4caf50;
       --secondary-color: #ffffff;
+      --accent-color: #ff6b35;
       --text-color: #333333;
-      --bg-light: #f9f9f9;
+      --text-light: #666666;
+      --bg-light: #f8f9fa;
+      --bg-dark: #2c3e50;
       --max-width: 1200px;
+      --border-radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -21,264 +29,773 @@
     }
 
     body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
       color: var(--text-color);
       line-height: 1.6;
       background: var(--bg-light);
     }
 
-    .header {
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
       color: var(--secondary-color);
       padding: 2rem 0;
       text-align: center;
     }
 
+    .header-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
     .header h1 {
       font-size: 2.5rem;
-      margin-bottom: 0.5rem;
       font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .header p {
       font-size: 1.2rem;
       opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .container {
+    /* Navigation */
+    nav {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 0 1rem;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
     }
 
-    .back-link {
-      display: inline-block;
-      margin: 2rem 0;
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
       color: var(--primary-color);
       text-decoration: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-menu a {
+      color: var(--text-color);
+      text-decoration: none;
       font-weight: 500;
-      transition: color 0.3s ease;
+      transition: var(--transition);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
     }
 
-    .back-link:hover {
-      color: #1f5f1f;
+    .nav-menu a:hover {
+      color: var(--primary-color);
+      background: var(--bg-light);
     }
 
+    /* Main Content */
+    .main-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    .section-header p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Golf Club Grid */
     .golf-clubs-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 2rem;
-      margin: 2rem 0;
+      margin-bottom: 4rem;
     }
 
     .golf-club-card {
       background: var(--secondary-color);
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 1px solid #e1e7ef;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      cursor: pointer;
     }
 
     .golf-club-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .club-image {
+      width: 100%;
+      height: 250px;
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .club-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .club-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(45,90,39,0.8) 0%, rgba(74,124,89,0.8) 50%, rgba(107,142,35,0.8) 100%);
+      z-index: 1;
+    }
+
+    .club-image .club-icon {
+      position: relative;
+      z-index: 2;
+    }
+
+    .club-content {
+      padding: 1.5rem;
     }
 
     .club-name {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      color: #1e40af;
-      margin-bottom: 1rem;
-    }
-
-    .club-info {
-      margin-bottom: 1rem;
-    }
-
-    .club-info-label {
-      font-weight: 600;
-      color: #666;
-      display: inline-block;
-      min-width: 80px;
-    }
-
-    .club-university {
-      background: #eff6ff;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      display: inline-block;
-      margin-bottom: 1rem;
-      color: #1e40af;
-      font-weight: 600;
-    }
-
-    .club-activities {
-      background: #f0f9ff;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      border-left: 4px solid #3b82f6;
-    }
-
-    .club-activities h4 {
-      color: #1e40af;
+      color: var(--text-color);
       margin-bottom: 0.5rem;
     }
 
+    .club-university {
+      color: var(--primary-color);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .club-university::before {
+      content: '🎓';
+      font-size: 1rem;
+    }
+
+    .club-location {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .club-location::before {
+      content: '📍';
+      font-size: 1rem;
+    }
+
     .club-description {
-      color: #666;
+      color: var(--text-color);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .club-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-tag {
+      background: var(--primary-light);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .view-details {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .view-details:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Partnership Section */
+    .partnership-section {
+      background: var(--secondary-color);
+      border-radius: var(--border-radius);
+      padding: 3rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-top: 4rem;
+    }
+
+    .partnership-section h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    .partnership-section p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .partnership-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .partnership-btn:hover {
+      background: #e55a2b;
+      transform: translateY(-2px);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--secondary-color);
+      border-radius: var(--border-radius);
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--bg-light);
+      color: var(--text-color);
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-subtitle {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
+    .modal-body {
+      padding: 1rem 2rem 2rem;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+    }
+
+    .modal-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+    }
+
+    .modal-description {
+      color: var(--text-color);
       line-height: 1.7;
-      margin-top: 1rem;
+      margin-bottom: 1.5rem;
     }
 
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
+    .modal-features {
+      margin-bottom: 1.5rem;
     }
 
-    .no-clubs {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
+    .modal-features h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 0.75rem;
     }
 
+    .modal-features ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .modal-features li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+      color: var(--text-color);
+    }
+
+    .modal-features li:last-child {
+      border-bottom: none;
+    }
+
+    .modal-contact {
+      background: var(--bg-light);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-top: 1.5rem;
+    }
+
+    .modal-contact h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    .contact-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-color);
+    }
+
+    .contact-item::before {
+      font-size: 1.2rem;
+    }
+
+    .contact-item.phone::before {
+      content: '📞';
+    }
+
+    .contact-item.email::before {
+      content: '✉️';
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
+      .nav-menu {
+        display: none;
+      }
+
       .golf-clubs-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
       }
 
-      .golf-club-card {
-        padding: 1.5rem;
+      .modal {
+        padding: 1rem;
       }
 
-      .header h1 {
-        font-size: 2rem;
+      .modal-content {
+        margin: 1rem;
+      }
+
+      .contact-info {
+        grid-template-columns: 1fr;
       }
     }
+
+    /* Loading Animation */
+    .loading {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .golf-club-card:nth-child(1) { animation-delay: 0.1s; }
+    .golf-club-card:nth-child(2) { animation-delay: 0.2s; }
+    .golf-club-card:nth-child(3) { animation-delay: 0.3s; }
+    .golf-club-card:nth-child(4) { animation-delay: 0.4s; }
+    .golf-club-card:nth-child(5) { animation-delay: 0.5s; }
+    .golf-club-card:nth-child(6) { animation-delay: 0.6s; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="container">
+  <!-- Header -->
+  <header>
+    <div class="header-content">
       <h1>提携ゴルフ部</h1>
-      <p>キャディタスと提携している大学ゴルフ部の一覧です</p>
+      <p>大学や企業のゴルフ部と提携し、キャディの研修機会を創出しています。ゴルフ部の皆様も是非ご参加ください。</p>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">Golf-Caddy</a>
+      <ul class="nav-menu">
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="index.html#golf-course-benefits">ゴルフ場向け</a></li>
+        <li><a href="index.html#caddy-benefits">キャディ向け</a></li>
+        <li><a href="partner-golf-courses.html">提携ゴルフ場</a></li>
+        <li><a href="partner-golf-clubs.html">提携ゴルフ部</a></li>
+        <li><a href="index.html#login">ログイン</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Golf Clubs Section -->
+    <section id="golf-clubs">
+      <div class="section-header">
+        <h2>提携ゴルフ部一覧</h2>
+        <p>大学や企業のゴルフ部と提携し、キャディの研修機会を創出しています。</p>
+      </div>
+
+      <div class="golf-clubs-grid" id="golfClubsGrid">
+        <!-- ゴルフ部カードがここに動的に生成されます -->
+      </div>
+    </section>
+
+    <!-- Partnership Section -->
+    <section id="partnership" class="partnership-section">
+      <h3>ゴルフ部の皆様も是非ご参加ください</h3>
+      <p>キャディプラスと提携して、ゴルフ部の活動をより充実させませんか？<br>経験豊富なキャディとの交流で、技術向上と新しい発見を実現できます。</p>
+      <a href="mailto:partnership@golf-caddy.com" class="partnership-btn">お問い合わせ</a>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="clubModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" id="modalClose">&times;</button>
+        <h3 class="modal-title" id="modalTitle">ゴルフ部名</h3>
+        <p class="modal-subtitle" id="modalSubtitle">大学・企業名</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-image" id="modalImage">
+          <div class="club-icon">🏌️</div>
+        </div>
+        <div class="modal-description" id="modalDescription">
+          ゴルフ部の詳細な説明がここに表示されます。
+        </div>
+        <div class="modal-features">
+          <h4>特徴・活動内容</h4>
+          <ul id="modalFeatures">
+            <li>特徴1</li>
+            <li>特徴2</li>
+            <li>特徴3</li>
+          </ul>
+        </div>
+        <div class="modal-contact">
+          <h4>お問い合わせ</h4>
+          <div class="contact-info">
+            <div class="contact-item phone" id="modalPhone">電話番号</div>
+            <div class="contact-item email" id="modalEmail">メールアドレス</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="container">
-    <a href="/" class="back-link">← ホームに戻る</a>
-    
-    <div id="loading" class="loading">
-      ゴルフ部情報を読み込み中...
-    </div>
-
-    <div id="golf-clubs-container" class="golf-clubs-grid" style="display: none;">
-      <!-- Golf clubs will be populated here -->
-    </div>
-
-    <div id="no-clubs" class="no-clubs" style="display: none;">
-      まだ提携ゴルフ部の登録がありません。
-    </div>
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Initialize Supabase
-    const supabaseUrl = 'https://vqjxajzaasuqfgvhvxci.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanoaYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE5MDQ3MTQsImV4cCI6MjA0NzQ4MDcxNH0.7YWcH2PmXtR2rSFVHCwePWUH0a3_nDQh6o1C7oy7rvk';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanoaYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
 
+    // モーダルの制御
+    const modal = document.getElementById('clubModal');
+    const modalClose = document.getElementById('modalClose');
+
+    modalClose.onclick = () => {
+      modal.classList.remove('show');
+    };
+
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('show');
+      }
+    };
+
+    // ゴルフ部データの読み込みと表示
     async function loadGolfClubs() {
       try {
-        // For now, we'll use caddies table and filter by university
-        // Later you might want to create a separate golf_clubs table
-        const { data: golfClubs, error } = await supabase
-          .from('caddies')
-          .select('university, created_at')
-          .not('university', 'is', null)
-          .neq('university', '');
-
-        const loadingElement = document.getElementById('loading');
-        const containerElement = document.getElementById('golf-clubs-container');
-        const noClubsElement = document.getElementById('no-clubs');
-
-        loadingElement.style.display = 'none';
-
-        if (error) {
-          throw error;
-        }
-
-        if (!golfClubs || golfClubs.length === 0) {
-          noClubsElement.style.display = 'block';
-          return;
-        }
-
-        // Group by university
-        const clubsMap = new Map();
-        golfClubs.forEach(caddy => {
-          if (caddy.university) {
-            if (!clubsMap.has(caddy.university)) {
-              clubsMap.set(caddy.university, {
-                name: caddy.university,
-                memberCount: 0,
-                latestJoin: caddy.created_at
-              });
-            }
-            const club = clubsMap.get(caddy.university);
-            club.memberCount++;
-            if (new Date(caddy.created_at) > new Date(club.latestJoin)) {
-              club.latestJoin = caddy.created_at;
-            }
-          }
-        });
-
-        if (clubsMap.size === 0) {
-          noClubsElement.style.display = 'block';
-          return;
-        }
-
-        containerElement.style.display = 'grid';
+        console.log('ゴルフ部データを読み込み中...');
         
-        Array.from(clubsMap.values()).forEach(club => {
-          const clubCard = createGolfClubCard(club);
-          containerElement.appendChild(clubCard);
+        // 現在はモックデータを使用（将来的にデータベースから取得）
+        const mockGolfClubs = [
+          {
+            id: 1,
+            name: '東京大学ゴルフ部',
+            university: '東京大学',
+            location: '東京都文京区',
+            description: '東京大学の学生で構成されるゴルフ部です。技術向上と交流を目的として活動しています。',
+            image_url: null,
+            phone: '03-1234-5678',
+            email: 'golf@u-tokyo.ac.jp',
+            features: ['学生主体', '技術向上', '交流活動']
+          },
+          {
+            id: 2,
+            name: '早稲田大学ゴルフ部',
+            university: '早稲田大学',
+            location: '東京都新宿区',
+            description: '早稲田大学の学生で構成されるゴルフ部です。競技会への参加も積極的に行っています。',
+            image_url: null,
+            phone: '03-2345-6789',
+            email: 'golf@waseda.ac.jp',
+            features: ['競技会参加', '技術向上', '部活動']
+          },
+          {
+            id: 3,
+            name: '慶應義塾大学ゴルフ部',
+            university: '慶應義塾大学',
+            location: '東京都港区',
+            description: '慶應義塾大学の学生で構成されるゴルフ部です。伝統ある部活動として多くの学生に愛されています。',
+            image_url: null,
+            phone: '03-3456-7890',
+            email: 'golf@keio.ac.jp',
+            features: ['伝統ある部活動', '技術向上', '学生交流']
+          }
+        ];
+
+        console.log('取得したゴルフ部:', mockGolfClubs);
+
+        if (mockGolfClubs.length === 0) {
+          document.getElementById('golfClubsGrid').innerHTML = 
+            '<div style="text-align: center; padding: 3rem; color: var(--text-light);">現在、提携ゴルフ部はありません。</div>';
+          return;
+        }
+
+        // ゴルフ部カードを生成
+        const grid = document.getElementById('golfClubsGrid');
+        grid.innerHTML = '';
+
+        mockGolfClubs.forEach((club, index) => {
+          const card = createGolfClubCard(club, index);
+          grid.appendChild(card);
         });
 
       } catch (error) {
-        console.error('Error loading golf clubs:', error);
-        document.getElementById('loading').textContent = 'ゴルフ部情報の読み込みに失敗しました。';
+        console.error('ゴルフ部データ読み込みエラー:', error);
+        document.getElementById('golfClubsGrid').innerHTML = 
+          '<div style="text-align: center; padding: 3rem; color: var(--text-light);">データの読み込みに失敗しました。</div>';
       }
     }
 
-    function createGolfClubCard(club) {
+    // ゴルフ部カードの作成
+    function createGolfClubCard(club, index) {
       const card = document.createElement('div');
-      card.className = 'golf-club-card';
-      
+      card.className = 'golf-club-card loading';
+      card.style.animationDelay = `${index * 0.1}s`;
+
+      // 画像URLがある場合は使用、ない場合はデフォルトアイコン
+      const imageContent = club.image_url 
+        ? `<img src="${club.image_url}" alt="${club.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+        : '';
+
       card.innerHTML = `
-        <div class="club-university">${club.name}</div>
-        <div class="club-name">${club.name} ゴルフ部</div>
-        
-        <div class="club-info">
-          <span class="club-info-label">登録メンバー:</span>
-          ${club.memberCount}名
+        <div class="club-image">
+          ${imageContent}
+          <div class="club-icon" style="${club.image_url ? 'display: none;' : ''}">🏌️</div>
         </div>
-        
-        <div class="club-activities">
-          <h4>🏌️‍♂️ 活動内容</h4>
-          <p>キャディサービスを通じて実際のゴルフ場での経験を積み、ゴルフスキルとホスピタリティを向上させています。</p>
-        </div>
-        
-        <div class="club-description">
-          最新参加日: ${new Date(club.latestJoin).toLocaleDateString('ja-JP')}
+        <div class="club-content">
+          <h3 class="club-name">${club.name || 'ゴルフ部名未設定'}</h3>
+          <div class="club-university">${club.university || '大学・企業名未設定'}</div>
+          <div class="club-location">${club.location || '所在地未設定'}</div>
+          <p class="club-description">${club.description ? club.description.substring(0, 100) + '...' : '詳細情報はありません'}</p>
+          <div class="club-features">
+            ${club.features ? club.features.map(feature => `<span class="feature-tag">${feature}</span>`).join('') : ''}
+          </div>
+          <button class="view-details" onclick="showClubDetails(${club.id})">詳細を見る</button>
         </div>
       `;
-      
+
       return card;
     }
 
-    // Load golf clubs when page loads
+    // ゴルフ部詳細の表示
+    async function showClubDetails(clubId) {
+      try {
+        // モックデータから該当するゴルフ部を取得
+        const mockGolfClubs = [
+          {
+            id: 1,
+            name: '東京大学ゴルフ部',
+            university: '東京大学',
+            location: '東京都文京区',
+            description: '東京大学の学生で構成されるゴルフ部です。技術向上と交流を目的として活動しています。毎週末に練習を行い、定期的に他大学との交流試合も実施しています。',
+            image_url: null,
+            phone: '03-1234-5678',
+            email: 'golf@u-tokyo.ac.jp',
+            features: ['学生主体', '技術向上', '交流活動', '週末練習', '他大学との交流試合']
+          },
+          {
+            id: 2,
+            name: '早稲田大学ゴルフ部',
+            university: '早稲田大学',
+            location: '東京都新宿区',
+            description: '早稲田大学の学生で構成されるゴルフ部です。競技会への参加も積極的に行っています。部員同士の親睦を深めながら、ゴルフ技術の向上を目指しています。',
+            image_url: null,
+            phone: '03-2345-6789',
+            email: 'golf@waseda.ac.jp',
+            features: ['競技会参加', '技術向上', '部活動', '親睦活動', '練習会']
+          },
+          {
+            id: 3,
+            name: '慶應義塾大学ゴルフ部',
+            university: '慶應義塾大学',
+            location: '東京都港区',
+            description: '慶應義塾大学の学生で構成されるゴルフ部です。伝統ある部活動として多くの学生に愛されています。OB・OGとの交流も盛んで、卒業後もゴルフを通じた繋がりを大切にしています。',
+            image_url: null,
+            phone: '03-3456-7890',
+            email: 'golf@keio.ac.jp',
+            features: ['伝統ある部活動', '技術向上', '学生交流', 'OB・OG交流', '練習会']
+          }
+        ];
+
+        const club = mockGolfClubs.find(c => c.id === clubId);
+        if (!club) {
+          alert('ゴルフ部情報が見つかりません');
+          return;
+        }
+
+        // モーダルの内容を更新
+        document.getElementById('modalTitle').textContent = club.name || 'ゴルフ部名未設定';
+        document.getElementById('modalSubtitle').textContent = club.university || '大学・企業名未設定';
+        document.getElementById('modalDescription').textContent = club.description || '詳細情報はありません';
+        
+        // 画像の更新
+        const modalImage = document.getElementById('modalImage');
+        if (club.image_url) {
+          modalImage.innerHTML = `<img src="${club.image_url}" alt="${club.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="club-icon" style="display: none;">🏌️</div>`;
+        } else {
+          modalImage.innerHTML = '<div class="club-icon">🏌️</div>';
+        }
+
+        // 特徴・活動内容の更新
+        const featuresList = document.getElementById('modalFeatures');
+        if (club.features && club.features.length > 0) {
+          featuresList.innerHTML = club.features.map(feature => `<li>${feature}</li>`).join('');
+        } else {
+          featuresList.innerHTML = '<li>特徴情報はありません</li>';
+        }
+
+        // 連絡先情報の更新
+        document.getElementById('modalPhone').textContent = club.phone || '電話番号未設定';
+        document.getElementById('modalEmail').textContent = club.email || 'メールアドレス未設定';
+
+        // モーダルを表示
+        modal.classList.add('show');
+
+      } catch (error) {
+        console.error('ゴルフ部詳細表示エラー:', error);
+        alert('詳細情報の表示に失敗しました');
+      }
+    }
+
+    // ページ読み込み時にゴルフ部データを読み込み
     document.addEventListener('DOMContentLoaded', loadGolfClubs);
   </script>
 </body>

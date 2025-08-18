@@ -2,16 +2,24 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>提携ゴルフ場 - Golf-Caddy Matching Service</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary-color: #2f8f2f;
+      --primary-dark: #1e5f1e;
+      --primary-light: #4caf50;
       --secondary-color: #ffffff;
+      --accent-color: #ff6b35;
       --text-color: #333333;
-      --bg-light: #f9f9f9;
+      --text-light: #666666;
+      --bg-light: #f8f9fa;
+      --bg-dark: #2c3e50;
       --max-width: 1200px;
+      --border-radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * {
@@ -21,242 +29,711 @@
     }
 
     body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
       color: var(--text-color);
       line-height: 1.6;
       background: var(--bg-light);
     }
 
-    .header {
-      background: var(--primary-color);
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
       color: var(--secondary-color);
       padding: 2rem 0;
       text-align: center;
     }
 
+    .header-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
     .header h1 {
       font-size: 2.5rem;
-      margin-bottom: 0.5rem;
       font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .header p {
       font-size: 1.2rem;
       opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .container {
+    /* Navigation */
+    nav {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 0 1rem;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
     }
 
-    .back-link {
-      display: inline-block;
-      margin: 2rem 0;
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
       color: var(--primary-color);
       text-decoration: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-menu a {
+      color: var(--text-color);
+      text-decoration: none;
       font-weight: 500;
-      transition: color 0.3s ease;
+      transition: var(--transition);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
     }
 
-    .back-link:hover {
-      color: #1f5f1f;
+    .nav-menu a:hover {
+      color: var(--primary-color);
+      background: var(--bg-light);
     }
 
+    /* Main Content */
+    .main-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    .section-header p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Golf Course Grid */
     .golf-courses-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 2rem;
-      margin: 2rem 0;
+      margin-bottom: 4rem;
     }
 
     .golf-course-card {
       background: var(--secondary-color);
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      cursor: pointer;
     }
 
     .golf-course-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .course-image {
+      width: 100%;
+      height: 250px;
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .course-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(45,90,39,0.8) 0%, rgba(74,124,89,0.8) 50%, rgba(107,142,35,0.8) 100%);
+      z-index: 1;
+    }
+
+    .course-image .course-icon {
+      position: relative;
+      z-index: 2;
+    }
+
+    .course-content {
+      padding: 1.5rem;
     }
 
     .course-name {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-    }
-
-    .course-info {
-      margin-bottom: 1rem;
-    }
-
-    .course-info-label {
-      font-weight: 600;
-      color: #666;
-      display: inline-block;
-      min-width: 80px;
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
     }
 
     .course-address {
-      color: #555;
-      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .course-perks {
-      background: #f0f8f0;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      border-left: 4px solid var(--primary-color);
-    }
-
-    .course-perks h4 {
-      color: var(--primary-color);
-      margin-bottom: 0.5rem;
+    .course-address::before {
+      content: '📍';
+      font-size: 1rem;
     }
 
     .course-description {
-      color: #666;
+      color: var(--text-color);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .course-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-tag {
+      background: var(--primary-light);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .view-details {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .view-details:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Partnership Section */
+    .partnership-section {
+      background: var(--secondary-color);
+      border-radius: var(--border-radius);
+      padding: 3rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-top: 4rem;
+    }
+
+    .partnership-section h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    .partnership-section p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .partnership-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .partnership-btn:hover {
+      background: #e55a2b;
+      transform: translateY(-2px);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--secondary-color);
+      border-radius: var(--border-radius);
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--bg-light);
+      color: var(--text-color);
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-subtitle {
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
+    .modal-body {
+      padding: 1rem 2rem 2rem;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+    }
+
+    .modal-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+    }
+
+    .modal-description {
+      color: var(--text-color);
       line-height: 1.7;
-      margin-top: 1rem;
+      margin-bottom: 1.5rem;
     }
 
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
+    .modal-features {
+      margin-bottom: 1.5rem;
     }
 
-    .no-courses {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
+    .modal-features h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 0.75rem;
     }
 
+    .modal-features ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .modal-features li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+      color: var(--text-color);
+    }
+
+    .modal-features li:last-child {
+      border-bottom: none;
+    }
+
+    .modal-contact {
+      background: var(--bg-light);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-top: 1.5rem;
+    }
+
+    .modal-contact h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    .contact-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-color);
+    }
+
+    .contact-item::before {
+      font-size: 1.2rem;
+    }
+
+    .contact-item.phone::before {
+      content: '📞';
+    }
+
+    .contact-item.email::before {
+      content: '✉️';
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
+      .nav-menu {
+        display: none;
+      }
+
       .golf-courses-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
       }
 
-      .golf-course-card {
-        padding: 1.5rem;
+      .modal {
+        padding: 1rem;
       }
 
-      .header h1 {
-        font-size: 2rem;
+      .modal-content {
+        margin: 1rem;
+      }
+
+      .contact-info {
+        grid-template-columns: 1fr;
       }
     }
+
+    /* Loading Animation */
+    .loading {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .golf-course-card:nth-child(1) { animation-delay: 0.1s; }
+    .golf-course-card:nth-child(2) { animation-delay: 0.2s; }
+    .golf-course-card:nth-child(3) { animation-delay: 0.3s; }
+    .golf-course-card:nth-child(4) { animation-delay: 0.4s; }
+    .golf-course-card:nth-child(5) { animation-delay: 0.5s; }
+    .golf-course-card:nth-child(6) { animation-delay: 0.6s; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="container">
+  <!-- Header -->
+  <header>
+    <div class="header-content">
       <h1>提携ゴルフ場</h1>
-      <p>キャディタスと提携しているゴルフ場の一覧です</p>
+      <p>厳選された提携ゴルフ場をご紹介します。高品質なサービスと美しいコースで、最高のゴルフ体験をお楽しみください。</p>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">Golf-Caddy</a>
+      <ul class="nav-menu">
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="index.html#golf-course-benefits">ゴルフ場向け</a></li>
+        <li><a href="index.html#caddy-benefits">キャディ向け</a></li>
+        <li><a href="partner-golf-courses.html">提携ゴルフ場</a></li>
+        <li><a href="partner-golf-clubs.html">提携ゴルフ部</a></li>
+        <li><a href="index.html#login">ログイン</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Golf Courses Section -->
+    <section id="golf-courses">
+      <div class="section-header">
+        <h2>厳選された提携ゴルフ場</h2>
+        <p>登録されているゴルフ場の中から、プロフィールが充実しているゴルフ場をご紹介します。</p>
+      </div>
+
+      <div class="golf-courses-grid" id="golfCoursesGrid">
+        <!-- ゴルフ場カードがここに動的に生成されます -->
+      </div>
+    </section>
+
+    <!-- Partnership Section -->
+    <section id="partnership" class="partnership-section">
+      <h3>パートナーゴルフ場を募集しています</h3>
+      <p>キャディプラスと提携して、お客様により良いゴルフ体験を提供しませんか？<br>経験豊富なキャディとのマッチングで、サービス品質の向上と売上の増加を実現できます。</p>
+      <a href="mailto:partnership@golf-caddy.com" class="partnership-btn">お問い合わせ</a>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="courseModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" id="modalClose">&times;</button>
+        <h3 class="modal-title" id="modalTitle">ゴルフ場名</h3>
+        <p class="modal-subtitle" id="modalSubtitle">住所</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-image" id="modalImage">
+          <div class="course-icon">🏌️</div>
+        </div>
+        <div class="modal-description" id="modalDescription">
+          ゴルフ場の詳細な説明がここに表示されます。
+        </div>
+        <div class="modal-features">
+          <h4>特徴・アピールポイント</h4>
+          <ul id="modalFeatures">
+            <li>特徴1</li>
+            <li>特徴2</li>
+            <li>特徴3</li>
+          </ul>
+        </div>
+        <div class="modal-contact">
+          <h4>お問い合わせ</h4>
+          <div class="contact-info">
+            <div class="contact-item phone" id="modalPhone">電話番号</div>
+            <div class="contact-item email" id="modalEmail">メールアドレス</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="container">
-    <a href="/" class="back-link">← ホームに戻る</a>
-    
-    <div id="loading" class="loading">
-      ゴルフ場情報を読み込み中...
-    </div>
-
-    <div id="golf-courses-container" class="golf-courses-grid" style="display: none;">
-      <!-- Golf courses will be populated here -->
-    </div>
-
-    <div id="no-courses" class="no-courses" style="display: none;">
-      まだ提携ゴルフ場の登録がありません。
-    </div>
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Initialize Supabase
-    const supabaseUrl = 'https://vqjxajzaasuqfgvhvxci.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanoaYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE5MDQ3MTQsImV4cCI6MjA0NzQ4MDcxNH0.7YWcH2PmXtR2rSFVHCwePWUH0a3_nDQh6o1C7oy7rvk';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
 
+    // モーダルの制御
+    const modal = document.getElementById('courseModal');
+    const modalClose = document.getElementById('modalClose');
+
+    modalClose.onclick = () => {
+      modal.classList.remove('show');
+    };
+
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('show');
+      }
+    };
+
+    // ゴルフ場データの読み込みと表示
     async function loadGolfCourses() {
       try {
+        console.log('ゴルフ場データを読み込み中...');
+        
+        // プロフィールが充実しているゴルフ場を取得
         const { data: golfCourses, error } = await supabase
           .from('golf_courses')
           .select('*')
-          .order('created_at', { ascending: false });
-
-        const loadingElement = document.getElementById('loading');
-        const containerElement = document.getElementById('golf-courses-container');
-        const noCoursesElement = document.getElementById('no-courses');
-
-        loadingElement.style.display = 'none';
+          .not('name', 'is', null)
+          .not('address', 'is', null)
+          .not('description', 'is', null)
+          .not('contact_name', 'is', null)
+          .not('phone', 'is', null);
 
         if (error) {
-          throw error;
-        }
-
-        if (!golfCourses || golfCourses.length === 0) {
-          noCoursesElement.style.display = 'block';
+          console.error('ゴルフ場データ取得エラー:', error);
           return;
         }
 
-        containerElement.style.display = 'grid';
-        
-        golfCourses.forEach(course => {
-          const courseCard = createGolfCourseCard(course);
-          containerElement.appendChild(courseCard);
+        console.log('取得したゴルフ場:', golfCourses);
+
+        if (!golfCourses || golfCourses.length === 0) {
+          document.getElementById('golfCoursesGrid').innerHTML = 
+            '<div style="text-align: center; padding: 3rem; color: var(--text-light);">現在、提携ゴルフ場はありません。</div>';
+          return;
+        }
+
+        // ゴルフ場カードを生成
+        const grid = document.getElementById('golfCoursesGrid');
+        grid.innerHTML = '';
+
+        golfCourses.forEach((course, index) => {
+          const card = createGolfCourseCard(course, index);
+          grid.appendChild(card);
         });
 
       } catch (error) {
-        console.error('Error loading golf courses:', error);
-        document.getElementById('loading').textContent = 'ゴルフ場情報の読み込みに失敗しました。';
+        console.error('ゴルフ場データ読み込みエラー:', error);
+        document.getElementById('golfCoursesGrid').innerHTML = 
+          '<div style="text-align: center; padding: 3rem; color: var(--text-light);">データの読み込みに失敗しました。</div>';
       }
     }
 
-    function createGolfCourseCard(course) {
+    // ゴルフ場カードの作成
+    function createGolfCourseCard(course, index) {
       const card = document.createElement('div');
-      card.className = 'golf-course-card';
-      
+      card.className = 'golf-course-card loading';
+      card.style.animationDelay = `${index * 0.1}s`;
+
+      // 画像URLがある場合は使用、ない場合はデフォルトアイコン
+      const imageContent = course.image_url 
+        ? `<img src="${course.image_url}" alt="${course.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+        : '';
+
       card.innerHTML = `
-        <div class="course-name">${course.name || 'ゴルフ場名未設定'}</div>
-        
-        <div class="course-info">
-          <span class="course-info-label">担当者:</span>
-          ${course.contact_name || '未設定'}
+        <div class="course-image">
+          ${imageContent}
+          <div class="course-icon" style="${course.image_url ? 'display: none;' : ''}">🏌️</div>
         </div>
-        
-        <div class="course-info">
-          <span class="course-info-label">電話:</span>
-          ${course.phone || '未設定'}
-        </div>
-        
-        <div class="course-info">
-          <span class="course-info-label">メール:</span>
-          ${course.email || '未設定'}
-        </div>
-        
-        ${course.perks ? `
-          <div class="course-perks">
-            <h4>🎁 キャディ特典</h4>
-            <p>${course.perks}</p>
+        <div class="course-content">
+          <h3 class="course-name">${course.name || 'ゴルフ場名未設定'}</h3>
+          <div class="course-address">${course.address || '住所未設定'}</div>
+          <p class="course-description">${course.description ? course.description.substring(0, 100) + '...' : '詳細情報はありません'}</p>
+          <div class="course-features">
+            ${course.perks ? `<span class="feature-tag">${course.perks}</span>` : ''}
+            ${course.contact_name ? '<span class="feature-tag">担当者あり</span>' : ''}
           </div>
-        ` : ''}
-        
-        <div class="course-description">
-          登録日: ${new Date(course.created_at).toLocaleDateString('ja-JP')}
+          <button class="view-details" onclick="showCourseDetails('${course.gid}')">詳細を見る</button>
         </div>
       `;
-      
+
       return card;
     }
 
-    // Load golf courses when page loads
+    // ゴルフ場詳細の表示
+    async function showCourseDetails(gid) {
+      try {
+        const { data: course, error } = await supabase
+          .from('golf_courses')
+          .select('*')
+          .eq('gid', gid)
+          .single();
+
+        if (error) {
+          console.error('ゴルフ場詳細取得エラー:', error);
+          alert('詳細情報の取得に失敗しました');
+          return;
+        }
+
+        // モーダルの内容を更新
+        document.getElementById('modalTitle').textContent = course.name || 'ゴルフ場名未設定';
+        document.getElementById('modalSubtitle').textContent = course.address || '住所未設定';
+        document.getElementById('modalDescription').textContent = course.description || '詳細情報はありません';
+        
+        // 画像の更新
+        const modalImage = document.getElementById('modalImage');
+        if (course.image_url) {
+          modalImage.innerHTML = `<img src="${course.image_url}" alt="${course.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="course-icon" style="display: none;">🏌️</div>`;
+        } else {
+          modalImage.innerHTML = '<div class="course-icon">🏌️</div>';
+        }
+
+        // 特徴・アピールポイントの更新
+        const features = [];
+        if (course.perks) features.push(course.perks);
+        if (course.contact_name) features.push(`担当者: ${course.contact_name}`);
+        if (course.description) features.push('詳細な説明あり');
+
+        const featuresList = document.getElementById('modalFeatures');
+        if (features.length > 0) {
+          featuresList.innerHTML = features.map(feature => `<li>${feature}</li>`).join('');
+        } else {
+          featuresList.innerHTML = '<li>特徴情報はありません</li>';
+        }
+
+        // 連絡先情報の更新
+        document.getElementById('modalPhone').textContent = course.phone || '電話番号未設定';
+        document.getElementById('modalEmail').textContent = course.email || 'メールアドレス未設定';
+
+        // モーダルを表示
+        modal.classList.add('show');
+
+      } catch (error) {
+        console.error('ゴルフ場詳細表示エラー:', error);
+        alert('詳細情報の表示に失敗しました');
+      }
+    }
+
+    // ページ読み込み時にゴルフ場データを読み込み
     document.addEventListener('DOMContentLoaded', loadGolfCourses);
   </script>
 </body>
