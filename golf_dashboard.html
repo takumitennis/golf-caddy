@@ -231,7 +231,7 @@
     <button id="btnMainMsg" style="display:none;">メッセージ</button>
     <button id="logoutBtn" style="margin-left:auto;">ログアウト</button>
   </div>
-  <div id="welcome" style="margin-top:10px;"></div>
+      <div id="welcome" style="margin-top:10px; font-size: 1.2rem; font-weight: 600; color: #2c3e50; padding: 0 24px;"></div>
   <!-- 予約バー -->
   <div id="reserveBar">
     <div class="reserve-info"><span id="reserveDateText"></span> を予約しますか？</div>
@@ -290,7 +290,7 @@
             const { error } = await supabase.from('golf_courses').insert({ gid: generatedGid, email, name, contact_name: contact, phone, perks });
             if (error) throw error;
             gid = generatedGid; hasProfile = true;
-            document.getElementById('welcome').textContent = `ようこそ ${name} 様`;
+            document.getElementById('welcome').textContent = name;
             // 予約管理を有効化
             const mainStatus = document.getElementById('mainStatus');
             if (mainStatus) mainStatus.classList.remove('hidden');
@@ -346,9 +346,8 @@
       
     </div>
 
-    <!-- Tab 3: Training availability -->
-    <div id="tab3" class="hidden" style="margin-top:20px;">
-      <h3>研修可能日設定</h3>
+          <!-- Tab 3: Training availability -->
+      <div id="tab3" class="hidden" style="margin-top:20px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <button id="prevTrainingMonth">◀</button>
         <span id="trainingCalTitle"></span>
@@ -358,9 +357,8 @@
       <small style="display:block;margin-top:8px;">青=設定済み, 白=未設定 | クリックで設定/解除</small>
     </div>
 
-    <!-- Tab 4: Training requests -->
-    <div id="tab4" class="hidden" style="margin-top:20px;">
-      <h3>研修予約者一覧</h3>
+          <!-- Tab 4: Training requests -->
+      <div id="tab4" class="hidden" style="margin-top:20px;">
       <div id="trainingRequestsList"></div>
     </div>
   </div>
@@ -481,7 +479,7 @@
       }
       
       gid = rows.gid; hasProfile = true;
-      document.getElementById("welcome").textContent = `ようこそ ${rows.name} 様`;
+      document.getElementById("welcome").textContent = rows.name;
       
       // populate profile tab
       const profHtml = `
