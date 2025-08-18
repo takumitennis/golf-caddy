@@ -24,9 +24,14 @@ export async function onRequest(context) {
 
   try {
     // 環境変数の確認
+    console.log('=== 環境変数確認 ===');
+    console.log('LINE_CHANNEL_ACCESS_TOKEN:', env.LINE_CHANNEL_ACCESS_TOKEN ? '設定済み' : '未設定');
+    console.log('SUPABASE_URL:', env.SUPABASE_URL ? '設定済み' : '未設定');
+    console.log('SUPABASE_SERVICE_KEY:', env.SUPABASE_SERVICE_KEY ? '設定済み' : '未設定');
+    
     if (!env.LINE_CHANNEL_ACCESS_TOKEN) {
       console.error('LINE_CHANNEL_ACCESS_TOKEN not set');
-      return new Response('LINE configuration missing', { 
+      return new Response('LINE configuration missing: LINE_CHANNEL_ACCESS_TOKEN not set', { 
         status: 500, 
         headers: corsHeaders 
       });
@@ -64,7 +69,7 @@ export async function onRequest(context) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('LINE API error:', response.status, errorText);
-      return new Response(`LINE API error: ${response.status}`, { 
+      return new Response(`LINE API error: ${response.status} - ${errorText}`, { 
         status: 500, 
         headers: corsHeaders 
       });

@@ -229,7 +229,6 @@
     <button id="btnMainProf">プロフィール</button>
     <button id="btnMainStat" class="active">予約管理</button>
     <button id="btnMainMsg" style="display:none;">メッセージ</button>
-    <button id="testNotificationBtn" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">テスト通知</button>
     <button id="logoutBtn" style="margin-left:auto;">ログアウト</button>
   </div>
   <div id="welcome" style="margin: 15px 0; font-size: 1.2rem; font-weight: 600; color: #2c3e50; text-align: center;"></div>
@@ -830,45 +829,7 @@
       
       document.getElementById('saveProfileEditBtn').onclick = saveProfileEdit;
 
-              // テスト通知ボタンのイベントリスナー
-        const testNotificationBtn = document.getElementById('testNotificationBtn');
-        if (testNotificationBtn) {
-          testNotificationBtn.onclick = async () => {
-            try {
-              console.log('テスト通知開始');
-              
-              // 環境変数の確認
-              console.log('=== 環境変数確認 ===');
-              console.log('現在のURL:', window.location.href);
-              console.log('Cloudflare Pages環境:', window.location.hostname.includes('pages.dev') ? 'Yes' : 'No');
-              
-              // テスト用のLINE通知を送信
-              await sendLineNotification('test_cid', '2025-01-20', '09:00');
-              
-              // 実際のLINE通知のテスト
-              console.log('=== 実際のLINE通知テスト ===');
-              const response = await fetch('/api/send-line-notification', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  lineUserId: 'test_user_id',
-                  message: 'テスト通知です'
-                })
-              });
-              
-              console.log('Cloudflare Functions レスポンス:', response.status);
-              const responseText = await response.text();
-              console.log('レスポンス内容:', responseText);
-              
-              alert('テスト完了。コンソールを確認してください。');
-            } catch (error) {
-              console.error('テスト通知エラー:', error);
-              alert('テスト通知でエラーが発生しました: ' + error.message);
-            }
-          };
-        }
+      
 
       // 初期表示は「空きキャディ確認」を開く（年/月初期化後）
       try { switchTab(1); } catch (e) { console.warn('switchTab init warn:', e?.message || e); }
@@ -1132,10 +1093,16 @@
         
         // LINE通知を送信
         try {
+          console.log('=== 予約完了時のLINE通知開始 ===');
+          console.log('キャディID:', randomCid);
+          console.log('予約日:', dateStr);
+          console.log('時間:', timeSlot);
+          
           await sendLineNotification(randomCid, dateStr, timeSlot);
           console.log('LINE通知送信完了');
         } catch (notificationError) {
           console.error('LINE通知送信エラー:', notificationError);
+          console.error('エラー詳細:', notificationError.message);
           // 通知エラーでも予約は完了させる
         }
         
@@ -2075,11 +2042,7 @@
         console.log(`Date: ${dateStr}`);
         console.log(`Time: ${timeSlot}`);
         
-        // テスト用の処理
-        if (cid === 'test_cid') {
-          console.log('テスト通知モード - 実際のLINE通知は送信しません');
-          return;
-        }
+
         
         // キャディのLINE連携情報を取得
         console.log('Fetching LINE integration for caddy...');
