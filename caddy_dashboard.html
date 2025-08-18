@@ -636,14 +636,28 @@
       const last=new Date(calYear,calMonth+1,0);
       document.getElementById('calTitle').textContent=`${calYear}年 ${calMonth+1}月`;
 
+      console.log(`=== カレンダー描画開始 ===`);
+      console.log(`月: ${calYear}年 ${calMonth+1}月`);
+      console.log(`キャディID: ${cid}`);
+
       // fetch own availability
       const { data, error } = await supabase.from('caddy_availability')
          .select('date')
          .eq('cid', cid)
          .gte('date', first.toISOString().slice(0,10))
          .lte('date', last.toISOString().slice(0,10));
+      
+      console.log(`データベース取得結果:`, { data, error });
+      
+      if (error) {
+        console.error(`データベース取得エラー:`, error);
+      }
+      
       const availSet=new Set();
-      if(!error){ data.forEach(r=>availSet.add(r.date)); }
+      if(!error && data){ 
+        data.forEach(r=>availSet.add(r.date)); 
+        console.log(`取得した空き日:`, Array.from(availSet));
+      }
 
       // fetch booked days for current month (bookings joined)
       const { data: assigns } = await supabase
@@ -698,13 +712,25 @@
 
     async function toggle(dateStr,isAvail){
       if (!editMode) return; // 通常モードでは反応しない
+      
+      console.log(`=== シフト編集: toggle ===`);
+      console.log(`日付: ${dateStr}`);
+      console.log(`現在の状態: ${isAvail ? '空き日' : '×'}`);
+      console.log(`変更後の状態: ${isAvail ? '×' : '空き日'}`);
+      
       if(isAvail){
         pendingDeletes.add(dateStr);
         pendingInserts.delete(dateStr);
+        console.log(`削除予定に追加: ${dateStr}`);
       } else {
         pendingInserts.add(dateStr);
         pendingDeletes.delete(dateStr);
+        console.log(`追加予定に追加: ${dateStr}`);
       }
+      
+      console.log(`現在のpendingDeletes:`, Array.from(pendingDeletes));
+      console.log(`現在のpendingInserts:`, Array.from(pendingInserts));
+      
       // 見た目だけ即時反映（ローカルの暫定Setを基に描画）
       const cells = calTable.querySelectorAll('td');
       cells.forEach((td)=>{
@@ -717,6 +743,8 @@
         td.className = nowAvail ? 'cal-ok' : 'cal-ng';
         td.innerHTML=`<small>${day}</small><br>${nowAvail?'<span class="ok-circle"></span>':'❌'}`;
       });
+      
+      console.log(`UI更新完了`);
     }
 
     // キャディ予定（予約確定分）を右側カレンダーに描画
@@ -1006,25 +1034,51 @@
     };
     if (saveBtn) saveBtn.onclick = async ()=>{
       // 一括反映
+      console.log(`=== シフト保存開始 ===`);
+      console.log(`キャディID: ${cid}`);
+      console.log(`削除予定:`, Array.from(pendingDeletes));
+      console.log(`追加予定:`, Array.from(pendingInserts));
+      
       try {
         if (pendingDeletes.size>0){
           const dates = Array.from(pendingDeletes);
-          await supabase.from('caddy_availability').delete().eq('cid', cid).in('date', dates);
+          console.log(`削除処理開始: ${dates}`);
+          const deleteResult = await supabase.from('caddy_availability').delete().eq('cid', cid).in('date', dates);
+          console.log(`削除結果:`, deleteResult);
+          if (deleteResult.error) {
+            console.error(`削除エラー:`, deleteResult.error);
+            throw new Error(`削除エラー: ${deleteResult.error.message}`);
+          }
         }
+        
         if (pendingInserts.size>0){
           const rows = Array.from(pendingInserts).map(d=>({ cid, date: d }));
-          await supabase.from('caddy_availability').insert(rows);
+          console.log(`追加処理開始: ${rows}`);
+          const insertResult = await supabase.from('caddy_availability').insert(rows);
+          console.log(`追加結果:`, insertResult);
+          if (insertResult.error) {
+            console.error(`追加エラー:`, insertResult.error);
+            throw new Error(`追加エラー: ${insertResult.error.message}`);
+          }
         }
+        
+        console.log(`保存処理完了`);
         pendingDeletes.clear();
         pendingInserts.clear();
         editMode = false;
         if (saveBtn) saveBtn.disabled = true;
         if (editBtn) editBtn.disabled = false;
-        // 戻す
-        renderCal();
+        
+        // カレンダーを再描画
+        console.log(`カレンダー再描画開始`);
+        await renderCal();
+        console.log(`カレンダー再描画完了`);
+        
         alert('シフトを確定しました');
       } catch (e) {
-        console.error(e);
+        console.error(`=== シフト保存エラー ===`);
+        console.error('エラー詳細:', e);
+        console.error('エラースタック:', e.stack);
         alert('保存に失敗しました: ' + (e.message||e));
       }
     };
