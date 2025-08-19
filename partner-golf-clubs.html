@@ -1027,15 +1027,43 @@
       }
       
       try {
-        // メール送信の処理（実際の実装ではサーバーサイドで処理）
-        const mailtoLink = `mailto:partnership@golf-caddy.com?subject=ゴルフ部/サークルからのお問い合わせ: ${encodeURIComponent(clubName)}&body=ゴルフ部/サークル名: ${encodeURIComponent(clubName)}%0D%0A担当者名: ${encodeURIComponent(contactName)}%0D%0Aメールアドレス: ${encodeURIComponent(contactEmail)}%0D%0A%0D%0Aお問い合わせ内容:%0D%0A${encodeURIComponent(contactMessage)}`;
+        // 送信ボタンを無効化
+        const sendButton = document.querySelector('#contactFormModal button[onclick="sendContactForm()"]');
+        const originalText = sendButton.textContent;
+        sendButton.textContent = '送信中...';
+        sendButton.disabled = true;
         
-        window.open(mailtoLink);
-        alert('お問い合わせありがとうございます。メールクライアントが開きます。');
-        closeContactForm();
+        // Cloudflare Functionにデータを送信
+        const response = await fetch('/api/send-contact-form', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clubName,
+            contactName,
+            contactEmail,
+            contactMessage
+          }),
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          alert('お問い合わせを受け付けました。ありがとうございます。');
+          closeContactForm();
+        } else {
+          throw new Error(result.error || '送信に失敗しました');
+        }
+        
       } catch (error) {
         console.error('Contact form error:', error);
         alert('送信に失敗しました: ' + error.message);
+      } finally {
+        // 送信ボタンを元に戻す
+        const sendButton = document.querySelector('#contactFormModal button[onclick="sendContactForm()"]');
+        sendButton.textContent = '送信';
+        sendButton.disabled = false;
       }
     }
 

@@ -21,3 +21,4 @@ vars = { }
 # 2. LINE_CHANNEL_SECRET: LINE Developers Consoleで取得  
 # 3. SUPABASE_URL: SupabaseプロジェクトのURL
 # 4. SUPABASE_SERVICE_KEY: Supabaseのservice_role key（RLSをバイパス）
+# 5. RESEND_API_KEY: ResendのAPIキー（メール送信用）
