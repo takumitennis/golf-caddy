@@ -642,6 +642,61 @@
       <div class="section-header">
         <h2>厳選された提携ゴルフ場</h2>
         <p>登録されているゴルフ場の中から、プロフィールが充実しているゴルフ場をご紹介します。</p>
+        
+        <!-- 都道府県絞り込み -->
+        <div class="filter-section" style="margin-top: 2rem;">
+          <label for="prefectureFilter" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-color);">都道府県で絞り込み</label>
+          <select id="prefectureFilter" style="padding: 0.75rem 1rem; border: 2px solid var(--primary-light); border-radius: var(--border-radius); font-size: 1rem; min-width: 200px; background: white;">
+            <option value="">全ての都道府県</option>
+            <option value="北海道">北海道</option>
+            <option value="青森県">青森県</option>
+            <option value="岩手県">岩手県</option>
+            <option value="宮城県">宮城県</option>
+            <option value="秋田県">秋田県</option>
+            <option value="山形県">山形県</option>
+            <option value="福島県">福島県</option>
+            <option value="茨城県">茨城県</option>
+            <option value="栃木県">栃木県</option>
+            <option value="群馬県">群馬県</option>
+            <option value="埼玉県">埼玉県</option>
+            <option value="千葉県">千葉県</option>
+            <option value="東京都">東京都</option>
+            <option value="神奈川県">神奈川県</option>
+            <option value="新潟県">新潟県</option>
+            <option value="富山県">富山県</option>
+            <option value="石川県">石川県</option>
+            <option value="福井県">福井県</option>
+            <option value="山梨県">山梨県</option>
+            <option value="長野県">長野県</option>
+            <option value="岐阜県">岐阜県</option>
+            <option value="静岡県">静岡県</option>
+            <option value="愛知県">愛知県</option>
+            <option value="三重県">三重県</option>
+            <option value="滋賀県">滋賀県</option>
+            <option value="京都府">京都府</option>
+            <option value="大阪府">大阪府</option>
+            <option value="兵庫県">兵庫県</option>
+            <option value="奈良県">奈良県</option>
+            <option value="和歌山県">和歌山県</option>
+            <option value="鳥取県">鳥取県</option>
+            <option value="島根県">島根県</option>
+            <option value="岡山県">岡山県</option>
+            <option value="広島県">広島県</option>
+            <option value="山口県">山口県</option>
+            <option value="徳島県">徳島県</option>
+            <option value="香川県">香川県</option>
+            <option value="愛媛県">愛媛県</option>
+            <option value="高知県">高知県</option>
+            <option value="福岡県">福岡県</option>
+            <option value="佐賀県">佐賀県</option>
+            <option value="長崎県">長崎県</option>
+            <option value="熊本県">熊本県</option>
+            <option value="大分県">大分県</option>
+            <option value="宮崎県">宮崎県</option>
+            <option value="鹿児島県">鹿児島県</option>
+            <option value="沖縄県">沖縄県</option>
+          </select>
+        </div>
       </div>
 
       <div class="golf-courses-grid" id="golfCoursesGrid">
@@ -680,13 +735,7 @@
             <li>特徴3</li>
           </ul>
         </div>
-        <div class="modal-contact">
-          <h4>お問い合わせ</h4>
-          <div class="contact-info">
-            <div class="contact-item phone" id="modalPhone">電話番号</div>
-            <div class="contact-item email" id="modalEmail">メールアドレス</div>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -803,14 +852,11 @@
           return;
         }
 
+        // 全データを保持
+        allGolfCourses = golfCourses;
+        
         // ゴルフ場カードを生成
-        const grid = document.getElementById('golfCoursesGrid');
-        grid.innerHTML = '';
-
-        golfCourses.forEach((course, index) => {
-          const card = createGolfCourseCard(course, index);
-          grid.appendChild(card);
-        });
+        displayGolfCourses(golfCourses);
 
       } catch (error) {
         console.error('=== ゴルフ場データ読み込みエラー ===');
@@ -838,11 +884,11 @@
         </div>
         <div class="course-content">
           <h3 class="course-name">${course.name || 'ゴルフ場名未設定'}</h3>
-          <div class="course-address">${course.address || '住所未設定'}</div>
+          <div class="course-address">${course.prefecture || '都道府県未設定'}${course.city ? ' ' + course.city : ''}</div>
           <p class="course-description">${course.description ? course.description.substring(0, 100) + '...' : '詳細情報はありません'}</p>
           <div class="course-features">
             ${course.perks ? `<span class="feature-tag">${course.perks}</span>` : ''}
-            ${course.contact_name ? '<span class="feature-tag">担当者あり</span>' : ''}
+            ${course.prefecture ? `<span class="feature-tag">${course.prefecture}</span>` : ''}
           </div>
           <button class="view-details" onclick="showCourseDetails('${course.gid}')">詳細を見る</button>
         </div>
@@ -882,7 +928,7 @@
         // 特徴・アピールポイントの更新
         const features = [];
         if (course.perks) features.push(course.perks);
-        if (course.contact_name) features.push(`担当者: ${course.contact_name}`);
+        if (course.prefecture) features.push(`所在地: ${course.prefecture}${course.city ? ' ' + course.city : ''}`);
         if (course.description) features.push('詳細な説明あり');
 
         const featuresList = document.getElementById('modalFeatures');
@@ -892,9 +938,7 @@
           featuresList.innerHTML = '<li>特徴情報はありません</li>';
         }
 
-        // 連絡先情報の更新
-        document.getElementById('modalPhone').textContent = course.phone || '電話番号未設定';
-        document.getElementById('modalEmail').textContent = course.email || 'メールアドレス未設定';
+
 
         // モーダルを表示
         modal.classList.add('show');
@@ -905,8 +949,52 @@
       }
     }
 
+    // 都道府県絞り込みの処理
+    let allGolfCourses = []; // 全ゴルフ場データを保持
+    
+    function filterGolfCourses() {
+      const selectedPrefecture = document.getElementById('prefectureFilter').value;
+      const grid = document.getElementById('golfCoursesGrid');
+      
+      if (!selectedPrefecture) {
+        // 全て表示
+        displayGolfCourses(allGolfCourses);
+        return;
+      }
+      
+      // 選択された都道府県で絞り込み
+      const filteredCourses = allGolfCourses.filter(course => 
+        course.prefecture === selectedPrefecture
+      );
+      
+      displayGolfCourses(filteredCourses);
+    }
+    
+    function displayGolfCourses(courses) {
+      const grid = document.getElementById('golfCoursesGrid');
+      grid.innerHTML = '';
+      
+      if (courses.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-light);">該当するゴルフ場がありません。</div>';
+        return;
+      }
+      
+      courses.forEach((course, index) => {
+        const card = createGolfCourseCard(course, index);
+        grid.appendChild(card);
+      });
+    }
+    
     // ページ読み込み時にゴルフ場データを読み込み
-    document.addEventListener('DOMContentLoaded', loadGolfCourses);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadGolfCourses();
+      
+      // 都道府県絞り込みのイベントリスナーを設定
+      const prefectureFilter = document.getElementById('prefectureFilter');
+      if (prefectureFilter) {
+        prefectureFilter.addEventListener('change', filterGolfCourses);
+      }
+    });
   </script>
 </body>
 </html> 
