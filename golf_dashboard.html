@@ -269,6 +269,13 @@
               <label style="display:block;margin-bottom:4px;">特典</label>
               <input type="text" id="gcPerks" placeholder="例: 打ちっぱなし無料 など" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;" />
             </div>
+            <div style="margin-bottom:12px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" id="gcPartnerDisplay" style="width:auto;margin:0;">
+                <span>提携ゴルフ場ページに表示する</span>
+              </label>
+              <small style="color:#666;margin-left:24px;">チェックすると、提携ゴルフ場ページで一般ユーザーに表示されます</small>
+            </div>
             <div style="text-align:right;">
               <button type="submit" style="background:#27ae60;color:#fff;border:none;border-radius:6px;padding:10px 16px;">保存して予約管理へ</button>
             </div>
@@ -282,12 +289,21 @@
           const contact = document.getElementById('gcContact').value.trim();
           const phone = document.getElementById('gcPhone').value.trim();
           const perks = document.getElementById('gcPerks').value.trim();
+          const partnerDisplay = document.getElementById('gcPartnerDisplay').checked;
           if (!name){ alert('ゴルフ場名を入力してください'); return; }
           try{
             // gid を生成（簡易）
             const { data: u } = await supabase.auth.getUser();
             const generatedGid = 'g' + (u.user?.id||Date.now().toString()).slice(0,6);
-            const { error } = await supabase.from('golf_courses').insert({ gid: generatedGid, email, name, contact_name: contact, phone, perks });
+            const { error } = await supabase.from('golf_courses').insert({ 
+              gid: generatedGid, 
+              email, 
+              name, 
+              contact_name: contact, 
+              phone, 
+              perks,
+              partner_display: partnerDisplay
+            });
             if (error) throw error;
             gid = generatedGid; hasProfile = true;
             document.getElementById('welcome').textContent = name;
@@ -517,6 +533,11 @@
               <tr><th style="text-align:left;padding:8px;border-bottom:1px solid #eee;">担当者名</th><td style="padding:8px;border-bottom:1px solid #eee;">${rows.contact_name||'未設定'}</td></tr>
               <tr><th style="text-align:left;padding:8px;border-bottom:1px solid #eee;">電話番号</th><td style="padding:8px;border-bottom:1px solid #eee;">${rows.phone||'未設定'}</td></tr>
               <tr><th style="text-align:left;padding:8px;border-bottom:1px solid #eee;">特典</th><td style="padding:8px;border-bottom:1px solid #eee;">${rows.perks||'未設定'}</td></tr>
+              <tr><th style="text-align:left;padding:8px;border-bottom:1px solid #eee;">提携表示</th><td style="padding:8px;border-bottom:1px solid #eee;">
+                <span style="color:${rows.partner_display ? '#27ae60' : '#666'};font-weight:${rows.partner_display ? '600' : '400'};">
+                  ${rows.partner_display ? '表示中' : '非表示'}
+                </span>
+              </td></tr>
             </table>
             <button id="editProfileBtn" style="background:#27ae60;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;margin-top:15px;">プロフィールを編集</button>
           </div>
@@ -550,6 +571,13 @@
               <div style="margin-bottom:15px;">
                 <label style="display:block;margin-bottom:5px;font-weight:600;">キャディ特典</label>
                 <textarea id="editPerks" placeholder="打ちっぱなし無料、食事提供など..." style="width:100%;height:80px;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;">${rows.perks||''}</textarea>
+              </div>
+              <div style="margin-bottom:15px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="editPartnerDisplay" ${rows.partner_display ? 'checked' : ''} style="width:auto;margin:0;">
+                  <span>提携ゴルフ場ページに表示する</span>
+                </label>
+                <small style="color:#666;margin-left:24px;">チェックすると、提携ゴルフ場ページで一般ユーザーに表示されます</small>
               </div>
             </form>
             <div style="margin-top:20px;text-align:right;">
@@ -1687,6 +1715,7 @@
       const contactName = document.getElementById('editContactName').value.trim();
       const phone = document.getElementById('editPhone').value.trim();
       const perks = document.getElementById('editPerks').value.trim();
+      const partnerDisplay = document.getElementById('editPartnerDisplay').checked;
       
       try {
         const { error } = await supabase
@@ -1694,7 +1723,8 @@
           .update({ 
             contact_name: contactName,
             phone: phone,
-            perks: perks
+            perks: perks,
+            partner_display: partnerDisplay
           })
           .eq('gid', gid);
         
@@ -1707,6 +1737,17 @@
           rows[1].cells[1].textContent = contactName || '未設定';
           rows[2].cells[1].textContent = phone || '未設定';
           rows[3].cells[1].textContent = perks || '未設定';
+          
+          // 提携表示の状態も更新
+          const partnerDisplayCell = rows[4].cells[1];
+          if (partnerDisplayCell) {
+            const statusSpan = partnerDisplayCell.querySelector('span');
+            if (statusSpan) {
+              statusSpan.textContent = partnerDisplay ? '表示中' : '非表示';
+              statusSpan.style.color = partnerDisplay ? '#27ae60' : '#666';
+              statusSpan.style.fontWeight = partnerDisplay ? '600' : '400';
+            }
+          }
         }
         
         document.getElementById('profileEditModal').style.display = 'none';

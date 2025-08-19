@@ -742,7 +742,8 @@
             .select('*')
             .not('name', 'is', null)
             .not('contact_name', 'is', null)
-            .not('phone', 'is', null);
+            .not('phone', 'is', null)
+            .eq('partner_display', true);
           
           if (dataError) {
             console.error('データ取得エラー:', dataError);
