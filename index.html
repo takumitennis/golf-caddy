@@ -86,7 +86,7 @@
       position: relative;
       z-index: 2;
       max-width: 1200px;
-      padding: 104px 3rem 0; /* ヘッダー高さ分のtop padding追加 */
+      padding: 120px 3rem 0; /* 固定ナビゲーション分のtop padding追加 */
       text-align: center;
       animation: fadeInUp 1s ease-out;
     }
@@ -226,7 +226,7 @@
 
     /* Navigation */
     .top-nav {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
@@ -238,7 +238,7 @@
       background: rgba(0,0,0,0.28);
       backdrop-filter: blur(2px);
       border-bottom: 1px solid rgba(255,255,255,0.08);
-      z-index: 10;
+      z-index: 1000;
       transition: var(--transition);
     }
 
@@ -598,11 +598,11 @@
       #spLoginTab{ cursor:pointer; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
-      .top-nav { position:absolute; top:0; left:0; right:0; padding: 0.3rem 0.375rem; gap: 3px; z-index: 15; justify-content:center; height: 62px; flex-wrap: wrap; }
+      .top-nav { position:fixed; top:0; left:0; right:0; padding: 0.3rem 0.375rem; gap: 3px; z-index: 1000; justify-content:center; height: 62px; flex-wrap: wrap; }
       .nav-main { gap: 0.3rem; flex-wrap: wrap; width: 100%; justify-content: center; }
       .nav-item { width:auto; max-width:none; }
       .nav-tab { padding: 0.19rem 0.26rem; font-size: 0.65rem; width:auto; border-radius: 5px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
-      .hero-content{ max-width: 96%; padding: 88px 1rem 0; }
+      .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
       
       /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
       .brand {

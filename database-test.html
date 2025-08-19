@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>データベーステスト - Golf-Caddy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .test-section {
+      margin-bottom: 30px;
+    }
+    .test-button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .test-button:hover {
+      background: #45a049;
+    }
+    .result {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .error {
+      background: #ffebee;
+      border-color: #f44336;
+      color: #c62828;
+    }
+    .success {
+      background: #e8f5e8;
+      border-color: #4caf50;
+      color: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+  <h1>データベーステストページ</h1>
+  <p>このページでデータベースの構造とデータを確認できます。</p>
+
+  <div class="container">
+    <h2>1. テーブル存在確認</h2>
+    <div class="test-section">
+      <button class="test-button" onclick="testTableExists('golf_courses')">golf_coursesテーブル確認</button>
+      <button class="test-button" onclick="testTableExists('caddies')">caddiesテーブル確認</button>
+      <button class="test-button" onclick="testTableExists('users')">usersテーブル確認</button>
+      <div id="table-exists-result" class="result"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>2. データ確認</h2>
+    <div class="test-section">
+      <button class="test-button" onclick="testGolfCoursesData()">ゴルフ場データ確認</button>
+      <button class="test-button" onclick="testCaddiesData()">キャディデータ確認</button>
+      <button class="test-button" onclick="testUsersData()">ユーザーデータ確認</button>
+      <div id="data-result" class="result"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>3. スキーマ確認</h2>
+    <div class="test-section">
+      <button class="test-button" onclick="testTableSchema('golf_courses')">golf_coursesスキーマ確認</button>
+      <button class="test-button" onclick="testTableSchema('caddies')">caddiesスキーマ確認</button>
+      <div id="schema-result" class="result"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>4. 全テーブル一覧</h2>
+    <div class="test-section">
+      <button class="test-button" onclick="listAllTables()">全テーブル一覧取得</button>
+      <div id="tables-result" class="result"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://vqjxajzaasuqfgvhvxci.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    );
+
+    // テーブル存在確認
+    async function testTableExists(tableName) {
+      const resultDiv = document.getElementById('table-exists-result');
+      resultDiv.textContent = `テスト中: ${tableName}テーブル...`;
+      resultDiv.className = 'result';
+
+      try {
+        const { data, error } = await supabase
+          .from(tableName)
+          .select('*')
+          .limit(1);
+
+        if (error) {
+          resultDiv.textContent = `❌ ${tableName}テーブルエラー:\n${JSON.stringify(error, null, 2)}`;
+          resultDiv.className = 'result error';
+        } else {
+          resultDiv.textContent = `✅ ${tableName}テーブルは存在します\nデータ件数: ${data ? data.length : 0}`;
+          resultDiv.className = 'result success';
+        }
+      } catch (err) {
+        resultDiv.textContent = `❌ ${tableName}テーブル確認失敗:\n${err.message}`;
+        resultDiv.className = 'result error';
+      }
+    }
+
+    // ゴルフ場データ確認
+    async function testGolfCoursesData() {
+      const resultDiv = document.getElementById('data-result');
+      resultDiv.textContent = 'ゴルフ場データ確認中...';
+      resultDiv.className = 'result';
+
+      try {
+        const { data, error } = await supabase
+          .from('golf_courses')
+          .select('*')
+          .limit(10);
+
+        if (error) {
+          resultDiv.textContent = `❌ ゴルフ場データ取得エラー:\n${JSON.stringify(error, null, 2)}`;
+          resultDiv.className = 'result error';
+        } else {
+          if (data && data.length > 0) {
+            resultDiv.textContent = `✅ ゴルフ場データ取得成功\n件数: ${data.length}\n\nデータ:\n${JSON.stringify(data, null, 2)}`;
+            resultDiv.className = 'result success';
+          } else {
+            resultDiv.textContent = `⚠️ ゴルフ場データは0件です`;
+            resultDiv.className = 'result';
+          }
+        }
+      } catch (err) {
+        resultDiv.textContent = `❌ ゴルフ場データ確認失敗:\n${err.message}`;
+        resultDiv.className = 'result error';
+      }
+    }
+
+    // キャディデータ確認
+    async function testCaddiesData() {
+      const resultDiv = document.getElementById('data-result');
+      resultDiv.textContent = 'キャディデータ確認中...';
+      resultDiv.className = 'result';
+
+      try {
+        const { data, error } = await supabase
+          .from('caddies')
+          .select('*')
+          .limit(10);
+
+        if (error) {
+          resultDiv.textContent = `❌ キャディデータ取得エラー:\n${JSON.stringify(error, null, 2)}`;
+          resultDiv.className = 'result error';
+        } else {
+          if (data && data.length > 0) {
+            resultDiv.textContent = `✅ キャディデータ取得成功\n件数: ${data.length}\n\nデータ:\n${JSON.stringify(data, null, 2)}`;
+            resultDiv.className = 'result success';
+          } else {
+            resultDiv.textContent = `⚠️ キャディデータは0件です`;
+            resultDiv.className = 'result';
+          }
+        }
+      } catch (err) {
+        resultDiv.textContent = `❌ キャディデータ確認失敗:\n${err.message}`;
+        resultDiv.className = 'result error';
+      }
+    }
+
+    // ユーザーデータ確認
+    async function testUsersData() {
+      const resultDiv = document.getElementById('data-result');
+      resultDiv.textContent = 'ユーザーデータ確認中...';
+      resultDiv.className = 'result';
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .limit(10);
+
+        if (error) {
+          resultDiv.textContent = `❌ ユーザーデータ取得エラー:\n${JSON.stringify(error, null, 2)}`;
+          resultDiv.className = 'result error';
+        } else {
+          if (data && data.length > 0) {
+            resultDiv.textContent = `✅ ユーザーデータ取得成功\n件数: ${data.length}\n\nデータ:\n${JSON.stringify(data, null, 2)}`;
+            resultDiv.className = 'result success';
+          } else {
+            resultDiv.textContent = `⚠️ ユーザーデータは0件です`;
+            resultDiv.className = 'result';
+          }
+        }
+      } catch (err) {
+        resultDiv.textContent = `❌ ユーザーデータ確認失敗:\n${err.message}`;
+        resultDiv.className = 'result error';
+      }
+    }
+
+    // テーブルスキーマ確認
+    async function testTableSchema(tableName) {
+      const resultDiv = document.getElementById('schema-result');
+      resultDiv.textContent = `${tableName}テーブルのスキーマ確認中...`;
+      resultDiv.className = 'result';
+
+      try {
+        // スキーマ情報を取得するために、実際のデータから推測
+        const { data, error } = await supabase
+          .from(tableName)
+          .select('*')
+          .limit(1);
+
+        if (error) {
+          resultDiv.textContent = `❌ ${tableName}スキーマ確認エラー:\n${JSON.stringify(error, null, 2)}`;
+          resultDiv.className = 'result error';
+        } else {
+          if (data && data.length > 0) {
+            const sample = data[0];
+            const schema = Object.keys(sample).map(key => {
+              const value = sample[key];
+              const type = value === null ? 'NULL' : typeof value;
+              return `${key}: ${type}${value === null ? '' : ' (' + JSON.stringify(value).substring(0, 50) + ')'}`;
+            }).join('\n');
+            
+            resultDiv.textContent = `✅ ${tableName}テーブルスキーマ:\n\n${schema}`;
+            resultDiv.className = 'result success';
+          } else {
+            resultDiv.textContent = `⚠️ ${tableName}テーブルにデータがありません`;
+            resultDiv.className = 'result';
+          }
+        }
+      } catch (err) {
+        resultDiv.textContent = `❌ ${tableName}スキーマ確認失敗:\n${err.message}`;
+        resultDiv.className = 'result error';
+      }
+    }
+
+    // 全テーブル一覧取得
+    async function listAllTables() {
+      const resultDiv = document.getElementById('tables-result');
+      resultDiv.textContent = '全テーブル一覧取得中...';
+      resultDiv.className = 'result';
+
+      try {
+        // 一般的なテーブル名をテスト
+        const commonTables = [
+          'golf_courses', 'caddies', 'users', 'profiles', 
+          'bookings', 'training_requests', 'messages',
+          'line_integrations', 'line_notifications'
+        ];
+
+        const results = [];
+        for (const tableName of commonTables) {
+          try {
+            const { data, error } = await supabase
+              .from(tableName)
+              .select('*')
+              .limit(1);
+            
+            if (error) {
+              results.push(`❌ ${tableName}: エラー - ${error.message}`);
+            } else {
+              results.push(`✅ ${tableName}: 存在 (データ件数: ${data ? data.length : 0})`);
+            }
+          } catch (err) {
+            results.push(`❌ ${tableName}: 例外 - ${err.message}`);
+          }
+        }
+
+        resultDiv.textContent = `全テーブル確認結果:\n\n${results.join('\n')}`;
+        resultDiv.className = 'result success';
+      } catch (err) {
+        resultDiv.textContent = `❌ 全テーブル一覧取得失敗:\n${err.message}`;
+        resultDiv.className = 'result error';
+      }
+    }
+  </script>
+</body>
+</html>
