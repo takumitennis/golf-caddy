@@ -269,13 +269,7 @@
               <label style="display:block;margin-bottom:4px;">特典</label>
               <input type="text" id="gcPerks" placeholder="例: 打ちっぱなし無料 など" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;" />
             </div>
-            <div style="margin-bottom:12px;">
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                <input type="checkbox" id="gcPartnerDisplay" style="width:auto;margin:0;">
-                <span>提携ゴルフ場ページに表示する</span>
-              </label>
-              <small style="color:#666;margin-left:24px;">チェックすると、提携ゴルフ場ページで一般ユーザーに表示されます</small>
-            </div>
+
             <div style="text-align:right;">
               <button type="submit" style="background:#27ae60;color:#fff;border:none;border-radius:6px;padding:10px 16px;">保存して予約管理へ</button>
             </div>
@@ -289,7 +283,6 @@
           const contact = document.getElementById('gcContact').value.trim();
           const phone = document.getElementById('gcPhone').value.trim();
           const perks = document.getElementById('gcPerks').value.trim();
-          const partnerDisplay = document.getElementById('gcPartnerDisplay').checked;
           if (!name){ alert('ゴルフ場名を入力してください'); return; }
           try{
             // gid を生成（簡易）
@@ -301,8 +294,7 @@
               name, 
               contact_name: contact, 
               phone, 
-              perks,
-              partner_display: partnerDisplay
+              perks
             });
             if (error) throw error;
             gid = generatedGid; hasProfile = true;
@@ -541,6 +533,22 @@
             </table>
             <button id="editProfileBtn" style="background:#27ae60;color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;margin-top:15px;">プロフィールを編集</button>
           </div>
+          
+          <!-- 提携表示設定 -->
+          <div style="background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);margin-top:20px;">
+            <h4 style="margin-top:0;color:#2c3e50;">提携表示設定</h4>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;">
+                <input type="checkbox" id="partnerDisplayToggle" ${rows.partner_display ? 'checked' : ''} style="width:18px;height:18px;margin:0;">
+                <span>提携ゴルフ場ページに表示する</span>
+              </label>
+            </div>
+            <p style="margin:0;color:#666;font-size:0.9rem;">
+              チェックすると、提携ゴルフ場ページで一般ユーザーに表示されます。<br>
+              現在の状態: <strong style="color:${rows.partner_display ? '#27ae60' : '#666'}">${rows.partner_display ? '表示中' : '非表示'}</strong>
+            </p>
+            <button id="savePartnerDisplayBtn" style="background:#3498db;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;margin-top:15px;">設定を保存</button>
+          </div>
         </div>
         
         <!-- Description Edit Modal -->
@@ -572,13 +580,7 @@
                 <label style="display:block;margin-bottom:5px;font-weight:600;">キャディ特典</label>
                 <textarea id="editPerks" placeholder="打ちっぱなし無料、食事提供など..." style="width:100%;height:80px;padding:8px;border:1px solid #ddd;border-radius:4px;resize:vertical;">${rows.perks||''}</textarea>
               </div>
-              <div style="margin-bottom:15px;">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                  <input type="checkbox" id="editPartnerDisplay" ${rows.partner_display ? 'checked' : ''} style="width:auto;margin:0;">
-                  <span>提携ゴルフ場ページに表示する</span>
-                </label>
-                <small style="color:#666;margin-left:24px;">チェックすると、提携ゴルフ場ページで一般ユーザーに表示されます</small>
-              </div>
+
             </form>
             <div style="margin-top:20px;text-align:right;">
               <button id="cancelProfileEditBtn" style="padding:8px 16px;border:1px solid #ccc;background:#f0f0f0;border-radius:4px;cursor:pointer;">キャンセル</button>
@@ -598,6 +600,36 @@
       // Initialize all event listeners after gid is set
       initializeEventListeners();
       isInitialized = true;
+      
+      // 提携表示設定のイベントリスナーを設定
+      const partnerDisplayToggle = document.getElementById('partnerDisplayToggle');
+      const savePartnerDisplayBtn = document.getElementById('savePartnerDisplayBtn');
+      
+      if (partnerDisplayToggle && savePartnerDisplayBtn) {
+        savePartnerDisplayBtn.onclick = async () => {
+          const isChecked = partnerDisplayToggle.checked;
+          try {
+            const { error } = await supabase
+              .from('golf_courses')
+              .update({ partner_display: isChecked })
+              .eq('gid', gid);
+            
+            if (error) throw error;
+            
+            // UI更新
+            const statusText = document.querySelector('#mainProfile p strong');
+            if (statusText) {
+              statusText.textContent = isChecked ? '表示中' : '非表示';
+              statusText.style.color = isChecked ? '#27ae60' : '#666';
+            }
+            
+            alert(`提携表示設定を${isChecked ? '有効' : '無効'}にしました`);
+          } catch (err) {
+            console.error('提携表示設定更新エラー:', err);
+            alert('設定の更新に失敗しました: ' + (err.message || err));
+          }
+        };
+      }
       
       // If currently on training requests tab, load the data
       if (document.getElementById('tab4').classList.contains('hidden') === false) {
@@ -1715,7 +1747,6 @@
       const contactName = document.getElementById('editContactName').value.trim();
       const phone = document.getElementById('editPhone').value.trim();
       const perks = document.getElementById('editPerks').value.trim();
-      const partnerDisplay = document.getElementById('editPartnerDisplay').checked;
       
       try {
         const { error } = await supabase
@@ -1723,8 +1754,7 @@
           .update({ 
             contact_name: contactName,
             phone: phone,
-            perks: perks,
-            partner_display: partnerDisplay
+            perks: perks
           })
           .eq('gid', gid);
         
@@ -1737,17 +1767,6 @@
           rows[1].cells[1].textContent = contactName || '未設定';
           rows[2].cells[1].textContent = phone || '未設定';
           rows[3].cells[1].textContent = perks || '未設定';
-          
-          // 提携表示の状態も更新
-          const partnerDisplayCell = rows[4].cells[1];
-          if (partnerDisplayCell) {
-            const statusSpan = partnerDisplayCell.querySelector('span');
-            if (statusSpan) {
-              statusSpan.textContent = partnerDisplay ? '表示中' : '非表示';
-              statusSpan.style.color = partnerDisplay ? '#27ae60' : '#666';
-              statusSpan.style.fontWeight = partnerDisplay ? '600' : '400';
-            }
-          }
         }
         
         document.getElementById('profileEditModal').style.display = 'none';
