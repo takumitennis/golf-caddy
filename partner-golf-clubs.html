@@ -73,7 +73,7 @@
       padding: 0.75rem 1.5rem;
       border-radius: var(--border-radius);
       font-weight: 500;
-      font-size: 0.66rem;
+      font-size: 0.82rem;
       transition: var(--transition);
       display: block;
       letter-spacing: 0.02em;
@@ -310,9 +310,14 @@
       margin-right: auto;
     }
 
+    .partnership-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
     .partnership-btn {
-      background: var(--accent-color);
-      color: white;
       border: none;
       padding: 1rem 2rem;
       border-radius: var(--border-radius);
@@ -322,9 +327,25 @@
       transition: var(--transition);
       text-decoration: none;
       display: inline-block;
+      min-width: 200px;
     }
 
-    .partnership-btn:hover {
+    .partnership-btn.caddy-register {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .partnership-btn.caddy-register:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .partnership-btn.contact-inquiry {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .partnership-btn.contact-inquiry:hover {
       background: #e55a2b;
       transform: translateY(-2px);
     }
@@ -635,7 +656,11 @@
     <section id="partnership" class="partnership-section">
       <h3>ゴルフ部の皆様も是非ご参加ください</h3>
       <p>キャディプラスと提携して、ゴルフ部の活動をより充実させませんか？<br>経験豊富なキャディとの交流で、技術向上と新しい発見を実現できます。</p>
-      <a href="mailto:partnership@golf-caddy.com" class="partnership-btn">お問い合わせ</a>
+      
+      <div class="partnership-buttons">
+        <button class="partnership-btn caddy-register" onclick="openCaddyRegistration()">キャディ登録をする</button>
+        <button class="partnership-btn contact-inquiry" onclick="openContactForm()">ゴルフ部/サークルとして問い合わせる</button>
+      </div>
     </section>
   </main>
 
@@ -868,6 +893,149 @@
       } catch (error) {
         console.error('ゴルフ部詳細表示エラー:', error);
         alert('詳細情報の表示に失敗しました');
+      }
+    }
+
+    // キャディ登録ポップアップを開く
+    function openCaddyRegistration() {
+      // ホームページのログインモーダルと同じスタイルのポップアップを作成
+      const modalHTML = `
+        <div id="caddyRegistrationModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:1000;">
+          <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:400px; text-align:center; position:relative;">
+            <button onclick="closeCaddyRegistration()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
+            
+            <h3 style="margin-bottom:1.5rem; color:#333; font-size:1.2rem; font-weight:bold;">キャディ登録</h3>
+            
+            <div style="margin-bottom:1rem; text-align:left;">
+              <label style="display:block; margin-bottom:0.5rem; font-weight:500;">メールアドレス</label>
+              <input id="caddyEmail" type="email" placeholder="メールアドレスを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
+            </div>
+            
+            <div style="margin-bottom:1.5rem; text-align:left;">
+              <label style="display:block; margin-bottom:0.5rem; font-weight:500;">パスワード</label>
+              <input id="caddyPassword" type="password" placeholder="パスワードを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
+            </div>
+            
+            <button onclick="registerCaddy()" style="width:100%; background:#2e7d32; color:white; border:none; padding:0.875rem; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1rem;">
+              登録
+            </button>
+            
+            <p style="margin:0; color:#666; font-size:0.9rem;">
+              既にアカウントをお持ちの方は<a href="caddy_dashboard.html" style="color:#2e7d32;">こちら</a>
+            </p>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // キャディ登録モーダルを閉じる
+    function closeCaddyRegistration() {
+      const modal = document.getElementById('caddyRegistrationModal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    // キャディ登録処理
+    async function registerCaddy() {
+      const email = document.getElementById('caddyEmail').value;
+      const password = document.getElementById('caddyPassword').value;
+      
+      if (!email || !password) {
+        alert('メールアドレスとパスワードを入力してください');
+        return;
+      }
+      
+      try {
+        // ここでSupabaseの認証処理を行う
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password
+        });
+        
+        if (error) {
+          throw error;
+        } else {
+          alert('登録が完了しました！確認メールをご確認ください。');
+          closeCaddyRegistration();
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        alert('登録に失敗しました: ' + error.message);
+      }
+    }
+
+    // お問い合わせフォームを開く
+    function openContactForm() {
+      const modalHTML = `
+        <div id="contactFormModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:1000;">
+          <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:500px; text-align:center; position:relative;">
+            <button onclick="closeContactForm()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
+            
+            <h3 style="margin-bottom:1.5rem; color:#333; font-size:1.2rem; font-weight:bold;">ゴルフ部/サークルからのお問い合わせ</h3>
+            
+            <div style="margin-bottom:1rem; text-align:left;">
+              <label style="display:block; margin-bottom:0.5rem; font-weight:500;">ゴルフ部/サークル名<span style="color:red;">*</span></label>
+              <input id="clubName" type="text" placeholder="例: 東京大学ゴルフ部" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" required />
+            </div>
+            
+            <div style="margin-bottom:1rem; text-align:left;">
+              <label style="display:block; margin-bottom:0.5rem; font-weight:500;">担当者名<span style="color:red;">*</span></label>
+              <input id="contactName" type="text" placeholder="担当者名を入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" required />
+            </div>
+            
+            <div style="margin-bottom:1rem; text-align:left;">
+              <label style="display:block; margin-bottom:0.5rem; font-weight:500;">メールアドレス<span style="color:red;">*</span></label>
+              <input id="contactEmail" type="email" placeholder="メールアドレスを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" required />
+            </div>
+            
+            <div style="margin-bottom:1.5rem; text-align:left;">
+              <label style="display:block; margin-bottom:0.5rem; font-weight:500;">お問い合わせ内容</label>
+              <textarea id="contactMessage" placeholder="提携について詳しく教えてください" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem; min-height:100px; resize:vertical;"></textarea>
+            </div>
+            
+            <button onclick="sendContactForm()" style="width:100%; background:#ff6b35; color:white; border:none; padding:0.875rem; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer;">
+              送信
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // お問い合わせフォームを閉じる
+    function closeContactForm() {
+      const modal = document.getElementById('contactFormModal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    // お問い合わせフォーム送信処理
+    async function sendContactForm() {
+      const clubName = document.getElementById('clubName').value;
+      const contactName = document.getElementById('contactName').value;
+      const contactEmail = document.getElementById('contactEmail').value;
+      const contactMessage = document.getElementById('contactMessage').value;
+      
+      if (!clubName || !contactName || !contactEmail) {
+        alert('必須項目を入力してください');
+        return;
+      }
+      
+      try {
+        // メール送信の処理（実際の実装ではサーバーサイドで処理）
+        const mailtoLink = `mailto:partnership@golf-caddy.com?subject=ゴルフ部/サークルからのお問い合わせ: ${encodeURIComponent(clubName)}&body=ゴルフ部/サークル名: ${encodeURIComponent(clubName)}%0D%0A担当者名: ${encodeURIComponent(contactName)}%0D%0Aメールアドレス: ${encodeURIComponent(contactEmail)}%0D%0A%0D%0Aお問い合わせ内容:%0D%0A${encodeURIComponent(contactMessage)}`;
+        
+        window.open(mailtoLink);
+        alert('お問い合わせありがとうございます。メールクライアントが開きます。');
+        closeContactForm();
+      } catch (error) {
+        console.error('Contact form error:', error);
+        alert('送信に失敗しました: ' + error.message);
       }
     }
 
