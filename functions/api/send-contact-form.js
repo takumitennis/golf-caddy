@@ -2,6 +2,14 @@ export async function onRequestPost(context) {
   try {
     console.log('お問い合わせフォーム処理開始');
     
+    // 環境変数の確認
+    const envVars = {
+      RESEND_API_KEY: context.env.RESEND_API_KEY ? '設定済み' : '未設定',
+      hasEnv: !!context.env
+    };
+    
+    console.log('環境変数確認:', envVars);
+    
     const { request } = context;
     const formData = await request.json();
     
@@ -20,83 +28,14 @@ export async function onRequestPost(context) {
       });
     }
     
-    // メール送信処理
-    const emailContent = `
-ゴルフ部/サークルからのお問い合わせ
-
-ゴルフ部/サークル名: ${clubName}
-担当者名: ${contactName}
-メールアドレス: ${contactEmail}
-
-お問い合わせ内容:
-${contactMessage}
-
----
-このメールはキャディプラスのお問い合わせフォームから送信されました。
-    `;
-    
-    console.log('メール内容作成完了');
-    
-    // Resendを使用してメール送信
-    const RESEND_API_KEY = context.env.RESEND_API_KEY;
-    
-    console.log('RESEND_API_KEY確認:', RESEND_API_KEY ? '設定済み' : '未設定');
-    
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEYが設定されていません');
-      return new Response(JSON.stringify({ 
-        error: 'メール送信の設定が完了していません。しばらく時間をおいて再度お試しください。' 
-      }), { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
-    try {
-      console.log('Resend API呼び出し開始');
-      
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'noreply@golf-caddy.pages.dev',
-          to: 'caddytas@gmail.com',
-          subject: `ゴルフ部/サークルからのお問い合わせ: ${clubName}`,
-          text: emailContent,
-          html: emailContent.replace(/\n/g, '<br>')
-        }),
-      });
-      
-      console.log('Resend API レスポンス:', emailResponse.status, emailResponse.statusText);
-      
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.json();
-        console.error('Resend API エラー:', errorData);
-        throw new Error(`メール送信に失敗しました: ${errorData.message || 'Unknown error'}`);
-      }
-      
-      const emailResult = await emailResponse.json();
-      console.log('メール送信成功:', emailResult);
-      
-    } catch (emailError) {
-      console.error('メール送信エラー:', emailError);
-      return new Response(JSON.stringify({ 
-        error: 'メールの送信に失敗しました。しばらく時間をおいて再度お試しください。' 
-      }), { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
-    console.log('お問い合わせフォーム処理完了');
+    // 一時的にメール送信をスキップしてテスト
+    console.log('メール送信処理をスキップ（テスト中）');
     
     // 成功レスポンス
     return new Response(JSON.stringify({ 
       success: true,
-      message: 'お問い合わせを受け付けました。ありがとうございます。'
+      message: 'お問い合わせを受け付けました。ありがとうございます。（テスト中：メール送信は無効）',
+      envVars: envVars
     }), { 
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -106,7 +45,8 @@ ${contactMessage}
     console.error('お問い合わせフォーム処理エラー:', error);
     
     return new Response(JSON.stringify({ 
-      error: 'サーバーエラーが発生しました。しばらく時間をおいて再度お試しください。' 
+      error: 'サーバーエラーが発生しました: ' + error.message,
+      stack: error.stack
     }), { 
       status: 500,
       headers: { 'Content-Type': 'application/json' }
