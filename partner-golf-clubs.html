@@ -1027,11 +1027,12 @@
       }
       
       try {
-        // 送信ボタンを無効化
-        const sendButton = document.querySelector('#contactFormModal button[onclick="sendContactForm()"]');
-        const originalText = sendButton.textContent;
-        sendButton.textContent = '送信中...';
-        sendButton.disabled = true;
+        // 送信ボタンを無効化（より安全な方法）
+        const sendButton = document.querySelector('#contactFormModal button');
+        if (sendButton) {
+          sendButton.textContent = '送信中...';
+          sendButton.disabled = true;
+        }
         
         // Cloudflare Functionにデータを送信
         console.log('フォームデータ送信開始:', { clubName, contactName, contactEmail, contactMessage });
@@ -1065,10 +1066,12 @@
         console.error('Contact form error:', error);
         alert('送信に失敗しました: ' + error.message);
       } finally {
-        // 送信ボタンを元に戻す
-        const sendButton = document.querySelector('#contactFormModal button[onclick="sendContactForm()"]');
-        sendButton.textContent = '送信';
-        sendButton.disabled = false;
+        // 送信ボタンを元に戻す（より安全な方法）
+        const sendButton = document.querySelector('#contactFormModal button');
+        if (sendButton) {
+          sendButton.textContent = '送信';
+          sendButton.disabled = false;
+        }
       }
     }
 
