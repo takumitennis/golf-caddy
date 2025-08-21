@@ -1,12 +1,17 @@
 export async function onRequestPost(context) {
   try {
+    console.log('お問い合わせフォーム処理開始');
+    
     const { request } = context;
     const formData = await request.json();
+    
+    console.log('受信したフォームデータ:', formData);
     
     const { clubName, contactName, contactEmail, contactMessage } = formData;
     
     // 必須項目のバリデーション
     if (!clubName || !contactName || !contactEmail) {
+      console.error('必須項目が不足:', { clubName, contactName, contactEmail });
       return new Response(JSON.stringify({ 
         error: '必須項目が入力されていません' 
       }), { 
@@ -30,8 +35,12 @@ ${contactMessage}
 このメールはキャディプラスのお問い合わせフォームから送信されました。
     `;
     
+    console.log('メール内容作成完了');
+    
     // Resendを使用してメール送信
     const RESEND_API_KEY = context.env.RESEND_API_KEY;
+    
+    console.log('RESEND_API_KEY確認:', RESEND_API_KEY ? '設定済み' : '未設定');
     
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEYが設定されていません');
@@ -44,6 +53,8 @@ ${contactMessage}
     }
     
     try {
+      console.log('Resend API呼び出し開始');
+      
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -58,6 +69,8 @@ ${contactMessage}
           html: emailContent.replace(/\n/g, '<br>')
         }),
       });
+      
+      console.log('Resend API レスポンス:', emailResponse.status, emailResponse.statusText);
       
       if (!emailResponse.ok) {
         const errorData = await emailResponse.json();
@@ -77,6 +90,8 @@ ${contactMessage}
         headers: { 'Content-Type': 'application/json' }
       });
     }
+    
+    console.log('お問い合わせフォーム処理完了');
     
     // 成功レスポンス
     return new Response(JSON.stringify({ 

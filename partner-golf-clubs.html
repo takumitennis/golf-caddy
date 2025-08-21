@@ -1034,6 +1034,8 @@
         sendButton.disabled = true;
         
         // Cloudflare Functionにデータを送信
+        console.log('フォームデータ送信開始:', { clubName, contactName, contactEmail, contactMessage });
+        
         const response = await fetch('/api/send-contact-form', {
           method: 'POST',
           headers: {
@@ -1047,7 +1049,10 @@
           }),
         });
         
+        console.log('API レスポンス:', response.status, response.statusText);
+        
         const result = await response.json();
+        console.log('API レスポンス内容:', result);
         
         if (response.ok && result.success) {
           alert('お問い合わせを受け付けました。ありがとうございます。');
