@@ -316,14 +316,23 @@
 
     let cid;
     let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
-    // キャディ予定用の独立した月状態
-    let assignedCalMonth = calMonth;
-    let assignedCalYear = calYear;
+    // キャディ予定用の完全に独立した月状態
+    let assignedCalMonth = new Date().getMonth();
+    let assignedCalYear = new Date().getFullYear();
     
-    // キャディ予定カレンダーの更新関数（完全に再構築）
+    // 月移動の状態を追跡
+    let isNavigatingAssignedCalendar = false;
+    
+    // キャディ予定カレンダーの更新関数（確実な1ヶ月移動）
     function updateAssignedCalendar() {
       console.log('=== updateAssignedCalendar 開始 ===');
       console.log('現在の状態:', { assignedCalYear, assignedCalMonth });
+      
+      // 月の値が正しい範囲内にあることを確認
+      if (assignedCalMonth < 0 || assignedCalMonth > 11) {
+        console.error('月の値が不正:', assignedCalMonth);
+        assignedCalMonth = Math.max(0, Math.min(11, assignedCalMonth));
+      }
       
       // 月の範囲を正しく計算
       const first = new Date(assignedCalYear, assignedCalMonth, 1);
@@ -740,13 +749,13 @@
       }
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
 
-      // 「キャディ予定」タブ側のカレンダーも同月で更新
-      if(document.getElementById('mainAssigned')){
-        // キャディ予定カレンダーの月状態を同期
+      // 「キャディ予定」タブ側のカレンダーも同月で更新（初回のみ）
+      if(document.getElementById('mainAssigned') && !isNavigatingAssignedCalendar){
+        // 初回表示時のみメインカレンダーと同期
         assignedCalYear = calYear;
         assignedCalMonth = calMonth;
         
-        console.log('=== メインカレンダーと同期 ===');
+        console.log('=== 初回同期（メインカレンダーと） ===');
         console.log('同期前:', { calYear, calMonth, assignedCalYear, assignedCalMonth });
         
         const titleElement = document.getElementById('aCalTitle');
@@ -1502,16 +1511,19 @@
         console.log('=== 前月ボタンクリック ===');
         console.log('クリック前の状態:', { assignedCalYear, assignedCalMonth });
         
-        // Dateオブジェクトを使用して前月を計算
-        const currentDate = new Date(assignedCalYear, assignedCalMonth, 1);
-        currentDate.setMonth(currentDate.getMonth() - 1);
+        // ナビゲーション状態を設定
+        isNavigatingAssignedCalendar = true;
         
-        // 新しい年月を設定
-        assignedCalYear = currentDate.getFullYear();
-        assignedCalMonth = currentDate.getMonth();
+        // 前月に移動（確実に1ヶ月ずつ）
+        if (assignedCalMonth > 0) {
+          assignedCalMonth--;
+        } else {
+          assignedCalMonth = 11;
+          assignedCalYear--;
+        }
         
         console.log('クリック後の状態:', { assignedCalYear, assignedCalMonth });
-        console.log('計算された日付:', currentDate);
+        console.log('移動確認: 前月に1ヶ月移動');
         
         // カレンダーを更新
         updateAssignedCalendar();
@@ -1524,16 +1536,19 @@
         console.log('=== 次月ボタンクリック ===');
         console.log('クリック前の状態:', { assignedCalYear, assignedCalMonth });
         
-        // Dateオブジェクトを使用して次月を計算
-        const currentDate = new Date(assignedCalYear, assignedCalMonth, 1);
-        currentDate.setMonth(currentDate.getMonth() + 1);
+        // ナビゲーション状態を設定
+        isNavigatingAssignedCalendar = true;
         
-        // 新しい年月を設定
-        assignedCalYear = currentDate.getFullYear();
-        assignedCalMonth = currentDate.getMonth();
+        // 次月に移動（確実に1ヶ月ずつ）
+        if (assignedCalMonth < 11) {
+          assignedCalMonth++;
+        } else {
+          assignedCalMonth = 0;
+          assignedCalYear++;
+        }
         
         console.log('クリック後の状態:', { assignedCalYear, assignedCalMonth });
-        console.log('計算された日付:', currentDate);
+        console.log('移動確認: 次月に1ヶ月移動');
         
         // カレンダーを更新
         updateAssignedCalendar();
