@@ -1251,7 +1251,17 @@
       }
       if(k==='assign'){
         btnMainAssignEl?.classList.add('active');
-        renderAssignedList();
+        console.log('キャディ予定タブ選択');
+        
+        // 新しいカレンダーシステムを使用
+        if (ultraCalendar) {
+          console.log('ultraCalendar でカレンダー更新開始');
+          ultraCalendar.updateCalendar();
+        } else {
+          console.error('ultraCalendar が見つかりません');
+          // フォールバック: 古い方法で表示
+          renderAssignedList();
+        }
       } 
       if(k==='line'){
         btnMainLineEl?.classList.add('active');
@@ -1262,12 +1272,25 @@
 
     // 初期表示（プロフィールが描画済みであればprof、それ以外はshiftにフォールバック）
     try { switchMain('prof'); } catch(e) { switchMain('shift'); }
+    
     // タブボタン初期状態
     const b1 = document.getElementById('btnMainProf');
     const b2 = document.getElementById('btnMainShift');
     const b3 = document.getElementById('btnMainAssign');
     const b4 = document.getElementById('btnMainMsg');
     if (b1 && !b1.classList.contains('active')) b1.classList.add('active');
+    
+    // キャディ予定タブの初期化を確実に行う
+    console.log('キャディ予定タブ初期化開始');
+    if (ultraCalendar) {
+      console.log('ultraCalendar インスタンス確認:', ultraCalendar);
+      // 初期状態を設定
+      ultraCalendar.currentYear = new Date().getFullYear();
+      ultraCalendar.currentMonth = new Date().getMonth();
+      console.log('初期状態設定完了:', { year: ultraCalendar.currentYear, month: ultraCalendar.currentMonth });
+    } else {
+      console.error('ultraCalendar インスタンスが見つかりません');
+    }
 
 
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
