@@ -460,7 +460,7 @@
           .select(`
             booking_id,
             date,
-            golf_courses ( name, address ),
+            golf_courses ( name ),
             booking_caddies!inner ( cid )
           `)
           .eq('booking_caddies.cid', cid);
@@ -485,6 +485,8 @@
         });
         
         console.log('この月の予約数:', dateToBooking.size);
+        console.log('取得した予約データ:', bookings);
+        console.log('日付→予約マップ:', Array.from(dateToBooking.entries()));
         
         // 4. 予定リストを構築
         if (dateToBooking.size === 0) {
@@ -528,16 +530,25 @@
               <div style="flex: 1;">
                 <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">${booking.golf_courses?.name || 'ゴルフ場名なし'}</div>
                 <div style="font-size: 14px; color: #666;">${dateStr}</div>
+                <div style="font-size: 13px; color: #888; margin-top: 4px;">
+                  💬 メッセージを確認する（クリック）
+                </div>
               </div>
               <div style="color: #27ae60; font-size: 14px;">● 予約確定</div>
             `;
             
-            // クリックイベント（詳細表示）
+            // クリックイベント（メッセージチャットに飛ぶ）
             scheduleItem.style.cursor = 'pointer';
             scheduleItem.onclick = () => {
-              if (booking.golf_courses) {
-                openCourseDetail(booking);
-              }
+              console.log('予定クリック:', booking);
+              // メッセージタブに切り替えて、該当予約のメッセージを表示
+              switchMain('messages');
+              // 予約IDを保存して、メッセージ表示時に使用
+              window.currentBookingId = booking.booking_id;
+              // メッセージリストを更新
+              setTimeout(() => {
+                loadMessagesForBooking(booking.booking_id);
+              }, 100);
             };
             
             scheduleList.appendChild(scheduleItem);
@@ -552,6 +563,64 @@
     
     // シンプル予定リストのインスタンスを作成
     const simpleSchedule = new SimpleScheduleList();
+    
+    // 特定の予約のメッセージを表示する関数
+    async function loadMessagesForBooking(bookingId) {
+      console.log('予約IDのメッセージ読み込み開始:', bookingId);
+      
+      try {
+        // 予約情報を取得
+        const { data: booking, error: bookingError } = await supabase
+          .from('bookings')
+          .select(`
+            booking_id,
+            date,
+            golf_courses ( name )
+          `)
+          .eq('booking_id', bookingId)
+          .single();
+        
+        if (bookingError) {
+          console.error('予約情報取得エラー:', bookingError);
+          return;
+        }
+        
+        // メッセージリストのタイトルを更新
+        const messagesList = document.getElementById('messagesList');
+        if (messagesList) {
+          const titleDiv = document.createElement('div');
+          titleDiv.style.cssText = `
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+          `;
+          titleDiv.innerHTML = `
+            📅 ${booking.date} - ${booking.golf_courses?.name || 'ゴルフ場'}
+            <div style="font-size: 14px; font-weight: normal; color: #666; margin-top: 4px;">
+              この予約のメッセージ
+            </div>
+          `;
+          
+          // 既存のタイトルがあれば削除
+          const existingTitle = messagesList.querySelector('.booking-title');
+          if (existingTitle) {
+            existingTitle.remove();
+          }
+          
+          titleDiv.className = 'booking-title';
+          messagesList.insertBefore(titleDiv, messagesList.firstChild);
+        }
+        
+        // メッセージを取得（仮の実装 - 実際のメッセージテーブルに合わせて調整が必要）
+        console.log('予約のメッセージ表示完了:', booking);
+        
+      } catch (error) {
+        console.error('メッセージ読み込みエラー:', error);
+      }
+    }
     
     // 古い関数は削除（新カレンダーシステムで置き換え）
     const calTable=document.getElementById('calTable');
