@@ -320,20 +320,30 @@
     let assignedCalMonth = calMonth;
     let assignedCalYear = calYear;
     
-    // キャディ予定カレンダーの更新関数（状態管理改善）
+    // キャディ予定カレンダーの更新関数（完全に再構築）
     function updateAssignedCalendar() {
-      console.log('updateAssignedCalendar 開始:', { assignedCalYear, assignedCalMonth });
+      console.log('=== updateAssignedCalendar 開始 ===');
+      console.log('現在の状態:', { assignedCalYear, assignedCalMonth });
       
       // 月の範囲を正しく計算
       const first = new Date(assignedCalYear, assignedCalMonth, 1);
       const last = new Date(assignedCalYear, assignedCalMonth + 1, 0);
       
-      console.log('カレンダー範囲:', { first, last });
+      console.log('計算された範囲:', { 
+        first: first.toISOString(), 
+        last: last.toISOString(),
+        firstMonth: first.getMonth(),
+        lastMonth: last.getMonth(),
+        firstYear: first.getFullYear(),
+        lastYear: last.getFullYear()
+      });
       
       // タイトルを更新
       const titleElement = document.getElementById('aCalTitle');
       if (titleElement) {
-        titleElement.textContent = `${assignedCalYear}年 ${assignedCalMonth + 1}月`;
+        const displayMonth = assignedCalMonth + 1;
+        titleElement.textContent = `${assignedCalYear}年 ${displayMonth}月`;
+        console.log('タイトル更新:', `${assignedCalYear}年 ${displayMonth}月`);
       }
       
       // カレンダーを再描画（非同期処理の競合を防ぐ）
@@ -342,6 +352,7 @@
       }
       
       window.assignedCalUpdateTimeout = setTimeout(() => {
+        console.log('renderAssignedCal 呼び出し:', { first, last });
         renderAssignedCal(first, last);
       }, 100);
     }
@@ -735,12 +746,17 @@
         assignedCalYear = calYear;
         assignedCalMonth = calMonth;
         
-        console.log('メインカレンダーと同期:', { calYear, calMonth, assignedCalYear, assignedCalMonth });
+        console.log('=== メインカレンダーと同期 ===');
+        console.log('同期前:', { calYear, calMonth, assignedCalYear, assignedCalMonth });
         
         const titleElement = document.getElementById('aCalTitle');
         if (titleElement) {
-          titleElement.textContent = `${assignedCalYear}年 ${assignedCalMonth+1}月`;
+          const displayMonth = assignedCalMonth + 1;
+          titleElement.textContent = `${assignedCalYear}年 ${displayMonth}月`;
+          console.log('タイトル同期:', `${assignedCalYear}年 ${displayMonth}月`);
         }
+        
+        console.log('同期後:', { assignedCalYear, assignedCalMonth });
         
         // カレンダーを再描画
         renderAssignedCal(first, last);
@@ -1463,8 +1479,10 @@
       }
     }
     
-    // キャディ予定の月移動ボタンのイベントリスナー（重複登録防止）
+    // キャディ予定の月移動ボタンのイベントリスナー（完全に再構築）
     function setupCaddyScheduleNavigation() {
+      console.log('setupCaddyScheduleNavigation 開始');
+      
       // 既存のイベントリスナーを削除
       const prevBtn = document.getElementById('aPrevMonth');
       const nextBtn = document.getElementById('aNextMonth');
@@ -1481,17 +1499,19 @@
         e.preventDefault();
         e.stopPropagation();
         
-        console.log('前月ボタンクリック - 現在の状態:', { assignedCalYear, assignedCalMonth });
+        console.log('=== 前月ボタンクリック ===');
+        console.log('クリック前の状態:', { assignedCalYear, assignedCalMonth });
         
-        // 前月に移動
-        if (assignedCalMonth > 0) {
-          assignedCalMonth--;
-        } else {
-          assignedCalMonth = 11;
-          assignedCalYear--;
-        }
+        // Dateオブジェクトを使用して前月を計算
+        const currentDate = new Date(assignedCalYear, assignedCalMonth, 1);
+        currentDate.setMonth(currentDate.getMonth() - 1);
         
-        console.log('前月ボタンクリック - 移動後の状態:', { assignedCalYear, assignedCalMonth });
+        // 新しい年月を設定
+        assignedCalYear = currentDate.getFullYear();
+        assignedCalMonth = currentDate.getMonth();
+        
+        console.log('クリック後の状態:', { assignedCalYear, assignedCalMonth });
+        console.log('計算された日付:', currentDate);
         
         // カレンダーを更新
         updateAssignedCalendar();
@@ -1501,21 +1521,25 @@
         e.preventDefault();
         e.stopPropagation();
         
-        console.log('次月ボタンクリック - 現在の状態:', { assignedCalYear, assignedCalMonth });
+        console.log('=== 次月ボタンクリック ===');
+        console.log('クリック前の状態:', { assignedCalYear, assignedCalMonth });
         
-        // 次月に移動
-        if (assignedCalMonth < 11) {
-          assignedCalMonth++;
-        } else {
-          assignedCalMonth = 0;
-          assignedCalYear++;
-        }
+        // Dateオブジェクトを使用して次月を計算
+        const currentDate = new Date(assignedCalYear, assignedCalMonth, 1);
+        currentDate.setMonth(currentDate.getMonth() + 1);
         
-        console.log('次月ボタンクリック - 移動後の状態:', { assignedCalYear, assignedCalMonth });
+        // 新しい年月を設定
+        assignedCalYear = currentDate.getFullYear();
+        assignedCalMonth = currentDate.getMonth();
+        
+        console.log('クリック後の状態:', { assignedCalYear, assignedCalMonth });
+        console.log('計算された日付:', currentDate);
         
         // カレンダーを更新
         updateAssignedCalendar();
       });
+      
+      console.log('setupCaddyScheduleNavigation 完了');
     }
     
     // 初期設定
