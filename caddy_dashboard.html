@@ -320,16 +320,30 @@
     let assignedCalMonth = calMonth;
     let assignedCalYear = calYear;
     
-    // キャディ予定カレンダーの更新関数
+    // キャディ予定カレンダーの更新関数（状態管理改善）
     function updateAssignedCalendar() {
+      console.log('updateAssignedCalendar 開始:', { assignedCalYear, assignedCalMonth });
+      
+      // 月の範囲を正しく計算
       const first = new Date(assignedCalYear, assignedCalMonth, 1);
       const last = new Date(assignedCalYear, assignedCalMonth + 1, 0);
       
-      // タイトルを更新
-      document.getElementById('aCalTitle').textContent = `${assignedCalYear}年 ${assignedCalMonth + 1}月`;
+      console.log('カレンダー範囲:', { first, last });
       
-      // カレンダーを再描画
-      renderAssignedCal(first, last);
+      // タイトルを更新
+      const titleElement = document.getElementById('aCalTitle');
+      if (titleElement) {
+        titleElement.textContent = `${assignedCalYear}年 ${assignedCalMonth + 1}月`;
+      }
+      
+      // カレンダーを再描画（非同期処理の競合を防ぐ）
+      if (window.assignedCalUpdateTimeout) {
+        clearTimeout(window.assignedCalUpdateTimeout);
+      }
+      
+      window.assignedCalUpdateTimeout = setTimeout(() => {
+        renderAssignedCal(first, last);
+      }, 100);
     }
     const calTable=document.getElementById('calTable');
     const pendingInserts = new Set();
@@ -720,7 +734,15 @@
         // キャディ予定カレンダーの月状態を同期
         assignedCalYear = calYear;
         assignedCalMonth = calMonth;
-        document.getElementById('aCalTitle').textContent = `${assignedCalYear}年 ${assignedCalMonth+1}月`;
+        
+        console.log('メインカレンダーと同期:', { calYear, calMonth, assignedCalYear, assignedCalMonth });
+        
+        const titleElement = document.getElementById('aCalTitle');
+        if (titleElement) {
+          titleElement.textContent = `${assignedCalYear}年 ${assignedCalMonth+1}月`;
+        }
+        
+        // カレンダーを再描画
         renderAssignedCal(first, last);
       }
     }
@@ -795,22 +817,40 @@
       
       console.log('キャディ予定カレンダー - 月範囲:', { firstStr, lastStr, firstDate, lastDate });
 
-      // 日付→予約のマップ
+      // 日付→予約のマップ（表示される予定のみ）
       const dateToAssign = new Map();
       (assigns||[])
         .filter(a => {
           if (!a.date) return false;
+          
           // 日付が指定された月の範囲内にあるかチェック
           const dateObj = new Date(a.date);
           const year = dateObj.getFullYear();
           const month = dateObj.getMonth();
-          return year === assignedCalYear && month === assignedCalMonth;
+          
+          // 年と月が一致するかチェック
+          const isCorrectMonth = year === assignedCalYear && month === assignedCalMonth;
+          
+          // 表示される予定かチェック（golf_coursesの情報があるか）
+          const hasDisplayInfo = a.golf_courses && a.golf_courses.name;
+          
+          console.log(`予定フィルタリング: ${a.date}`, { 
+            year, month, assignedCalYear, assignedCalMonth, 
+            isCorrectMonth, hasDisplayInfo, 
+            golfCourseName: a.golf_courses?.name 
+          });
+          
+          return isCorrectMonth && hasDisplayInfo;
         })
         .forEach(a => {
           dateToAssign.set(a.date, a);
         });
       
       console.log('フィルタリング後の予約数:', dateToAssign.size);
+      console.log('表示される予定:', Array.from(dateToAssign.values()).map(a => ({ 
+        date: a.date, 
+        name: a.golf_courses?.name 
+      })));
 
       for(let day=1;day<=lastDate.getDate();day++){
         const dateStr=`${firstDate.getFullYear()}-${String(firstDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -1423,26 +1463,63 @@
       }
     }
     
-    // キャディ予定の月移動ボタンのイベントリスナー
-    document.getElementById('aPrevMonth')?.addEventListener('click', () => {
-      if (assignedCalMonth > 0) {
-        assignedCalMonth--;
-      } else {
-        assignedCalMonth = 11;
-        assignedCalYear--;
+    // キャディ予定の月移動ボタンのイベントリスナー（重複登録防止）
+    function setupCaddyScheduleNavigation() {
+      // 既存のイベントリスナーを削除
+      const prevBtn = document.getElementById('aPrevMonth');
+      const nextBtn = document.getElementById('aNextMonth');
+      
+      if (prevBtn) {
+        prevBtn.replaceWith(prevBtn.cloneNode(true));
       }
-      updateAssignedCalendar();
-    });
+      if (nextBtn) {
+        nextBtn.replaceWith(nextBtn.cloneNode(true));
+      }
+      
+      // 新しいイベントリスナーを設定
+      document.getElementById('aPrevMonth')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('前月ボタンクリック - 現在の状態:', { assignedCalYear, assignedCalMonth });
+        
+        // 前月に移動
+        if (assignedCalMonth > 0) {
+          assignedCalMonth--;
+        } else {
+          assignedCalMonth = 11;
+          assignedCalYear--;
+        }
+        
+        console.log('前月ボタンクリック - 移動後の状態:', { assignedCalYear, assignedCalMonth });
+        
+        // カレンダーを更新
+        updateAssignedCalendar();
+      });
+      
+      document.getElementById('aNextMonth')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('次月ボタンクリック - 現在の状態:', { assignedCalYear, assignedCalMonth });
+        
+        // 次月に移動
+        if (assignedCalMonth < 11) {
+          assignedCalMonth++;
+        } else {
+          assignedCalMonth = 0;
+          assignedCalYear++;
+        }
+        
+        console.log('次月ボタンクリック - 移動後の状態:', { assignedCalYear, assignedCalMonth });
+        
+        // カレンダーを更新
+        updateAssignedCalendar();
+      });
+    }
     
-    document.getElementById('aNextMonth')?.addEventListener('click', () => {
-      if (assignedCalMonth < 11) {
-        assignedCalMonth++;
-      } else {
-        assignedCalMonth = 0;
-        assignedCalYear++;
-      }
-      updateAssignedCalendar();
-    });
+    // 初期設定
+    setupCaddyScheduleNavigation();
     
     // LINE連携設定ボタンのイベントリスナー
     document.getElementById('connectLineBtn')?.addEventListener('click', () => {
