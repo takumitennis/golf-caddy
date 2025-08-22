@@ -250,7 +250,11 @@
       <button id="aNextMonth">▶</button>
     </div>
     <div style="color:#666; font-size:0.9rem; margin-top:6px;">予約が入っている日はゴルフ場名が表示されます（クリックで詳細）</div>
-    <table class="calendar" id="assignedCalTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
+    
+    <!-- 予定のリスト表示 -->
+    <div id="assignedScheduleList" style="margin-top:15px;">
+      <!-- 予定がここに表示されます -->
+    </div>
   </div>
   
   <!-- ゴルフ場詳細モーダル -->
@@ -353,12 +357,12 @@
     let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
     // 古い変数は削除（新カレンダーシステムで置き換え）
     
-    // 超シンプルで確実なカレンダーシステム（完全に新規構築）
-    class UltraSimpleCalendar {
+    // シンプルで確実な予定リスト表示システム
+    class SimpleScheduleList {
       constructor() {
         this.currentYear = new Date().getFullYear();
         this.currentMonth = new Date().getMonth();
-        console.log('UltraSimpleCalendar 初期化完了:', { year: this.currentYear, month: this.currentMonth });
+        console.log('SimpleScheduleList 初期化完了:', { year: this.currentYear, month: this.currentMonth });
       }
       
       // 前月ボタンクリック時の処理
@@ -378,7 +382,7 @@
         console.log('移動確認: 前月に1ヶ月移動完了');
         
         // 表示を更新
-        this.updateCalendar();
+        this.updateScheduleList();
       }
       
       // 次月ボタンクリック時の処理
@@ -398,20 +402,20 @@
         console.log('移動確認: 次月に1ヶ月移動完了');
         
         // 表示を更新
-        this.updateCalendar();
+        this.updateScheduleList();
       }
       
-      // カレンダー表示を更新
-      updateCalendar() {
-        console.log('=== カレンダー更新開始 ===');
+      // 予定リスト表示を更新
+      updateScheduleList() {
+        console.log('=== 予定リスト更新開始 ===');
         
         // 1. タイトルを更新
         this.updateTitle();
         
-        // 2. カレンダー本体を描画
-        this.drawCalendar();
+        // 2. 予定リストを描画
+        this.drawScheduleList();
         
-        console.log('=== カレンダー更新完了 ===');
+        console.log('=== 予定リスト更新完了 ===');
       }
       
       // タイトルを更新
@@ -426,49 +430,37 @@
         }
       }
       
-      // カレンダー本体を描画
-      async drawCalendar() {
-        console.log('カレンダー描画開始:', { year: this.currentYear, month: this.currentMonth });
+      // 予定リストを描画
+      async drawScheduleList() {
+        console.log('予定リスト描画開始:', { year: this.currentYear, month: this.currentMonth });
         
-        const table = document.getElementById('assignedCalTable');
-        if (!table) {
-          console.error('assignedCalTable が見つかりません');
+        const listContainer = document.getElementById('assignedScheduleList');
+        if (!listContainer) {
+          console.error('assignedScheduleList が見つかりません');
           return;
         }
         
-        // テーブルをクリア
-        table.innerHTML = '';
+        // コンテナをクリア
+        listContainer.innerHTML = '';
         
-        // 1. 見出し行を作成
-        const headerRow = document.createElement('tr');
-        const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-        weekdays.forEach(day => {
-          const th = document.createElement('th');
-          th.textContent = day;
-          headerRow.appendChild(th);
-        });
-        table.appendChild(headerRow);
-        
-        // 2. 月の情報を計算
+        // 1. 月の情報を計算
         const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1);
         const lastDayOfMonth = new Date(this.currentYear, this.currentMonth + 1, 0);
-        const startWeekday = firstDayOfMonth.getDay();
         const totalDays = lastDayOfMonth.getDate();
         
         console.log('月の詳細情報:', {
           firstDay: firstDayOfMonth.toISOString(),
           lastDay: lastDayOfMonth.toISOString(),
-          startWeekday,
           totalDays
         });
         
-        // 3. 予約データを取得
+        // 2. 予約データを取得
         const { data: bookings, error } = await supabase
           .from('bookings')
           .select(`
             booking_id,
             date,
-            golf_courses ( name ),
+            golf_courses ( name, address ),
             booking_caddies!inner ( cid )
           `)
           .eq('booking_caddies.cid', cid);
@@ -477,7 +469,7 @@
           console.warn('予約データ取得エラー:', error.message);
         }
         
-        // 4. 日付→予約のマップを作成
+        // 3. 日付→予約のマップを作成
         const dateToBooking = new Map();
         (bookings || []).forEach(booking => {
           if (booking.date) {
@@ -494,54 +486,72 @@
         
         console.log('この月の予約数:', dateToBooking.size);
         
-        // 5. カレンダーグリッドを構築
-        let currentRow = document.createElement('tr');
-        
-        // 月初の空セル
-        for (let i = 0; i < startWeekday; i++) {
-          currentRow.appendChild(document.createElement('td'));
+        // 4. 予定リストを構築
+        if (dateToBooking.size === 0) {
+          // 予定がない場合
+          listContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666; background: #f8f9fa; border-radius: 8px;">
+              <div style="font-size: 18px; margin-bottom: 8px;">📅</div>
+              <div>${this.currentYear}年${this.currentMonth + 1}月の予定はありません</div>
+            </div>
+          `;
+        } else {
+          // 予定がある場合
+          const scheduleList = document.createElement('div');
+          scheduleList.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+          
+          // 日付順にソート
+          const sortedDates = Array.from(dateToBooking.keys()).sort();
+          
+          sortedDates.forEach(dateStr => {
+            const booking = dateToBooking.get(dateStr);
+            const date = new Date(dateStr);
+            const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+            
+            const scheduleItem = document.createElement('div');
+            scheduleItem.style.cssText = `
+              background: #fff;
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              padding: 16px;
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            `;
+            
+            scheduleItem.innerHTML = `
+              <div style="text-align: center; min-width: 80px;">
+                <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${date.getDate()}</div>
+                <div style="font-size: 14px; color: #666;">${dayOfWeek}</div>
+              </div>
+              <div style="flex: 1;">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">${booking.golf_courses?.name || 'ゴルフ場名なし'}</div>
+                <div style="font-size: 14px; color: #666;">${dateStr}</div>
+              </div>
+              <div style="color: #27ae60; font-size: 14px;">● 予約確定</div>
+            `;
+            
+            // クリックイベント（詳細表示）
+            scheduleItem.style.cursor = 'pointer';
+            scheduleItem.onclick = () => {
+              if (booking.golf_courses) {
+                openCourseDetail(booking);
+              }
+            };
+            
+            scheduleList.appendChild(scheduleItem);
+          });
+          
+          listContainer.appendChild(scheduleList);
         }
         
-        // 日付セル
-        for (let day = 1; day <= totalDays; day++) {
-          const dateString = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const cell = document.createElement('td');
-          
-          // 予約があるかチェック
-          const hasBooking = dateToBooking.has(dateString);
-          
-          if (hasBooking) {
-            const booking = dateToBooking.get(dateString);
-            cell.innerHTML = `<small>${day}</small><br><span style="color:#2e7d32;">● ${booking.golf_courses?.name || '予約'}</span>`;
-            cell.style.background = '#e8f5e9';
-            cell.style.border = '2px solid #81c784';
-          } else {
-            cell.innerHTML = `<small>${day}</small>`;
-          }
-          
-          currentRow.appendChild(cell);
-          
-          // 週の終わりで改行
-          if ((startWeekday + day) % 7 === 0) {
-            table.appendChild(currentRow);
-            currentRow = document.createElement('tr');
-          }
-        }
-        
-        // 月末の空セル
-        if (currentRow.children.length > 0) {
-          while (currentRow.children.length < 7) {
-            currentRow.appendChild(document.createElement('td'));
-          }
-          table.appendChild(currentRow);
-        }
-        
-        console.log('カレンダー描画完了');
+        console.log('予定リスト描画完了');
       }
     }
     
-    // 超シンプルカレンダーのインスタンスを作成
-    const ultraCalendar = new UltraSimpleCalendar();
+    // シンプル予定リストのインスタンスを作成
+    const simpleSchedule = new SimpleScheduleList();
     
     // 古い関数は削除（新カレンダーシステムで置き換え）
     const calTable=document.getElementById('calTable');
@@ -928,10 +938,10 @@
       }
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
 
-      // 「キャディ予定」タブ側のカレンダーも同月で更新（超シンプルカレンダーシステム使用）
+      // 「キャディ予定」タブ側の予定リストも同月で更新（シンプル予定リストシステム使用）
       if(document.getElementById('mainAssigned')){
-        // 超シンプルカレンダーシステムで初期描画
-        ultraCalendar.updateCalendar();
+        // シンプル予定リストシステムで初期描画
+        simpleSchedule.updateScheduleList();
       }
     }
 
@@ -1253,12 +1263,12 @@
         btnMainAssignEl?.classList.add('active');
         console.log('キャディ予定タブ選択');
         
-        // 新しいカレンダーシステムを使用
-        if (ultraCalendar) {
-          console.log('ultraCalendar でカレンダー更新開始');
-          ultraCalendar.updateCalendar();
+        // 新しい予定リストシステムを使用
+        if (simpleSchedule) {
+          console.log('simpleSchedule で予定リスト更新開始');
+          simpleSchedule.updateScheduleList();
         } else {
-          console.error('ultraCalendar が見つかりません');
+          console.error('simpleSchedule が見つかりません');
           // フォールバック: 古い方法で表示
           renderAssignedList();
         }
@@ -1282,14 +1292,14 @@
     
     // キャディ予定タブの初期化を確実に行う
     console.log('キャディ予定タブ初期化開始');
-    if (ultraCalendar) {
-      console.log('ultraCalendar インスタンス確認:', ultraCalendar);
+    if (simpleSchedule) {
+      console.log('simpleSchedule インスタンス確認:', simpleSchedule);
       // 初期状態を設定
-      ultraCalendar.currentYear = new Date().getFullYear();
-      ultraCalendar.currentMonth = new Date().getMonth();
-      console.log('初期状態設定完了:', { year: ultraCalendar.currentYear, month: ultraCalendar.currentMonth });
+      simpleSchedule.currentYear = new Date().getFullYear();
+      simpleSchedule.currentMonth = new Date().getMonth();
+      console.log('初期状態設定完了:', { year: simpleSchedule.currentYear, month: simpleSchedule.currentMonth });
     } else {
-      console.error('ultraCalendar インスタンスが見つかりません');
+      console.error('simpleSchedule インスタンスが見つかりません');
     }
 
 
@@ -1701,13 +1711,13 @@
         nextBtn.replaceWith(nextBtn.cloneNode(true));
       }
       
-      // 新しいイベントリスナーを設定（超シンプルカレンダーシステム使用）
+      // 新しいイベントリスナーを設定（シンプル予定リストシステム使用）
       document.getElementById('aPrevMonth')?.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
         console.log('=== 前月ボタンクリック ===');
-        ultraCalendar.goToPreviousMonth();
+        simpleSchedule.goToPreviousMonth();
       });
       
       document.getElementById('aNextMonth')?.addEventListener('click', (e) => {
@@ -1715,7 +1725,7 @@
         e.stopPropagation();
         
         console.log('=== 次月ボタンクリック ===');
-        ultraCalendar.goToNextMonth();
+        simpleSchedule.goToNextMonth();
       });
       
       console.log('setupCaddyScheduleNavigation 完了');
