@@ -319,6 +319,18 @@
     // キャディ予定用の独立した月状態
     let assignedCalMonth = calMonth;
     let assignedCalYear = calYear;
+    
+    // キャディ予定カレンダーの更新関数
+    function updateAssignedCalendar() {
+      const first = new Date(assignedCalYear, assignedCalMonth, 1);
+      const last = new Date(assignedCalYear, assignedCalMonth + 1, 0);
+      
+      // タイトルを更新
+      document.getElementById('aCalTitle').textContent = `${assignedCalYear}年 ${assignedCalMonth + 1}月`;
+      
+      // カレンダーを再描画
+      renderAssignedCal(first, last);
+    }
     const calTable=document.getElementById('calTable');
     const pendingInserts = new Set();
     const pendingDeletes = new Set();
@@ -705,7 +717,10 @@
 
       // 「キャディ予定」タブ側のカレンダーも同月で更新
       if(document.getElementById('mainAssigned')){
-        document.getElementById('aCalTitle').textContent = `${calYear}年 ${calMonth+1}月`;
+        // キャディ予定カレンダーの月状態を同期
+        assignedCalYear = calYear;
+        assignedCalMonth = calMonth;
+        document.getElementById('aCalTitle').textContent = `${assignedCalYear}年 ${assignedCalMonth+1}月`;
         renderAssignedCal(first, last);
       }
     }
@@ -774,17 +789,28 @@
       let row=document.createElement('tr');
       for(let i=0;i<startWD;i++)row.appendChild(document.createElement('td'));
 
-      // 日付文字列のための範囲
-      const firstStr = firstDate.toISOString().slice(0,10);
-      const lastStr  = lastDate.toISOString().slice(0,10);
+      // 日付文字列のための範囲（正しい月の範囲を設定）
+      const firstStr = `${firstDate.getFullYear()}-${String(firstDate.getMonth() + 1).padStart(2, '0')}-01`;
+      const lastStr = `${lastDate.getFullYear()}-${String(lastDate.getMonth() + 1).padStart(2, '0')}-${String(lastDate.getDate()).padStart(2, '0')}`;
+      
+      console.log('キャディ予定カレンダー - 月範囲:', { firstStr, lastStr, firstDate, lastDate });
 
       // 日付→予約のマップ
       const dateToAssign = new Map();
       (assigns||[])
-        .filter(a=>a.date && a.date >= firstStr && a.date <= lastStr)
-        .forEach(a=>{
+        .filter(a => {
+          if (!a.date) return false;
+          // 日付が指定された月の範囲内にあるかチェック
+          const dateObj = new Date(a.date);
+          const year = dateObj.getFullYear();
+          const month = dateObj.getMonth();
+          return year === assignedCalYear && month === assignedCalMonth;
+        })
+        .forEach(a => {
           dateToAssign.set(a.date, a);
         });
+      
+      console.log('フィルタリング後の予約数:', dateToAssign.size);
 
       for(let day=1;day<=lastDate.getDate();day++){
         const dateStr=`${firstDate.getFullYear()}-${String(firstDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -1396,6 +1422,27 @@
         document.getElementById('lineConnected').style.display = 'none';
       }
     }
+    
+    // キャディ予定の月移動ボタンのイベントリスナー
+    document.getElementById('aPrevMonth')?.addEventListener('click', () => {
+      if (assignedCalMonth > 0) {
+        assignedCalMonth--;
+      } else {
+        assignedCalMonth = 11;
+        assignedCalYear--;
+      }
+      updateAssignedCalendar();
+    });
+    
+    document.getElementById('aNextMonth')?.addEventListener('click', () => {
+      if (assignedCalMonth < 11) {
+        assignedCalMonth++;
+      } else {
+        assignedCalMonth = 0;
+        assignedCalYear++;
+      }
+      updateAssignedCalendar();
+    });
     
     // LINE連携設定ボタンのイベントリスナー
     document.getElementById('connectLineBtn')?.addEventListener('click', () => {
