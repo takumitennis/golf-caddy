@@ -271,13 +271,38 @@
       </div>
       </div>
       </div>
-      <div id="mainMessages" class="hidden">
-      <div id="messagesList"></div>
-      <div id="chatInputArea" style="display:none;">
-        <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" />
-        <button id="sendChatBtn">送信</button>
+      <div id="mainMessages" class="hidden" style="margin-top:15px;">
+        <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          <h3 style="margin:0 0 15px;color:#333;display:flex;align-items:center;gap:8px;">
+            💬 メッセージ
+          </h3>
+          
+          <!-- 予約情報表示エリア -->
+          <div id="bookingInfo" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;border-left:4px solid #27ae60;">
+            <div id="bookingTitle" style="font-weight:600;color:#333;margin-bottom:8px;"></div>
+            <div id="bookingDate" style="font-size:14px;color:#666;"></div>
+          </div>
+          
+          <!-- メッセージリスト -->
+          <div id="messagesList" style="min-height:300px;background:#f8f9fa;border-radius:8px;padding:15px;">
+            <div style="text-align:center;color:#666;padding:40px;">
+              <div style="font-size:18px;margin-bottom:8px;">💬</div>
+              <div>予定を選択すると、その予約のメッセージが表示されます</div>
+            </div>
+          </div>
+          
+          <!-- チャット入力エリア -->
+          <div id="chatInputArea" style="display:none;margin-top:15px;">
+            <div style="display:flex;gap:10px;">
+              <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" 
+                     style="flex:1;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;" />
+              <button id="sendChatBtn" style="background:#27ae60;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;">
+                送信
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
     <!-- LINE連携設定 -->
     <div id="mainLineSettings" class="hidden" style="margin-top:15px;">
       <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
@@ -585,40 +610,143 @@
           return;
         }
         
-        // メッセージリストのタイトルを更新
-        const messagesList = document.getElementById('messagesList');
-        if (messagesList) {
-          const titleDiv = document.createElement('div');
-          titleDiv.style.cssText = `
-            background: #f8f9fa;
-            padding: 12px 16px;
-            border-bottom: 1px solid #e0e0e0;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 16px;
-          `;
-          titleDiv.innerHTML = `
-            📅 ${booking.date} - ${booking.golf_courses?.name || 'ゴルフ場'}
-            <div style="font-size: 14px; font-weight: normal; color: #666; margin-top: 4px;">
-              この予約のメッセージ
-            </div>
-          `;
-          
-          // 既存のタイトルがあれば削除
-          const existingTitle = messagesList.querySelector('.booking-title');
-          if (existingTitle) {
-            existingTitle.remove();
-          }
-          
-          titleDiv.className = 'booking-title';
-          messagesList.insertBefore(titleDiv, messagesList.firstChild);
+        console.log('取得した予約情報:', booking);
+        
+        // 予約情報を表示エリアに表示
+        const bookingInfo = document.getElementById('bookingInfo');
+        const bookingTitle = document.getElementById('bookingTitle');
+        const bookingDate = document.getElementById('bookingDate');
+        
+        if (bookingInfo && bookingTitle && bookingDate) {
+          bookingTitle.textContent = `${booking.golf_courses?.name || 'ゴルフ場'} の予約`;
+          bookingDate.textContent = `予約日: ${booking.date}`;
+          bookingInfo.style.display = 'block';
         }
         
-        // メッセージを取得（仮の実装 - 実際のメッセージテーブルに合わせて調整が必要）
+        // メッセージリストを更新
+        const messagesList = document.getElementById('messagesList');
+        if (messagesList) {
+          // 既存の内容をクリア
+          messagesList.innerHTML = '';
+          
+          // サンプルメッセージを表示（実際のメッセージテーブルに合わせて調整が必要）
+          const sampleMessages = [
+            {
+              sender: 'ゴルフ場スタッフ',
+              message: 'キャディのご予約ありがとうございます。当日は9:00に受付にお越しください。',
+              timestamp: '2025-10-28 10:30'
+            },
+            {
+              sender: 'TAKUMI YAMADA',
+              message: '承知いたしました。9:00に受付でお待ちしております。',
+              timestamp: '2025-10-28 11:15'
+            },
+            {
+              sender: 'ゴルフ場スタッフ',
+              message: '当日の天気予報は晴れの予定です。楽しいゴルフをお楽しみください。',
+              timestamp: '2025-10-28 14:20'
+            }
+          ];
+          
+          // メッセージを表示
+          sampleMessages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+              background: ${msg.sender === 'TAKUMI YAMADA' ? '#e3f2fd' : '#fff'};
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              padding: 12px;
+              margin-bottom: 12px;
+              max-width: 80%;
+              ${msg.sender === 'TAKUMI YAMADA' ? 'margin-left: auto;' : 'margin-right: auto;'}
+            `;
+            
+            messageDiv.innerHTML = `
+              <div style="font-weight:600;color:#333;margin-bottom:4px;font-size:14px;">
+                ${msg.sender}
+              </div>
+              <div style="color:#333;line-height:1.5;margin-bottom:6px;">
+                ${msg.message}
+              </div>
+              <div style="font-size:12px;color:#666;text-align:right;">
+                ${msg.timestamp}
+              </div>
+            `;
+            
+            messagesList.appendChild(messageDiv);
+          });
+          
+          // チャット入力エリアを表示
+          const chatInputArea = document.getElementById('chatInputArea');
+          if (chatInputArea) {
+            chatInputArea.style.display = 'block';
+          }
+        }
+        
         console.log('予約のメッセージ表示完了:', booking);
         
       } catch (error) {
         console.error('メッセージ読み込みエラー:', error);
+      }
+    }
+    
+    // メッセージ送信機能
+    function setupMessageSending() {
+      const sendChatBtn = document.getElementById('sendChatBtn');
+      const chatInput = document.getElementById('chatInput');
+      
+      if (sendChatBtn && chatInput) {
+        sendChatBtn.addEventListener('click', async () => {
+          const message = chatInput.value.trim();
+          if (!message) return;
+          
+          console.log('メッセージ送信:', message);
+          
+          // 新しいメッセージを画面に追加
+          const messagesList = document.getElementById('messagesList');
+          if (messagesList) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+              background: #e3f2fd;
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              padding: 12px;
+              margin-bottom: 12px;
+              max-width: 80%;
+              margin-left: auto;
+            `;
+            
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            messageDiv.innerHTML = `
+              <div style="font-weight:600;color:#333;margin-bottom:4px;font-size:14px;">
+                TAKUMI YAMADA
+              </div>
+              <div style="color:#333;line-height:1.5;margin-bottom:6px;">
+                ${message}
+              </div>
+              <div style="font-size:12px;color:#666;text-align:right;">
+                ${timestamp}
+              </div>
+            `;
+            
+            messagesList.appendChild(messageDiv);
+            
+            // 入力フィールドをクリア
+            chatInput.value = '';
+            
+            // スクロールを最下部に
+            messagesList.scrollTop = messagesList.scrollHeight;
+          }
+        });
+        
+        // Enterキーでも送信
+        chatInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            sendChatBtn.click();
+          }
+        });
       }
     }
     
@@ -1359,17 +1487,20 @@
     const b4 = document.getElementById('btnMainMsg');
     if (b1 && !b1.classList.contains('active')) b1.classList.add('active');
     
-    // キャディ予定タブの初期化を確実に行う
-    console.log('キャディ予定タブ初期化開始');
-    if (simpleSchedule) {
-      console.log('simpleSchedule インスタンス確認:', simpleSchedule);
-      // 初期状態を設定
-      simpleSchedule.currentYear = new Date().getFullYear();
-      simpleSchedule.currentMonth = new Date().getMonth();
-      console.log('初期状態設定完了:', { year: simpleSchedule.currentYear, month: simpleSchedule.currentMonth });
-    } else {
-      console.error('simpleSchedule インスタンスが見つかりません');
-    }
+          // キャディ予定タブの初期化を確実に行う
+      console.log('キャディ予定タブ初期化開始');
+      if (simpleSchedule) {
+        console.log('simpleSchedule インスタンス確認:', simpleSchedule);
+        // 初期状態を設定
+        simpleSchedule.currentYear = new Date().getFullYear();
+        simpleSchedule.currentMonth = new Date().getMonth();
+        console.log('初期状態設定完了:', { year: simpleSchedule.currentYear, month: simpleSchedule.currentMonth });
+      } else {
+        console.error('simpleSchedule インスタンスが見つかりません');
+      }
+      
+      // メッセージ送信機能を初期化
+      setupMessageSending();
 
 
     document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
