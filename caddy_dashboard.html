@@ -316,55 +316,195 @@
 
     let cid;
     let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
-    // キャディ予定用の完全に独立した月状態
+    // キャディ予定用の完全に独立した月状態（新システム）
     let assignedCalMonth = new Date().getMonth();
     let assignedCalYear = new Date().getFullYear();
     
-    // 月移動の状態を追跡
-    let isNavigatingAssignedCalendar = false;
-    
-    // キャディ予定カレンダーの更新関数（確実な1ヶ月移動）
-    function updateAssignedCalendar() {
-      console.log('=== updateAssignedCalendar 開始 ===');
-      console.log('現在の状態:', { assignedCalYear, assignedCalMonth });
-      
-      // 月の値が正しい範囲内にあることを確認
-      if (assignedCalMonth < 0 || assignedCalMonth > 11) {
-        console.error('月の値が不正:', assignedCalMonth);
-        assignedCalMonth = Math.max(0, Math.min(11, assignedCalMonth));
+    // 新しいカレンダーシステム
+    class CaddyScheduleCalendar {
+      constructor() {
+        this.currentYear = new Date().getFullYear();
+        this.currentMonth = new Date().getMonth();
+        this.isInitialized = false;
       }
       
-      // 月の範囲を正しく計算
-      const first = new Date(assignedCalYear, assignedCalMonth, 1);
-      const last = new Date(assignedCalYear, assignedCalMonth + 1, 0);
-      
-      console.log('計算された範囲:', { 
-        first: first.toISOString(), 
-        last: last.toISOString(),
-        firstMonth: first.getMonth(),
-        lastMonth: last.getMonth(),
-        firstYear: first.getFullYear(),
-        lastYear: last.getFullYear()
-      });
-      
-      // タイトルを更新
-      const titleElement = document.getElementById('aCalTitle');
-      if (titleElement) {
-        const displayMonth = assignedCalMonth + 1;
-        titleElement.textContent = `${assignedCalYear}年 ${displayMonth}月`;
-        console.log('タイトル更新:', `${assignedCalYear}年 ${displayMonth}月`);
+      // 前月に移動
+      goToPreviousMonth() {
+        console.log('=== 前月移動 ===');
+        console.log('移動前:', { year: this.currentYear, month: this.currentMonth });
+        
+        if (this.currentMonth > 0) {
+          this.currentMonth--;
+        } else {
+          this.currentMonth = 11;
+          this.currentYear--;
+        }
+        
+        console.log('移動後:', { year: this.currentYear, month: this.currentMonth });
+        
+        // グローバル変数も更新
+        assignedCalYear = this.currentYear;
+        assignedCalMonth = this.currentMonth;
+        
+        this.render();
       }
       
-      // カレンダーを再描画（非同期処理の競合を防ぐ）
-      if (window.assignedCalUpdateTimeout) {
-        clearTimeout(window.assignedCalUpdateTimeout);
+      // 次月に移動
+      goToNextMonth() {
+        console.log('=== 次月移動 ===');
+        console.log('移動前:', { year: this.currentYear, month: this.currentMonth });
+        
+        if (this.currentMonth < 11) {
+          this.currentMonth++;
+        } else {
+          this.currentMonth = 0;
+          this.currentYear++;
+        }
+        
+        console.log('移動後:', { year: this.currentYear, month: this.currentMonth });
+        
+        // グローバル変数も更新
+        assignedCalYear = this.currentYear;
+        assignedCalMonth = this.currentMonth;
+        
+        this.render();
       }
       
-      window.assignedCalUpdateTimeout = setTimeout(() => {
-        console.log('renderAssignedCal 呼び出し:', { first, last });
-        renderAssignedCal(first, last);
-      }, 100);
+      // カレンダーを描画
+      render() {
+        console.log('=== カレンダー描画開始 ===');
+        console.log('描画対象:', { year: this.currentYear, month: this.currentMonth });
+        
+        // タイトルを更新
+        const titleElement = document.getElementById('aCalTitle');
+        if (titleElement) {
+          const displayMonth = this.currentMonth + 1;
+          titleElement.textContent = `${this.currentYear}年 ${displayMonth}月`;
+          console.log('タイトル更新完了:', `${this.currentYear}年 ${displayMonth}月`);
+        }
+        
+        // カレンダー本体を描画
+        this.renderCalendarBody();
+      }
+      
+      // カレンダー本体を描画
+      async renderCalendarBody() {
+        const table = document.getElementById('assignedCalTable');
+        if (!table) {
+          console.error('assignedCalTable が見つかりません');
+          return;
+        }
+        
+        table.innerHTML = '';
+        
+        // 見出し行
+        const headerRow = document.createElement('tr');
+        ['日', '月', '火', '水', '木', '金', '土'].forEach(d => {
+          const th = document.createElement('th');
+          th.textContent = d;
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+        
+        // 月の最初の日と最後の日を計算
+        const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+        const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+        const startWeekday = firstDay.getDay();
+        const daysInMonth = lastDay.getDate();
+        
+        console.log('月の情報:', {
+          firstDay: firstDay.toISOString(),
+          lastDay: lastDay.toISOString(),
+          startWeekday,
+          daysInMonth
+        });
+        
+        // 予約データを取得
+        const { data: assigns, error } = await supabase
+          .from('bookings')
+          .select(`
+            booking_id,
+            date,
+            gid,
+            golf_courses ( gid,name,address,description,perks,image_url ),
+            booking_caddies!inner ( cid )
+          `)
+          .eq('booking_caddies.cid', cid);
+        
+        if (error) {
+          console.warn('予約取得エラー', error.message);
+        }
+        
+        // 日付→予約のマップを作成
+        const dateToAssign = new Map();
+        (assigns || []).forEach(a => {
+          if (a.date) {
+            const dateObj = new Date(a.date);
+            const year = dateObj.getFullYear();
+            const month = dateObj.getMonth();
+            
+            // 現在の月の予約のみ
+            if (year === this.currentYear && month === this.currentMonth) {
+              dateToAssign.set(a.date, a);
+            }
+          }
+        });
+        
+        console.log('フィルタリング後の予約数:', dateToAssign.size);
+        
+        // カレンダーグリッドを構築
+        let row = document.createElement('tr');
+        
+        // 月初の空セル
+        for (let i = 0; i < startWeekday; i++) {
+          row.appendChild(document.createElement('td'));
+        }
+        
+        // 日付セル
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const td = document.createElement('td');
+          
+          const assign = dateToAssign.get(dateStr);
+          if (assign) {
+            td.innerHTML = `<small>${day}</small><br><a href="#" data-bid="${assign.booking_id}" class="assigned-link"><span class="ok-circle" style="border-color:#2e7d32"></span> ${assign.golf_courses?.name || '予約'}</a>`;
+            td.style.background = '#e8f5e9';
+            td.style.border = '2px solid #81c784';
+            
+            // クリックイベント
+            td.querySelector('.assigned-link').onclick = (e) => {
+              e.preventDefault();
+              openCourseDetail(assign);
+            };
+          } else {
+            td.innerHTML = `<small>${day}</small>`;
+          }
+          
+          row.appendChild(td);
+          
+          // 週の終わりで改行
+          if ((startWeekday + day) % 7 === 0) {
+            table.appendChild(row);
+            row = document.createElement('tr');
+          }
+        }
+        
+        // 月末の空セル
+        if (row.children.length > 0) {
+          while (row.children.length < 7) {
+            row.appendChild(document.createElement('td'));
+          }
+          table.appendChild(row);
+        }
+        
+        console.log('カレンダー描画完了');
+      }
     }
+    
+    // カレンダーインスタンスを作成
+    const caddyScheduleCalendar = new CaddyScheduleCalendar();
+    
+    // 古い関数は削除（新カレンダーシステムで置き換え）
     const calTable=document.getElementById('calTable');
     const pendingInserts = new Set();
     const pendingDeletes = new Set();
@@ -749,26 +889,10 @@
       }
       if(row.children.length){while(row.children.length<7)row.appendChild(document.createElement('td'));calTable.appendChild(row);}  
 
-      // 「キャディ予定」タブ側のカレンダーも同月で更新（初回のみ）
-      if(document.getElementById('mainAssigned') && !isNavigatingAssignedCalendar){
-        // 初回表示時のみメインカレンダーと同期
-        assignedCalYear = calYear;
-        assignedCalMonth = calMonth;
-        
-        console.log('=== 初回同期（メインカレンダーと） ===');
-        console.log('同期前:', { calYear, calMonth, assignedCalYear, assignedCalMonth });
-        
-        const titleElement = document.getElementById('aCalTitle');
-        if (titleElement) {
-          const displayMonth = assignedCalMonth + 1;
-          titleElement.textContent = `${assignedCalYear}年 ${displayMonth}月`;
-          console.log('タイトル同期:', `${assignedCalYear}年 ${displayMonth}月`);
-        }
-        
-        console.log('同期後:', { assignedCalYear, assignedCalMonth });
-        
-        // カレンダーを再描画
-        renderAssignedCal(first, last);
+      // 「キャディ予定」タブ側のカレンダーも同月で更新（新システム使用）
+      if(document.getElementById('mainAssigned')){
+        // 新カレンダーシステムで初期描画
+        caddyScheduleCalendar.render();
       }
     }
 
@@ -1178,8 +1302,8 @@
        document.getElementById('welcome').textContent=`ようこそ ${row.name||''} さん`;
        document.getElementById('mainProfile').innerHTML=`
         <div class="card" style='display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap'>
-          <div id='avatarCircle' style='width:110px;height:110px;border-radius:50%;background:#ddd;overflow:hidden;'>
-            ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : ''}
+          <div id='avatarCircle' style='width:110px;height:110px;border-radius:50%;background:#ddd;overflow:hidden;display:flex;align-items:center;justify-content:center;'>
+            ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : `<div style='color:#999;font-size:24px;font-weight:bold;'>📷</div>`}
           </div>
           <div style='min-width:220px;flex:1;'>
             <h2 style='margin:0 0 8px;'>${row.name||'未設定'}</h2>
@@ -1217,8 +1341,8 @@
           <button type='submit'>保存</button>
           </form>
           <div id='profPreview' class='card' style='flex:1 1 260px;min-width:260px;'>
-            <div id='ppAvatar' style='width:120px;height:120px;border-radius:50%;background:#ddd;overflow:hidden;'>
-              ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : ''}
+            <div id='ppAvatar' style='width:120px;height:120px;border-radius:50%;background:#ddd;overflow:hidden;display:flex;align-items:center;justify-content:center;'>
+              ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : `<div style='color:#999;font-size:28px;font-weight:bold;'>📷</div>`}
             </div>
             <h3 id='ppName' style='margin:12px 0 8px;'>${row.name||''}</h3>
             <div class='pp-line'>電話: <span id='ppPhone'>${row.phone||''}</span></div>
@@ -1503,30 +1627,13 @@
         nextBtn.replaceWith(nextBtn.cloneNode(true));
       }
       
-      // 新しいイベントリスナーを設定
+      // 新しいイベントリスナーを設定（新カレンダーシステム使用）
       document.getElementById('aPrevMonth')?.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
         console.log('=== 前月ボタンクリック ===');
-        console.log('クリック前の状態:', { assignedCalYear, assignedCalMonth });
-        
-        // ナビゲーション状態を設定
-        isNavigatingAssignedCalendar = true;
-        
-        // 前月に移動（確実に1ヶ月ずつ）
-        if (assignedCalMonth > 0) {
-          assignedCalMonth--;
-        } else {
-          assignedCalMonth = 11;
-          assignedCalYear--;
-        }
-        
-        console.log('クリック後の状態:', { assignedCalYear, assignedCalMonth });
-        console.log('移動確認: 前月に1ヶ月移動');
-        
-        // カレンダーを更新
-        updateAssignedCalendar();
+        caddyScheduleCalendar.goToPreviousMonth();
       });
       
       document.getElementById('aNextMonth')?.addEventListener('click', (e) => {
@@ -1534,24 +1641,7 @@
         e.stopPropagation();
         
         console.log('=== 次月ボタンクリック ===');
-        console.log('クリック前の状態:', { assignedCalYear, assignedCalMonth });
-        
-        // ナビゲーション状態を設定
-        isNavigatingAssignedCalendar = true;
-        
-        // 次月に移動（確実に1ヶ月ずつ）
-        if (assignedCalMonth < 11) {
-          assignedCalMonth++;
-        } else {
-          assignedCalMonth = 0;
-          assignedCalYear++;
-        }
-        
-        console.log('クリック後の状態:', { assignedCalYear, assignedCalMonth });
-        console.log('移動確認: 次月に1ヶ月移動');
-        
-        // カレンダーを更新
-        updateAssignedCalendar();
+        caddyScheduleCalendar.goToNextMonth();
       });
       
       console.log('setupCaddyScheduleNavigation 完了');
