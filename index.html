@@ -431,11 +431,7 @@
       padding: 6px 0;
     }
 
-    .nav-item:hover .dropdown-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
+    /* .nav-item:hover .dropdown-menu を削除 - JavaScriptで制御するため */
     
     /* モバイル版でのドロップダウン表示 */
     .nav-item.show-dropdown .dropdown-menu {
@@ -1208,19 +1204,25 @@
     
     // ドロップダウンメニューの動作を設定（シンプル版）
     function setupDropdownMenus() {
+      console.log('setupDropdownMenus called'); // デバッグログ
       const navItems = document.querySelectorAll('.nav-item');
+      console.log('Found navItems:', navItems.length); // デバッグログ
       
-      navItems.forEach(item => {
+      navItems.forEach((item, index) => {
         const dropdown = item.querySelector('.dropdown-menu');
+        console.log(`NavItem ${index}:`, item, 'Dropdown:', dropdown); // デバッグログ
+        
         if (dropdown) {
           // マウスイベント（デスクトップ）
           item.addEventListener('mouseenter', () => {
+            console.log('Mouse enter on nav item'); // デバッグログ
             dropdown.style.opacity = '1';
             dropdown.style.visibility = 'visible';
             dropdown.style.transform = 'translateX(-50%) translateY(0)';
           });
           
           item.addEventListener('mouseleave', () => {
+            console.log('Mouse leave on nav item'); // デバッグログ
             dropdown.style.opacity = '0';
             dropdown.style.visibility = 'hidden';
             dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
@@ -1228,6 +1230,7 @@
           
           // タッチイベント（モバイル）- シンプルな実装
           item.addEventListener('touchstart', (e) => {
+            console.log('Touch start on nav item'); // デバッグログ
             // リンクの場合は何もしない（リンクの動作を妨げない）
             if (e.target.tagName === 'A') {
               return;
