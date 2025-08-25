@@ -368,10 +368,48 @@
 
     /* Mobile login button (replacing hamburger) */
     .mobile-login{ display:none; }
-    .hamburger{ display:none; position:absolute; right:12px; top:10px; width:44px; height:40px; border:1px solid rgba(255,255,255,.35); border-radius:8px; background:rgba(0,0,0,.25); z-index:11; }
+    .hamburger{ 
+      display: none; 
+      position: absolute; 
+      right: 12px; 
+      top: 10px; 
+      width: 44px; 
+      height: 40px; 
+      border: 1px solid rgba(255,255,255,.35); 
+      border-radius: 8px; 
+      background: rgba(0,0,0,.25); 
+      z-index: 10000; 
+      cursor: pointer;
+    }
     .hamburger span{ display:block; height:2px; background:#fff; margin:9px 8px; }
-    .nav-drawer{ display:none; }
-    .nav-drawer a{ display:none; }
+    .nav-drawer{ 
+      display: none; 
+      position: fixed;
+      top: 62px;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(10px);
+      z-index: 9998;
+      padding: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-drawer a{ 
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .nav-drawer a:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
 
     .dropdown-menu {
       position: absolute;
@@ -627,31 +665,29 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
-      .hamburger{ display:none; }
+      .hamburger{ display:block !important; }
       /* モバイルはログインをナビと同列に表示 */
       .nav-auth-mobile{ display:flex !important; }
       #spLoginTab{ cursor:pointer; }
       .login-section{ display:none; }
       .auth-menu{ display:none; }
-      .top-nav { position:fixed; top:0; left:0; right:0; padding: 0.3rem 0.375rem; gap: 3px; z-index: 1000; justify-content:center; height: 62px; flex-wrap: wrap; }
+      .top-nav { 
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        padding: 0.3rem 0.375rem; 
+        gap: 3px; 
+        z-index: 9999; 
+        justify-content: center; 
+        height: 62px; 
+        flex-wrap: wrap; 
+      }
               .nav-main { 
-          gap: clamp(0.3rem, 1.5vw, 0.6rem); 
-          flex-wrap: nowrap; 
-          width: 100%; 
-          justify-content: center; 
-          overflow-x: auto;
-          padding: 0 0.5rem;
+          display: none; /* モバイル版ではナビゲーションメニューを非表示 */
         }
-      .nav-item { width:auto; max-width:none; }
-              .nav-tab { 
-          padding: 0.15rem 0.25rem; 
-          font-size: clamp(0.5rem, 2.2vw, 0.7rem); 
-          width: auto; 
-          border-radius: 5px; 
-          white-space: nowrap; 
-          letter-spacing: 0; 
-          text-shadow: none; 
-        }
+      .nav-item { display: none; }
+      .nav-tab { display: none; }
       .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
       
       /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
@@ -707,22 +743,10 @@
 
 
       .nav-main { 
-        display: flex; 
-        flex-direction: row; 
-        align-items: center; 
-        gap: clamp(0.4rem, 1.8vw, 0.8rem); 
-        width: auto; 
-        flex-wrap: nowrap;
-        overflow-x: auto;
+        display: none; /* モバイル版ではナビゲーションメニューを非表示 */
       }
-      .nav-item { width:auto; max-width:none; }
-      .nav-tab { 
-        padding: 0.4rem 0.5rem; 
-        font-size: clamp(0.6rem, 2vw, 0.8rem); 
-        width: auto; 
-        border-radius: 8px; 
-        white-space: nowrap; 
-      }
+      .nav-item { display: none; }
+      .nav-tab { display: none; }
 
       .login-section {
         flex-direction: column;
@@ -733,6 +757,36 @@
       .nav-login-btn {
         width: 100%;
         max-width: 200px;
+      }
+      
+      /* モバイル版でのドロワーメニューの表示 */
+      .nav-drawer {
+        display: none;
+        position: fixed;
+        top: 62px;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.95);
+        backdrop-filter: blur(10px);
+        z-index: 9998;
+        padding: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+      .nav-drawer a {
+        display: block;
+        color: #fff;
+        text-decoration: none;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      .nav-drawer a:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-2px);
       }
 
       /* SP用: ドロップダウン幅を文字ギリギリに */
@@ -1203,12 +1257,16 @@
     const drawer = document.getElementById('drawer');
     if (btnMenu && drawer){
       btnMenu.addEventListener('click', ()=>{
+        console.log('ハンバーガーメニューがクリックされました');
         const opened = drawer.style.display==='block';
         drawer.style.display = opened ? 'none' : 'block';
         drawer.setAttribute('aria-hidden', opened ? 'true':'false');
+        console.log('ドロワーメニューの表示状態:', opened ? '非表示' : '表示');
       });
       drawer.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>{
-        drawer.style.display='none'; drawer.setAttribute('aria-hidden','true');
+        console.log('ドロワーメニューのリンクがクリックされました:', a.textContent);
+        drawer.style.display='none'; 
+        drawer.setAttribute('aria-hidden','true');
       }));
     }
 
