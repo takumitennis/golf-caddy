@@ -37,94 +37,7 @@
 
 
 
-    /* Navigation */
-    .top-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 1.5rem;
-      height: 80px;
-      background: rgba(0,0,0,0.28);
-      backdrop-filter: blur(2px);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      z-index: 1000;
-      transition: var(--transition);
-    }
-
-    .top-nav.scrolled { background: rgba(0,0,0,0.7); }
-
-    .nav-main {
-      display: flex;
-      gap: clamp(0.5rem, 2vw, 1.5rem);
-      align-items: center;
-      flex-wrap: nowrap;
-      justify-content: center;
-    }
-
-    .nav-item {
-      position: relative;
-    }
-
-    .nav-tab {
-      color: #fff;
-      text-decoration: none;
-      padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
-      border-radius: var(--border-radius);
-      font-weight: 500;
-      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
-      transition: var(--transition);
-      display: block;
-      letter-spacing: 0.02em;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-      white-space: nowrap;
-    }
-
-    .nav-tab:hover {
-      background: rgba(255,255,255,0.1);
-      transform: translateY(-1px);
-    }
-    
-
-
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius);
-      padding: 0.5rem 0;
-      min-width: 200px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateX(-50%) translateY(-10px);
-      transition: var(--transition);
-      z-index: 1001;
-    }
-
-    /* .nav-item:hover .dropdown-menu を削除 - JavaScriptで制御するため */
-
-    .dropdown-item {
-      display: block;
-      padding: 0.75rem 1.5rem;
-      color: #fff;
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 0.9rem;
-    }
-
-    .dropdown-item:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    .auth-dropdown {
-      min-width: 150px;
-    }
+    /* Navigation - ホームページのCSSを使用するため削除 */
 
     /* Main Content */
     .main-content {
@@ -559,40 +472,43 @@
 
   <!-- Navigation -->
   <nav class="top-nav">
-    <div class="nav-main">
-      <div class="nav-item">
-        <a href="index.html#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
-        <div class="dropdown-menu">
-          <a href="index.html#golf-course-benefits" class="dropdown-item">メリット</a>
-          <a href="index.html#features" class="dropdown-item">機能紹介</a>
-          <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
+        <div class="nav-main">
+            <div class="nav-item">
+          <a href="index.html#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
+                <div class="dropdown-menu">
+            <a href="index.html#golf-course-benefits" class="dropdown-item">メリット</a>
+            <a href="index.html#features" class="dropdown-item">機能紹介</a>
+            <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
+                </div>
+            </div>
+            <div class="nav-item">
+          <a href="index.html#caddy-benefits" class="nav-tab">キャディの方へ</a>
+                <div class="dropdown-menu">
+            <a href="index.html#caddy-benefits" class="dropdown-item">メリット</a>
+            <a href="index.html#features" class="dropdown-item">機能紹介</a>
+            <a href="training-program.html" class="dropdown-item">研修について</a>
+            <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
+                </div>
+            </div>
+
+            <div class="nav-item">
+              <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
+              <div class="dropdown-menu">
+                <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
+                <a href="partner-golf-courses.html#partnership" class="dropdown-item">パートナー募集</a>
+              </div>
+            </div>
+
+            <div class="nav-item">
+              <a class="auth-link nav-tab" href="#" id="loginModalTrigger">ログイン</a>
+              <div class="dropdown-menu auth-dropdown">
+                <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
+                <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
+              </div>
+            </div>
         </div>
-      </div>
-      <div class="nav-item">
-        <a href="index.html#caddy-benefits" class="nav-tab">キャディの方へ</a>
-        <div class="dropdown-menu">
-          <a href="index.html#caddy-benefits" class="dropdown-item">メリット</a>
-          <a href="index.html#features" class="dropdown-item">機能紹介</a>
-          <a href="training-program.html" class="dropdown-item">研修について</a>
-          <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
         </div>
-      </div>
-      <div class="nav-item">
-        <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
-        <div class="dropdown-menu">
-          <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
-          <a href="partner-golf-courses.html#partnership" class="dropdown-item">パートナー募集</a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <a class="auth-link nav-tab" href="#" id="loginModalTrigger">ログイン</a>
-        <div class="dropdown-menu auth-dropdown">
-          <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
-          <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
-        </div>
-      </div>
-    </div>
-  </nav>
+      <div class="login-section" style="display:none;"></div>
 
   <!-- Main Content -->
   <main class="main-content">
