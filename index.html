@@ -737,10 +737,11 @@
         right: auto !important;
         transform: translateX(-50%) translateY(0) !important;
         padding: 4px 0;
-        background: transparent !important;
-        border: 0 !important;
-        box-shadow: none !important;
-        backdrop-filter: none !important;
+        background: rgba(0,0,0,0.9) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        backdrop-filter: blur(8px) !important;
+        border-radius: 8px !important;
       }
       .top-nav .dropdown-item, .top-nav .auth-dropdown a {
         padding: 8px 12px;
@@ -1110,6 +1111,48 @@
         this.style.transform = 'translateY(0)';
       });
     });
+    
+    // ドロップダウンメニューの動作を設定（モバイル対応）
+    function setupDropdownMenus() {
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      navItems.forEach(item => {
+        const dropdown = item.querySelector('.dropdown-menu');
+        if (dropdown) {
+          // マウスイベント（デスクトップ）
+          item.addEventListener('mouseenter', () => {
+            dropdown.style.opacity = '1';
+            dropdown.style.visibility = 'visible';
+            dropdown.style.transform = 'translateX(-50%) translateY(0)';
+          });
+          
+          item.addEventListener('mouseleave', () => {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+          });
+          
+          // タッチイベント（モバイル）
+          item.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const isVisible = dropdown.style.visibility === 'visible';
+            
+            if (isVisible) {
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            } else {
+              dropdown.style.opacity = '1';
+              dropdown.style.visibility = 'visible';
+              dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            }
+          });
+        }
+      });
+    }
+    
+    // ページ読み込み時にドロップダウンメニューを設定
+    document.addEventListener('DOMContentLoaded', setupDropdownMenus);
 
     // Hamburger drawer
     const btnMenu = document.getElementById('btnMenu');
