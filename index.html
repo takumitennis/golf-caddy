@@ -289,7 +289,7 @@
       padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
       border-radius: var(--border-radius);
       font-weight: 500;
-      font-size: clamp(0.55rem, 1.8vw, 0.85rem);
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
       transition: var(--transition);
       display: block;
       letter-spacing: 0.02em;
@@ -315,7 +315,7 @@
       padding: 0.75rem 1.5rem;
       border: none;
       border-radius: var(--border-radius);
-      font-size: 0.95rem;
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
       font-weight: 600;
       cursor: pointer;
       color: #fff;
@@ -346,7 +346,27 @@
 
     /* Auth dropdown (desktop) */
     .auth-menu{ position:relative; margin-left:16px; }
-    .auth-link{ color:#fff; text-decoration:none; font-weight:500; letter-spacing:.02em; display:block; padding: 0.75rem 1.5rem; border-radius: var(--border-radius); font-size: 0.66rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: var(--transition); }
+    .auth-link{ 
+      color:#fff; 
+      text-decoration:none; 
+      font-weight:500; 
+      letter-spacing:.02em; 
+      display:block; 
+      padding: 0.75rem 1.5rem; 
+      border-radius: var(--border-radius); 
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem); 
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5); 
+      transition: var(--transition); 
+    }
+    
+    /* 外部リンクアイコンのスタイル */
+    .auth-link::after {
+      content: "↗";
+      font-size: 0.8em;
+      margin-left: 0.2em;
+      vertical-align: super;
+      line-height: 1;
+    }
     .auth-link:hover{ background: rgba(255,255,255,0.1); transform: translateY(-1px); }
     .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background: rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow: 0 10px 30px rgba(0,0,0,.3); backdrop-filter: blur(4px); }
     .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.86rem; border:none; text-align:center; }
