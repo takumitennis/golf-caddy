@@ -1206,7 +1206,7 @@
       });
     });
     
-    // ドロップダウンメニューの動作を設定（モバイル対応）
+    // ドロップダウンメニューの動作を設定（シンプル版）
     function setupDropdownMenus() {
       const navItems = document.querySelectorAll('.nav-item');
       
@@ -1215,20 +1215,20 @@
         if (dropdown) {
           // マウスイベント（デスクトップ）
           item.addEventListener('mouseenter', () => {
-            if (!('ontouchstart' in window)) {
-              item.classList.add('show-dropdown');
-            }
+            dropdown.style.opacity = '1';
+            dropdown.style.visibility = 'visible';
+            dropdown.style.transform = 'translateX(-50%) translateY(0)';
           });
           
           item.addEventListener('mouseleave', () => {
-            if (!('ontouchstart' in window)) {
-              item.classList.remove('show-dropdown');
-            }
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
           });
           
           // タッチイベント（モバイル）
           item.addEventListener('touchstart', (e) => {
-            // リンクの場合はpreventDefaultしない
+            // リンクの場合は何もしない
             if (e.target.tagName === 'A' && e.target.href !== '#') {
               return;
             }
@@ -1236,66 +1236,38 @@
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('タッチイベント発火:', item.querySelector('.nav-tab')?.textContent);
-            
             // 他のドロップダウンを閉じる
             navItems.forEach(otherItem => {
               if (otherItem !== item) {
-                otherItem.classList.remove('show-dropdown');
+                const otherDropdown = otherItem.querySelector('.dropdown-menu');
+                if (otherDropdown) {
+                  otherDropdown.style.opacity = '0';
+                  otherDropdown.style.visibility = 'hidden';
+                  otherDropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+                }
               }
             });
             
             // 現在のドロップダウンの表示/非表示を切り替え
-            const isVisible = item.classList.contains('show-dropdown');
+            const isVisible = dropdown.style.visibility === 'visible';
             if (isVisible) {
-              item.classList.remove('show-dropdown');
-              console.log('ドロップダウンを非表示にしました');
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
             } else {
-              item.classList.add('show-dropdown');
-              console.log('ドロップダウンを表示しました');
+              dropdown.style.opacity = '1';
+              dropdown.style.visibility = 'visible';
+              dropdown.style.transform = 'translateX(-50%) translateY(0)';
             }
           });
           
-          // クリックイベントも追加（タッチとクリックの両方に対応）
-          item.addEventListener('click', (e) => {
-            // リンクの場合は何もしない（リンクの動作を妨げない）
-            if (e.target.tagName === 'A' && e.target.href !== '#') {
-              return;
-            }
-            
-            if ('ontouchstart' in window) {
-              // タッチデバイスの場合は何もしない（タッチイベントで処理）
-              return;
-            }
-            
-            console.log('クリックイベント発火:', item.querySelector('.nav-tab')?.textContent);
-            
-            // 他のドロップダウンを閉じる
-            navItems.forEach(otherItem => {
-              if (otherItem !== item) {
-                otherItem.classList.remove('show-dropdown');
-              }
-            });
-            
-            // 現在のドロップダウンの表示/非表示を切り替え
-            const isVisible = item.classList.contains('show-dropdown');
-            if (isVisible) {
-              item.classList.remove('show-dropdown');
-              console.log('ドロップダウンを非表示にしました');
-            } else {
-              item.classList.add('show-dropdown');
-              console.log('ドロップダウンを表示しました');
-            }
-          });
-          
-          // ドロップダウンメニュー内のクリックイベント
+          // ドロップダウンメニュー内のリンククリック
           dropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            // リンクがクリックされた場合、ドロップダウンを閉じる
             if (e.target.tagName === 'A') {
-              item.classList.remove('show-dropdown');
-              console.log('リンクがクリックされました。ドロップダウンを閉じます:', e.target.textContent);
+              // リンクがクリックされた場合、ドロップダウンを閉じる
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
             }
           });
         }
@@ -1305,16 +1277,12 @@
       document.addEventListener('touchstart', (e) => {
         if (!e.target.closest('.nav-item')) {
           navItems.forEach(item => {
-            item.classList.remove('show-dropdown');
-          });
-        }
-      });
-      
-      // ドロップダウン外をクリックしたら閉じる
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav-item')) {
-          navItems.forEach(item => {
-            item.classList.remove('show-dropdown');
+            const dropdown = item.querySelector('.dropdown-menu');
+            if (dropdown) {
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            }
           });
         }
       });
@@ -1325,47 +1293,7 @@
       console.log('DOMContentLoaded: ドロップダウンメニューの設定を開始');
       setupDropdownMenus();
       
-      // ログインのドロップダウンメニューを特別に設定
-      const loginItem = document.querySelector('.nav-item .auth-link')?.closest('.nav-item');
-      if (loginItem) {
-        const loginTab = loginItem.querySelector('.auth-link');
-        const loginDropdown = loginItem.querySelector('.dropdown-menu');
-        
-        if (loginTab && loginDropdown) {
-          // ログインタブのクリックイベント
-          loginTab.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            console.log('ログインタブがクリックされました');
-            
-            // 他のドロップダウンを閉じる
-            document.querySelectorAll('.nav-item').forEach(item => {
-              if (item !== loginItem) {
-                item.classList.remove('show-dropdown');
-              }
-            });
-            
-            // ログインのドロップダウンの表示/非表示を切り替え
-            const isVisible = loginItem.classList.contains('show-dropdown');
-            if (isVisible) {
-              loginItem.classList.remove('show-dropdown');
-              console.log('ログインのドロップダウンを非表示にしました');
-            } else {
-              loginItem.classList.add('show-dropdown');
-              console.log('ログインのドロップダウンを表示しました');
-            }
-          });
-          
-          // ログインのドロップダウンメニュー内のリンククリック
-          loginDropdown.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' && e.target.hasAttribute('data-role')) {
-              console.log('ログイン選択:', e.target.getAttribute('data-role'));
-              loginItem.classList.remove('show-dropdown');
-            }
-          });
-        }
-      }
+
       
       console.log('DOMContentLoaded: ドロップダウンメニューの設定完了');
     });
