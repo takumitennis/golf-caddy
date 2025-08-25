@@ -1228,6 +1228,11 @@
           
           // タッチイベント（モバイル）
           item.addEventListener('touchstart', (e) => {
+            // リンクの場合はpreventDefaultしない
+            if (e.target.tagName === 'A' && e.target.href !== '#') {
+              return;
+            }
+            
             e.preventDefault();
             e.stopPropagation();
             
@@ -1253,6 +1258,11 @@
           
           // クリックイベントも追加（タッチとクリックの両方に対応）
           item.addEventListener('click', (e) => {
+            // リンクの場合は何もしない（リンクの動作を妨げない）
+            if (e.target.tagName === 'A' && e.target.href !== '#') {
+              return;
+            }
+            
             if ('ontouchstart' in window) {
               // タッチデバイスの場合は何もしない（タッチイベントで処理）
               return;
@@ -1281,6 +1291,12 @@
           // ドロップダウンメニュー内のクリックイベント
           dropdown.addEventListener('click', (e) => {
             e.stopPropagation();
+            
+            // リンクがクリックされた場合、ドロップダウンを閉じる
+            if (e.target.tagName === 'A') {
+              item.classList.remove('show-dropdown');
+              console.log('リンクがクリックされました。ドロップダウンを閉じます:', e.target.textContent);
+            }
           });
         }
       });
@@ -1308,6 +1324,49 @@
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOMContentLoaded: ドロップダウンメニューの設定を開始');
       setupDropdownMenus();
+      
+      // ログインのドロップダウンメニューを特別に設定
+      const loginItem = document.querySelector('.nav-item .auth-link')?.closest('.nav-item');
+      if (loginItem) {
+        const loginTab = loginItem.querySelector('.auth-link');
+        const loginDropdown = loginItem.querySelector('.dropdown-menu');
+        
+        if (loginTab && loginDropdown) {
+          // ログインタブのクリックイベント
+          loginTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('ログインタブがクリックされました');
+            
+            // 他のドロップダウンを閉じる
+            document.querySelectorAll('.nav-item').forEach(item => {
+              if (item !== loginItem) {
+                item.classList.remove('show-dropdown');
+              }
+            });
+            
+            // ログインのドロップダウンの表示/非表示を切り替え
+            const isVisible = loginItem.classList.contains('show-dropdown');
+            if (isVisible) {
+              loginItem.classList.remove('show-dropdown');
+              console.log('ログインのドロップダウンを非表示にしました');
+            } else {
+              loginItem.classList.add('show-dropdown');
+              console.log('ログインのドロップダウンを表示しました');
+            }
+          });
+          
+          // ログインのドロップダウンメニュー内のリンククリック
+          loginDropdown.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' && e.target.hasAttribute('data-role')) {
+              console.log('ログイン選択:', e.target.getAttribute('data-role'));
+              loginItem.classList.remove('show-dropdown');
+            }
+          });
+        }
+      }
+      
       console.log('DOMContentLoaded: ドロップダウンメニューの設定完了');
     });
 
