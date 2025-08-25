@@ -359,14 +359,7 @@
       transition: var(--transition); 
     }
     
-    /* ログインアイコンのスタイル */
-    .auth-link::after {
-      content: "🔑";
-      font-size: 0.9em;
-      margin-left: 0.3em;
-      vertical-align: middle;
-      line-height: 1;
-    }
+
     .auth-link:hover{ background: rgba(255,255,255,0.1); transform: translateY(-1px); }
     .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background: rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow: 0 10px 30px rgba(0,0,0,.3); backdrop-filter: blur(4px); }
     .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.86rem; border:none; text-align:center; }

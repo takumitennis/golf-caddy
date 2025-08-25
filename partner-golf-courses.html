@@ -88,14 +88,7 @@
       transform: translateY(-1px);
     }
     
-    /* ログインアイコンのスタイル */
-    .auth-link::after {
-      content: "🔑";
-      font-size: 0.9em;
-      margin-left: 0.3em;
-      vertical-align: middle;
-      line-height: 1;
-    }
+
 
     .dropdown-menu {
       position: absolute;
@@ -596,13 +589,6 @@
         </div>
       </div>
       <div class="nav-item">
-        <a href="partner-golf-clubs.html" class="nav-tab">提携ゴルフ部</a>
-        <div class="dropdown-menu">
-          <a href="partner-golf-clubs.html" class="dropdown-item">ゴルフ部一覧</a>
-          <a href="partner-golf-clubs.html#partnership" class="dropdown-item">パートナー募集</a>
-        </div>
-      </div>
-      <div class="nav-item">
         <a class="auth-link nav-tab" href="#" id="loginModalTrigger">ログイン</a>
         <div class="dropdown-menu auth-dropdown">
           <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
@@ -971,7 +957,32 @@
       if (prefectureFilter) {
         prefectureFilter.addEventListener('change', filterGolfCourses);
       }
+      
+      // ドロップダウンメニューの動作を設定
+      setupDropdownMenus();
     });
+    
+    // ドロップダウンメニューの動作を設定する関数
+    function setupDropdownMenus() {
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      navItems.forEach(item => {
+        const dropdown = item.querySelector('.dropdown-menu');
+        if (dropdown) {
+          item.addEventListener('mouseenter', () => {
+            dropdown.style.opacity = '1';
+            dropdown.style.visibility = 'visible';
+            dropdown.style.transform = 'translateX(-50%) translateY(0)';
+          });
+          
+          item.addEventListener('mouseleave', () => {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+          });
+        }
+      });
+    }
   </script>
 </body>
 </html> 
