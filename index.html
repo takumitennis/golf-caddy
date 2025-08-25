@@ -272,7 +272,7 @@
 
     .nav-main {
       display: flex;
-      gap: 1rem;
+      gap: clamp(0.5rem, 2vw, 1.5rem);
       align-items: center;
       flex-wrap: nowrap;
       justify-content: center;
@@ -286,10 +286,10 @@
     .nav-tab {
       color: #fff;
       text-decoration: none;
-      padding: 0.5rem 1rem;
+      padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
       border-radius: var(--border-radius);
       font-weight: 500;
-      font-size: 0.7rem;
+      font-size: clamp(0.55rem, 1.8vw, 0.85rem);
       transition: var(--transition);
       display: block;
       letter-spacing: 0.02em;
@@ -614,16 +614,24 @@
       .login-section{ display:none; }
       .auth-menu{ display:none; }
       .top-nav { position:fixed; top:0; left:0; right:0; padding: 0.3rem 0.375rem; gap: 3px; z-index: 1000; justify-content:center; height: 62px; flex-wrap: wrap; }
-      .nav-main { 
-        gap: 0.5rem; 
-        flex-wrap: nowrap; 
-        width: 100%; 
-        justify-content: center; 
-        overflow-x: auto;
-        padding: 0 0.5rem;
-      }
+              .nav-main { 
+          gap: clamp(0.3rem, 1.5vw, 0.6rem); 
+          flex-wrap: nowrap; 
+          width: 100%; 
+          justify-content: center; 
+          overflow-x: auto;
+          padding: 0 0.5rem;
+        }
       .nav-item { width:auto; max-width:none; }
-      .nav-tab { padding: 0.19rem 0.26rem; font-size: 0.65rem; width:auto; border-radius: 5px; white-space: nowrap; letter-spacing: 0; text-shadow:none; }
+              .nav-tab { 
+          padding: 0.15rem 0.25rem; 
+          font-size: clamp(0.5rem, 2.2vw, 0.7rem); 
+          width: auto; 
+          border-radius: 5px; 
+          white-space: nowrap; 
+          letter-spacing: 0; 
+          text-shadow: none; 
+        }
       .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
       
       /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
@@ -682,13 +690,19 @@
         display: flex; 
         flex-direction: row; 
         align-items: center; 
-        gap: 0.6rem; 
+        gap: clamp(0.4rem, 1.8vw, 0.8rem); 
         width: auto; 
         flex-wrap: nowrap;
         overflow-x: auto;
       }
       .nav-item { width:auto; max-width:none; }
-      .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.82rem; width:auto; border-radius: 8px; white-space: nowrap; }
+      .nav-tab { 
+        padding: 0.4rem 0.5rem; 
+        font-size: clamp(0.6rem, 2vw, 0.8rem); 
+        width: auto; 
+        border-radius: 8px; 
+        white-space: nowrap; 
+      }
 
       .login-section {
         flex-direction: column;
