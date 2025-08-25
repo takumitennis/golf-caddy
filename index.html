@@ -398,6 +398,13 @@
       visibility: visible;
       transform: translateX(-50%) translateY(0);
     }
+    
+    /* モバイル版でのドロップダウン表示 */
+    .nav-item.show-dropdown .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
 
     .dropdown-item {
       display: block;
@@ -737,11 +744,12 @@
         right: auto !important;
         transform: translateX(-50%) translateY(0) !important;
         padding: 4px 0;
-        background: rgba(0,0,0,0.9) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-        backdrop-filter: blur(8px) !important;
+        background: rgba(0,0,0,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+        backdrop-filter: blur(10px) !important;
         border-radius: 8px !important;
+        z-index: 1000 !important;
       }
       .top-nav .dropdown-item, .top-nav .auth-dropdown a {
         padding: 8px 12px;
@@ -1121,38 +1129,74 @@
         if (dropdown) {
           // マウスイベント（デスクトップ）
           item.addEventListener('mouseenter', () => {
-            dropdown.style.opacity = '1';
-            dropdown.style.visibility = 'visible';
-            dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            if (!('ontouchstart' in window)) {
+              item.classList.add('show-dropdown');
+            }
           });
           
           item.addEventListener('mouseleave', () => {
-            dropdown.style.opacity = '0';
-            dropdown.style.visibility = 'hidden';
-            dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            if (!('ontouchstart' in window)) {
+              item.classList.remove('show-dropdown');
+            }
           });
           
           // タッチイベント（モバイル）
           item.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const isVisible = dropdown.style.visibility === 'visible';
+            e.stopPropagation();
             
+            console.log('タッチイベント発火:', item.querySelector('.nav-tab')?.textContent);
+            
+            // 他のドロップダウンを閉じる
+            navItems.forEach(otherItem => {
+              if (otherItem !== item) {
+                otherItem.classList.remove('show-dropdown');
+              }
+            });
+            
+            // 現在のドロップダウンの表示/非表示を切り替え
+            const isVisible = item.classList.contains('show-dropdown');
             if (isVisible) {
-              dropdown.style.opacity = '0';
-              dropdown.style.visibility = 'hidden';
-              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+              item.classList.remove('show-dropdown');
+              console.log('ドロップダウンを非表示にしました');
             } else {
-              dropdown.style.opacity = '1';
-              dropdown.style.visibility = 'visible';
-              dropdown.style.transform = 'translateX(-50%) translateY(0)';
+              item.classList.add('show-dropdown');
+              console.log('ドロップダウンを表示しました');
             }
+          });
+          
+          // ドロップダウンメニュー内のクリックイベント
+          dropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+        }
+      });
+      
+      // ドロップダウン外をタップしたら閉じる
+      document.addEventListener('touchstart', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          navItems.forEach(item => {
+            item.classList.remove('show-dropdown');
+          });
+        }
+      });
+      
+      // ドロップダウン外をクリックしたら閉じる
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          navItems.forEach(item => {
+            item.classList.remove('show-dropdown');
           });
         }
       });
     }
     
     // ページ読み込み時にドロップダウンメニューを設定
-    document.addEventListener('DOMContentLoaded', setupDropdownMenus);
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded: ドロップダウンメニューの設定を開始');
+      setupDropdownMenus();
+      console.log('DOMContentLoaded: ドロップダウンメニューの設定完了');
+    });
 
     // Hamburger drawer
     const btnMenu = document.getElementById('btnMenu');
