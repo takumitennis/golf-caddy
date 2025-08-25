@@ -44,10 +44,10 @@
       left: 0;
       right: 0;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
-      padding: 1rem 2rem;
-      height: 104px;
+      padding: 0.75rem 1.5rem;
+      height: 80px;
       background: rgba(0,0,0,0.28);
       backdrop-filter: blur(2px);
       border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -59,8 +59,10 @@
 
     .nav-main {
       display: flex;
-      gap: 2rem;
+      gap: clamp(0.5rem, 2vw, 1.5rem);
       align-items: center;
+      flex-wrap: nowrap;
+      justify-content: center;
     }
 
     .nav-item {
@@ -70,19 +72,29 @@
     .nav-tab {
       color: #fff;
       text-decoration: none;
-      padding: 0.75rem 1.5rem;
+      padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
       border-radius: var(--border-radius);
       font-weight: 500;
-      font-size: 0.82rem;
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
       transition: var(--transition);
       display: block;
       letter-spacing: 0.02em;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
     }
 
     .nav-tab:hover {
       background: rgba(255,255,255,0.1);
       transform: translateY(-1px);
+    }
+    
+    /* ログインアイコンのスタイル */
+    .auth-link::after {
+      content: "🔑";
+      font-size: 0.9em;
+      margin-left: 0.3em;
+      vertical-align: middle;
+      line-height: 1;
     }
 
     .dropdown-menu {
@@ -560,10 +572,7 @@
   <nav class="top-nav">
     <div class="nav-main">
       <div class="nav-item">
-        <a href="index.html#golf-course-benefits" class="nav-tab">サービス</a>
-      </div>
-      <div class="nav-item">
-        <a href="index.html#golf-course-benefits" class="nav-tab">ゴルフ場向け</a>
+        <a href="index.html#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
         <div class="dropdown-menu">
           <a href="index.html#golf-course-benefits" class="dropdown-item">メリット</a>
           <a href="index.html#features" class="dropdown-item">機能紹介</a>
@@ -571,7 +580,7 @@
         </div>
       </div>
       <div class="nav-item">
-        <a href="index.html#caddy-benefits" class="nav-tab">キャディ向け</a>
+        <a href="index.html#caddy-benefits" class="nav-tab">キャディの方へ</a>
         <div class="dropdown-menu">
           <a href="index.html#caddy-benefits" class="dropdown-item">メリット</a>
           <a href="index.html#features" class="dropdown-item">機能紹介</a>
