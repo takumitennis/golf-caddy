@@ -1085,6 +1085,7 @@
       navItems.forEach(item => {
         const dropdown = item.querySelector('.dropdown-menu');
         if (dropdown) {
+          // マウスイベント（デスクトップ）
           item.addEventListener('mouseenter', () => {
             dropdown.style.opacity = '1';
             dropdown.style.visibility = 'visible';
@@ -1095,6 +1096,114 @@
             dropdown.style.opacity = '0';
             dropdown.style.visibility = 'hidden';
             dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+          });
+          
+          // クリックイベント（デスクトップ）
+          item.addEventListener('click', (e) => {
+            // リンクの場合は何もしない
+            if (e.target.tagName === 'A' && e.target.href !== '#') {
+              return;
+            }
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 他のドロップダウンを閉じる
+            navItems.forEach(otherItem => {
+              if (otherItem !== item) {
+                const otherDropdown = otherItem.querySelector('.dropdown-menu');
+                if (otherDropdown) {
+                  otherDropdown.style.opacity = '0';
+                  otherDropdown.style.visibility = 'hidden';
+                  otherDropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+                }
+              }
+            });
+            
+            // 現在のドロップダウンの表示/非表示を切り替え
+            const isVisible = dropdown.style.visibility === 'visible';
+            if (isVisible) {
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            } else {
+              dropdown.style.opacity = '1';
+              dropdown.style.visibility = 'visible';
+              dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            }
+          });
+          
+          // タッチイベント（モバイル）
+          item.addEventListener('touchstart', (e) => {
+            // リンクの場合は何もしない
+            if (e.target.tagName === 'A' && e.target.href !== '#') {
+              return;
+            }
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 他のドロップダウンを閉じる
+            navItems.forEach(otherItem => {
+              if (otherItem !== item) {
+                const otherDropdown = otherItem.querySelector('.dropdown-menu');
+                if (otherDropdown) {
+                  otherDropdown.style.opacity = '0';
+                  otherDropdown.style.visibility = 'hidden';
+                  otherDropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+                }
+              }
+            });
+            
+            // 現在のドロップダウンの表示/非表示を切り替え
+            const isVisible = dropdown.style.visibility === 'visible';
+            if (isVisible) {
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            } else {
+              dropdown.style.opacity = '1';
+              dropdown.style.visibility = 'visible';
+              dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            }
+          });
+          
+          // ドロップダウンメニュー内のリンククリック
+          dropdown.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+              // リンクがクリックされた場合、ドロップダウンを閉じる
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            }
+          });
+        }
+      });
+      
+      // ドロップダウン外をクリックしたら閉じる
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          navItems.forEach(item => {
+            const dropdown = item.querySelector('.dropdown-menu');
+            if (dropdown) {
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            }
+          });
+        }
+      });
+      
+      // ドロップダウン外をタップしたら閉じる
+      document.addEventListener('touchstart', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          navItems.forEach(item => {
+            const dropdown = item.querySelector('.dropdown-menu');
+            if (dropdown) {
+              dropdown.style.opacity = '0';
+              dropdown.style.visibility = 'hidden';
+              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            }
           });
         }
       });
