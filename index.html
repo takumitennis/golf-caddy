@@ -90,6 +90,17 @@
       text-align: center;
       animation: fadeInUp 1s ease-out;
     }
+    
+    /* モバイル用のヒーローコンテンツ調整 */
+    @media (max-width: 768px) {
+      .hero-content {
+        padding: 100px 1.5rem 0;
+      }
+      
+      .hero-text {
+        margin-bottom: 1rem;
+      }
+    }
 
     /* ロゴ背後のスポットは不要になったため無効化 */
     .hero-spot { display:none; }
@@ -624,8 +635,26 @@
         filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
       }
       .hero-bg{ background-position: center center; filter: brightness(0.9); }
-      .hero-title { font-size: clamp(14px, 3.4vw, 16px); letter-spacing: 0; line-height: 1.18; white-space: normal; overflow: visible; max-width: 92vw; margin: 0 auto 0.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-      .hero-subtitle { font-size: clamp(0.7rem, 2.1vw, 0.8rem); line-height: 1.55; }
+      .hero-title { 
+        font-size: clamp(16px, 4vw, 18px); 
+        letter-spacing: 0.02em; 
+        line-height: 1.4; 
+        white-space: normal; 
+        overflow: visible; 
+        max-width: 90vw; 
+        margin: 0 auto 1rem; 
+        text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        word-break: keep-all;
+        text-align: center;
+      }
+      .hero-subtitle { 
+        font-size: clamp(0.8rem, 2.5vw, 1rem); 
+        line-height: 1.6; 
+        margin: 0 auto 1.5rem;
+        max-width: 88vw;
+        text-align: center;
+        word-break: keep-all;
+      }
 
       .cta-buttons {
         flex-direction: column;
@@ -703,12 +732,22 @@
 
     @media (max-width: 480px) {
       .hero-title {
-        font-size: 1.3rem;
-        text-shadow: 0 3px 10px rgba(0,0,0,0.6);
+        font-size: clamp(18px, 5vw, 20px);
+        line-height: 1.5;
+        margin: 0 auto 1.2rem;
+        max-width: 85vw;
+        text-shadow: 0 3px 10px rgba(0,0,0,0.7);
+        word-break: keep-all;
+        text-align: center;
       }
 
       .hero-subtitle {
-        font-size: 1rem;
+        font-size: clamp(1rem, 3vw, 1.1rem);
+        line-height: 1.7;
+        margin: 0 auto 1.8rem;
+        max-width: 82vw;
+        text-align: center;
+        word-break: keep-all;
       }
 
       .benefits-header h2 {
@@ -820,7 +859,7 @@
             <span class="hero-line1">ゴルフ場に</span>
             <span class="hero-line2">いつでもキャディを</span>
           </h1>
-          <p class="hero-subtitle" style="margin-left:2px;">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+          <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
         </div>
         <div class="hero-nav" id="heroDots" aria-label="slides" style="margin-top: 2rem; display:flex; gap:10px; justify-content:center; z-index:3;"></div>
       </div>
