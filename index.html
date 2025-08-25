@@ -415,7 +415,7 @@
       position: absolute;
       top: 100%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(-6px);
       background: rgba(0,0,0,0.85);
       backdrop-filter: blur(4px);
       border-radius: 10px;
@@ -424,9 +424,9 @@
       visibility: hidden;
       box-shadow: 0 10px 30px rgba(0,0,0,.3);
       border: 1px solid rgba(255,255,255,0.12);
-      z-index: 10;
+      z-index: 1000;
       white-space: nowrap;
-      transition: var(--transition);
+      transition: all 0.2s ease;
       margin-top: 0.25rem;
       padding: 6px 0;
     }
@@ -439,6 +439,13 @@
     
     /* モバイル版でのドロップダウン表示 */
     .nav-item.show-dropdown .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    /* アクティブ状態でのドロップダウン表示 */
+    .nav-item.active .dropdown-menu {
       opacity: 1;
       visibility: visible;
       transform: translateX(-50%) translateY(0);
@@ -664,8 +671,8 @@
     }
 
     /* Responsive Design */
-    @media (max-width: 768px) {
-      .hamburger{ display:block !important; }
+        @media (max-width: 768px) {
+      .hamburger{ display:none; }
       /* モバイルはログインをナビと同列に表示 */
       .nav-auth-mobile{ display:flex !important; }
       #spLoginTab{ cursor:pointer; }
@@ -683,11 +690,24 @@
         height: 62px; 
         flex-wrap: wrap; 
       }
-              .nav-main { 
-          display: none; /* モバイル版ではナビゲーションメニューを非表示 */
+      .nav-main { 
+          gap: clamp(0.3rem, 1.5vw, 0.6rem); 
+          flex-wrap: nowrap; 
+          width: 100%; 
+          justify-content: center; 
+          overflow-x: auto;
+          padding: 0 0.5rem;
         }
-      .nav-item { display: none; }
-      .nav-tab { display: none; }
+      .nav-item { width:auto; max-width:none; }
+      .nav-tab { 
+          padding: 0.15rem 0.25rem; 
+          font-size: clamp(0.5rem, 2.2vw, 0.7rem); 
+          width: auto; 
+          border-radius: 5px; 
+          white-space: nowrap; 
+          letter-spacing: 0; 
+          text-shadow: none; 
+        }
       .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
       
       /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
@@ -743,10 +763,22 @@
 
 
       .nav-main { 
-        display: none; /* モバイル版ではナビゲーションメニューを非表示 */
+        display: flex; 
+        flex-direction: row; 
+        align-items: center; 
+        gap: clamp(0.4rem, 1.8vw, 0.8rem); 
+        width: auto; 
+        flex-wrap: nowrap;
+        overflow-x: auto;
       }
-      .nav-item { display: none; }
-      .nav-tab { display: none; }
+      .nav-item { width:auto; max-width:none; }
+      .nav-tab { 
+        padding: 0.4rem 0.5rem; 
+        font-size: clamp(0.6rem, 2vw, 0.8rem); 
+        width: auto; 
+        border-radius: 8px; 
+        white-space: nowrap; 
+      }
 
       .login-section {
         flex-direction: column;
@@ -1200,6 +1232,33 @@
             e.stopPropagation();
             
             console.log('タッチイベント発火:', item.querySelector('.nav-tab')?.textContent);
+            
+            // 他のドロップダウンを閉じる
+            navItems.forEach(otherItem => {
+              if (otherItem !== item) {
+                otherItem.classList.remove('show-dropdown');
+              }
+            });
+            
+            // 現在のドロップダウンの表示/非表示を切り替え
+            const isVisible = item.classList.contains('show-dropdown');
+            if (isVisible) {
+              item.classList.remove('show-dropdown');
+              console.log('ドロップダウンを非表示にしました');
+            } else {
+              item.classList.add('show-dropdown');
+              console.log('ドロップダウンを表示しました');
+            }
+          });
+          
+          // クリックイベントも追加（タッチとクリックの両方に対応）
+          item.addEventListener('click', (e) => {
+            if ('ontouchstart' in window) {
+              // タッチデバイスの場合は何もしない（タッチイベントで処理）
+              return;
+            }
+            
+            console.log('クリックイベント発火:', item.querySelector('.nav-tab')?.textContent);
             
             // 他のドロップダウンを閉じる
             navItems.forEach(otherItem => {
