@@ -144,16 +144,12 @@
       .top-nav { 
         padding: 0.5rem 1rem; 
         height: 70px;
-        justify-content: space-between; 
+        justify-content: center; 
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 1000;
-      }
-      
-      .brand-text {
-        font-size: 1.2rem;
       }
       
       .nav-main {
@@ -205,11 +201,35 @@
       }
       
       .main-content {
-        padding: 6rem 1rem 3rem;
+        padding: 6rem 0.5rem 3rem;
+        margin: 0;
+        max-width: 100%;
       }
 
       .golf-courses-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 0 0 2rem 0;
+      }
+
+      .golf-course-card {
+        margin: 0;
+        width: 100%;
+        max-width: none;
+      }
+
+      .section-header {
+        margin-bottom: 2rem;
+        padding: 0 0.5rem;
+      }
+
+      .section-header h2 {
+        font-size: 1.8rem;
+      }
+
+      .section-header p {
+        font-size: 1rem;
+        padding: 0 0.5rem;
       }
 
       .modal {
@@ -222,6 +242,38 @@
 
       .contact-info {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* 小さいモバイル画面対応 */
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 6rem 0.25rem 2rem;
+      }
+
+      .golf-courses-grid {
+        gap: 0.75rem;
+        margin: 0 0 1.5rem 0;
+      }
+
+      .golf-course-card {
+        border-radius: 8px;
+      }
+
+      .course-content {
+        padding: 1rem;
+      }
+
+      .course-name {
+        font-size: 1.2rem;
+      }
+
+      .section-header h2 {
+        font-size: 1.5rem;
+      }
+
+      .section-header p {
+        font-size: 0.9rem;
       }
     }
 
