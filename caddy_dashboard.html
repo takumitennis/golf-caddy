@@ -1701,18 +1701,75 @@
         console.log('新規プロフィール作成完了, cid:', cid);
       }
       
-      // アバター画像の処理（一時的に無効化 - Supabaseストレージの問題を解決後再有効化）
+      // アバター画像の処理
       const file = document.getElementById('pAvatar').files[0];
       if(file){
         console.log('アバター画像処理開始:', file.name);
-        console.log('注意: Supabaseストレージの問題により、画像の保存は一時的に無効化されています');
         
-        // 一時的に画像保存をスキップ
-        alert('画像の保存は一時的に無効化されています。Supabaseストレージの設定を確認してください。');
-        
-        // 画像なしの場合は既存データで画面更新
-        const updatedData = { ...row, ...payload, cid };
-        renderProfileDisplay(updatedData);
+        try {
+          // ファイルサイズチェック（5MB以下）
+          if (file.size > 5 * 1024 * 1024) {
+            alert('ファイルサイズが大きすぎます。5MB以下の画像を選択してください。');
+            return;
+          }
+          
+          // ファイル形式チェック
+          if (!file.type.startsWith('image/')) {
+            alert('画像ファイルを選択してください。');
+            return;
+          }
+          
+          // ユニークなファイル名を生成
+          const fileExt = file.name.split('.').pop();
+          const fileName = `avatar_${cid}_${Date.now()}.${fileExt}`;
+          
+          // Supabaseストレージに画像をアップロード
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('caddy-avatars')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+          
+          if (uploadError) {
+            console.error('画像アップロードエラー:', uploadError);
+            alert('画像のアップロードに失敗しました: ' + uploadError.message);
+            return;
+          }
+          
+          // アップロードされた画像のURLを取得
+          const { data: urlData } = supabase.storage
+            .from('caddy-avatars')
+            .getPublicUrl(fileName);
+          
+          const imageUrl = urlData.publicUrl;
+          console.log('画像アップロード成功:', imageUrl);
+          
+          // プロフィールに画像URLを保存
+          const { error: updateError } = await supabase
+            .from('caddies')
+            .update({ avatar_url: imageUrl })
+            .eq('cid', cid);
+          
+          if (updateError) {
+            console.error('プロフィール更新エラー:', updateError);
+            alert('プロフィールの更新に失敗しました: ' + updateError.message);
+            return;
+          }
+          
+          // 成功時の処理
+          const updatedData = { ...row, ...payload, cid, avatar_url: imageUrl };
+          renderProfileDisplay(updatedData);
+          alert('プロフィール画像が正常に保存されました！');
+          
+        } catch (error) {
+          console.error('画像処理エラー:', error);
+          alert('画像の処理中にエラーが発生しました: ' + error.message);
+          
+          // エラーが発生した場合でも、プロフィール情報は更新
+          const updatedData = { ...row, ...payload, cid };
+          renderProfileDisplay(updatedData);
+        }
       } else {
         console.log('アバター画像なし');
         // 画像なしの場合は既存データで画面更新
