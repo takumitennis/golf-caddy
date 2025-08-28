@@ -256,12 +256,9 @@
     .top-nav.scrolled { background: rgba(0,0,0,0.7); }
 
     .brand {
-      position: absolute;
-      left: 2rem;
-      top: 50%;
-      transform: translateY(-50%);
       display: flex;
       align-items: center;
+      flex-shrink: 0;
     }
 
     .brand-logo {
@@ -295,6 +292,7 @@
       letter-spacing: 0.02em;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
       white-space: nowrap;
+      cursor: pointer;
     }
 
     .nav-tab:hover {
@@ -302,8 +300,54 @@
       transform: translateY(-1px);
     }
 
-    .brand { position:absolute; left: 12px; top: 50%; transform: translateY(-50%); height: 100%; display:flex; align-items:center; }
-    .brand-logo { height: calc(100% - 10px); width:auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 10px;
+      min-width: 220px;
+      opacity: 0;
+      visibility: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3);
+      border: 1px solid rgba(255,255,255,0.12);
+      z-index: 1000;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      margin-top: 0.25rem;
+      padding: 6px 0;
+    }
+
+    .nav-item:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 14px;
+      font-size: .86rem;
+      font-weight: 500;
+      border: none;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+    .dropdown-item:first-child {
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
 
     .login-section {
       display: flex;
@@ -366,13 +410,13 @@
     .auth-dropdown a:last-child{ border:none; }
     .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateX(-50%) translateY(0); }
 
-    /* Mobile login button (replacing hamburger) */
-    .mobile-login{ display:none; }
+    /* Mobile navigation */
     .hamburger{ 
       display: none; 
       position: absolute; 
       right: 12px; 
-      top: 10px; 
+      top: 50%; 
+      transform: translateY(-50%);
       width: 44px; 
       height: 40px; 
       border: 1px solid rgba(255,255,255,.35); 
@@ -382,10 +426,11 @@
       cursor: pointer;
     }
     .hamburger span{ display:block; height:2px; background:#fff; margin:9px 8px; }
+    
     .nav-drawer{ 
       display: none; 
       position: fixed;
-      top: 62px;
+      top: 80px;
       left: 0;
       right: 0;
       background: rgba(0,0,0,0.95);
@@ -409,65 +454,6 @@
     .nav-drawer a:hover {
       background: rgba(255,255,255,0.2);
       transform: translateY(-2px);
-    }
-
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-6px);
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(4px);
-      border-radius: 10px;
-      min-width: 220px;
-      opacity: 0;
-      visibility: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,.3);
-      border: 1px solid rgba(255,255,255,0.12);
-      z-index: 1000;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      margin-top: 0.25rem;
-      padding: 6px 0;
-    }
-
-    /* .nav-item:hover .dropdown-menu を削除 - JavaScriptで制御するため */
-    
-    /* モバイル版でのドロップダウン表示 */
-    .nav-item.show-dropdown .dropdown-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
-    
-    /* アクティブ状態でのドロップダウン表示 */
-    .nav-item.active .dropdown-menu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .dropdown-item {
-      display: block;
-      color: #fff;
-      text-decoration: none;
-      padding: 10px 14px;
-      font-size: .86rem;
-      font-weight: 500;
-      border: none;
-      text-align: center;
-      transition: var(--transition);
-    }
-
-    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
-
-    .dropdown-item:last-child {
-      border-bottom: none;
-      border-radius: 0 0 var(--border-radius) var(--border-radius);
-    }
-
-    .dropdown-item:first-child {
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
 
     /* Content wrapper */
@@ -667,65 +653,61 @@
     }
 
     /* Responsive Design */
-        @media (max-width: 768px) {
-      .hamburger{ display:none; }
-      /* モバイルはログインをナビと同列に表示 */
-      .nav-auth-mobile{ display:flex !important; }
-      #spLoginTab{ cursor:pointer; }
-      .login-section{ display:none; }
-      .auth-menu{ display:none; }
+    @media (max-width: 768px) {
       .top-nav { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        right: 0; 
-        padding: 0.3rem 0.375rem; 
-        gap: 3px; 
-        z-index: 9999; 
-        justify-content: center; 
-        height: 62px; 
-        flex-wrap: wrap; 
-      }
-      .nav-main { 
-          gap: clamp(0.3rem, 1.5vw, 0.6rem); 
-          flex-wrap: nowrap; 
-          width: 100%; 
-          justify-content: center; 
-          overflow-x: auto;
-          padding: 0 0.5rem;
-        }
-      .nav-item { width:auto; max-width:none; }
-      .nav-tab { 
-          padding: 0.15rem 0.25rem; 
-          font-size: clamp(0.5rem, 2.2vw, 0.7rem); 
-          width: auto; 
-          border-radius: 5px; 
-          white-space: nowrap; 
-          letter-spacing: 0; 
-          text-shadow: none; 
-        }
-      .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
-      
-      /* モバイル版ではブランドロゴを「キャディとしての」テキストの上に配置 */
-      .brand {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, +110px);
-        height: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 20;
-        pointer-events: none;
+        padding: 0.5rem 1rem; 
+        height: 70px;
+        justify-content: space-between; 
       }
       
       .brand-logo {
-        height: 120px;
+        height: 50px;
         width: auto;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
       }
-      .hero-bg{ background-position: center center; filter: brightness(0.9); }
+      
+      .nav-main {
+        gap: clamp(0.3rem, 1.5vw, 0.8rem);
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .nav-item {
+        flex-shrink: 0;
+      }
+      
+      .nav-tab {
+        padding: 0.4rem 0.6rem;
+        font-size: clamp(0.6rem, 2.2vw, 0.8rem);
+        white-space: nowrap;
+        border-radius: 6px;
+      }
+      
+      .dropdown-menu {
+        min-width: auto;
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) translateY(0) !important;
+        padding: 4px 0;
+        background: rgba(0,0,0,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 8px !important;
+        z-index: 1000 !important;
+      }
+      
+      .dropdown-item {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+      
+      .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
+      
       .hero-title { 
         font-size: clamp(16px, 4vw, 18px); 
         letter-spacing: 0.02em; 
@@ -755,88 +737,6 @@
       .cta-btn {
         width: 100%;
         max-width: 300px;
-      }
-
-
-      .nav-main { 
-        display: flex; 
-        flex-direction: row; 
-        align-items: center; 
-        gap: clamp(0.4rem, 1.8vw, 0.8rem); 
-        width: auto; 
-        flex-wrap: nowrap;
-        overflow-x: auto;
-      }
-      .nav-item { width:auto; max-width:none; }
-      .nav-tab { 
-        padding: 0.4rem 0.5rem; 
-        font-size: clamp(0.6rem, 2vw, 0.8rem); 
-        width: auto; 
-        border-radius: 8px; 
-        white-space: nowrap; 
-      }
-
-      .login-section {
-        flex-direction: column;
-        gap: 0.5rem;
-        width: 100%;
-      }
-
-      .nav-login-btn {
-        width: 100%;
-        max-width: 200px;
-      }
-      
-      /* モバイル版でのドロワーメニューの表示 */
-      .nav-drawer {
-        display: none;
-        position: fixed;
-        top: 62px;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,0.95);
-        backdrop-filter: blur(10px);
-        z-index: 9998;
-        padding: 1rem;
-        border-top: 1px solid rgba(255,255,255,0.1);
-      }
-      .nav-drawer a {
-        display: block;
-        color: #fff;
-        text-decoration: none;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        background: rgba(255,255,255,0.1);
-        border-radius: 8px;
-        text-align: center;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-      .nav-drawer a:hover {
-        background: rgba(255,255,255,0.2);
-        transform: translateY(-2px);
-      }
-
-      /* SP用: ドロップダウン幅を文字ギリギリに */
-      .top-nav .dropdown-menu, .top-nav .auth-dropdown {
-        min-width: auto !important;
-        width: max-content;
-        max-width: calc(100vw - 24px);
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) translateY(0) !important;
-        padding: 4px 0;
-        background: rgba(0,0,0,0.95) !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
-        backdrop-filter: blur(10px) !important;
-        border-radius: 8px !important;
-        z-index: 1000 !important;
-      }
-      .top-nav .dropdown-item, .top-nav .auth-dropdown a {
-        padding: 8px 12px;
-        font-size: 0.66rem;
-        white-space: nowrap;
       }
 
       .benefits-header h2 {
@@ -939,52 +839,48 @@
 </head>
 <body>
   <header>
-    <button id="btnMenu" class="hamburger" aria-label="menu"><span></span><span></span><span></span></button>
     <div class="hero-bg" aria-hidden="true"></div>
     <nav class="top-nav">
-
-        <div class="nav-main">
-            <div class="nav-item">
+      <div class="brand">
+        <img src="images/キャディ.jpg" alt="CaddyPlus" class="brand-logo">
+      </div>
+      
+      <div class="nav-main">
+        <div class="nav-item">
           <a href="#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
-                <div class="dropdown-menu">
+          <div class="dropdown-menu">
             <a href="#golf-course-benefits" class="dropdown-item">メリット</a>
             <a href="#features" class="dropdown-item">機能紹介</a>
             <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
-                </div>
-            </div>
-            <div class="nav-item">
+          </div>
+        </div>
+        
+        <div class="nav-item">
           <a href="#caddy-benefits" class="nav-tab">キャディの方へ</a>
-                <div class="dropdown-menu">
+          <div class="dropdown-menu">
             <a href="#caddy-benefits" class="dropdown-item">メリット</a>
             <a href="#features" class="dropdown-item">機能紹介</a>
             <a href="training-program.html" class="dropdown-item">研修について</a>
             <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
-                </div>
-            </div>
-
-            <div class="nav-item">
-              <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
-              <div class="dropdown-menu">
-                <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
-                <a href="partner-golf-courses.html#partnership" class="dropdown-item">パートナー募集</a>
-              </div>
-            </div>
-
-            <div class="nav-item">
-              <a class="auth-link nav-tab" href="#" id="loginModalTrigger">ログイン</a>
-              <div class="dropdown-menu auth-dropdown">
-                <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
-                <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
-              </div>
-            </div>
+          </div>
         </div>
+
+        <div class="nav-item">
+          <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
+          <div class="dropdown-menu">
+            <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
+            <a href="partner-golf-courses.html#partnership" class="dropdown-item">パートナー募集</a>
+          </div>
         </div>
-      <div class="login-section" style="display:none;"></div>
-    </nav>
-    <nav id="drawer" class="nav-drawer" aria-hidden="true">
-      <a href="login.html?role=golf">ゴルフ場ログイン</a>
-      <a href="login.html?role=caddy">キャディログイン</a>
-      <a href="profile.html?role=golf">会員登録</a>
+
+        <div class="nav-item">
+          <a href="#" class="nav-tab" id="loginModalTrigger">ログイン</a>
+          <div class="dropdown-menu auth-dropdown">
+            <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
+            <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
+          </div>
+        </div>
+      </div>
     </nav>
 
     <div class="hero-content">
@@ -1202,50 +1098,61 @@
       });
     });
     
-    // ドロップダウンメニューの動作を設定（シンプル版）
+    // ドロップダウンメニューの動作を設定（PC版とモバイル版両対応）
     function setupDropdownMenus() {
-      console.log('setupDropdownMenus called'); // デバッグログ
       const navItems = document.querySelectorAll('.nav-item');
-      console.log('Found navItems:', navItems.length); // デバッグログ
       
-      navItems.forEach((item, index) => {
+      navItems.forEach((item) => {
         const dropdown = item.querySelector('.dropdown-menu');
-        console.log(`NavItem ${index}:`, item, 'Dropdown:', dropdown); // デバッグログ
         
         if (dropdown) {
           // マウスイベント（デスクトップ）
           item.addEventListener('mouseenter', () => {
-            console.log('Mouse enter on nav item'); // デバッグログ
-            dropdown.style.opacity = '1';
-            dropdown.style.visibility = 'visible';
-            dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            // 他のドロップダウンを閉じる
+            closeAllDropdowns();
+            // 現在のドロップダウンを開く
+            openDropdown(dropdown);
           });
           
           item.addEventListener('mouseleave', () => {
-            console.log('Mouse leave on nav item'); // デバッグログ
-            dropdown.style.opacity = '0';
-            dropdown.style.visibility = 'hidden';
-            dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            // 少し遅延を入れてドロップダウンを閉じる
+            setTimeout(() => {
+              if (!item.matches(':hover')) {
+                closeDropdown(dropdown);
+              }
+            }, 100);
           });
           
-          // タッチイベント（モバイル）- シンプルな実装
+          // タッチイベント（モバイル）- 改善版
+          let touchStartTime = 0;
+          let touchStartY = 0;
+          
           item.addEventListener('touchstart', (e) => {
-            console.log('Touch start on nav item'); // デバッグログ
-            // リンクの場合は何もしない（リンクの動作を妨げない）
-            if (e.target.tagName === 'A') {
-              return;
-            }
+            touchStartTime = Date.now();
+            touchStartY = e.touches[0].clientY;
+          });
+          
+          item.addEventListener('touchend', (e) => {
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchDistance = Math.abs(touchEndY - touchStartY);
             
-            // ドロップダウンの表示/非表示を切り替え
-            const isVisible = dropdown.style.visibility === 'visible';
-            if (isVisible) {
-              dropdown.style.opacity = '0';
-              dropdown.style.visibility = 'hidden';
-              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
-            } else {
-              dropdown.style.opacity = '1';
-              dropdown.style.visibility = 'visible';
-              dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            // 短時間のタッチ（タップ）のみを処理
+            if (touchDuration < 300 && touchDistance < 10) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // 他のドロップダウンを閉じる
+              closeAllDropdowns();
+              
+              // 現在のドロップダウンの表示/非表示を切り替え
+              const isVisible = dropdown.style.visibility === 'visible';
+              if (isVisible) {
+                closeDropdown(dropdown);
+              } else {
+                openDropdown(dropdown);
+              }
             }
           });
           
@@ -1253,42 +1160,52 @@
           dropdown.addEventListener('click', (e) => {
             if (e.target.tagName === 'A') {
               // リンクがクリックされた場合、ドロップダウンを閉じる
-              dropdown.style.opacity = '0';
-              dropdown.style.visibility = 'hidden';
-              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+              closeAllDropdowns();
             }
           });
         }
       });
+      
+      // 画面外クリックでドロップダウンを閉じる
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          closeAllDropdowns();
+        }
+      });
+      
+      // 画面外タッチでドロップダウンを閉じる
+      document.addEventListener('touchend', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          closeAllDropdowns();
+        }
+      });
     }
     
+    // ドロップダウンを開く関数
+    function openDropdown(dropdown) {
+      dropdown.style.opacity = '1';
+      dropdown.style.visibility = 'visible';
+      dropdown.style.transform = 'translateX(-50%) translateY(0)';
+    }
+    
+    // ドロップダウンを閉じる関数
+    function closeDropdown(dropdown) {
+      dropdown.style.opacity = '0';
+      dropdown.style.visibility = 'hidden';
+      dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+    }
+    
+    // すべてのドロップダウンを閉じる関数
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        closeDropdown(menu);
+      });
+    }
+
     // ページ読み込み時にドロップダウンメニューを設定
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOMContentLoaded: ドロップダウンメニューの設定を開始');
       setupDropdownMenus();
-      
-
-      
-      console.log('DOMContentLoaded: ドロップダウンメニューの設定完了');
     });
-
-    // Hamburger drawer
-    const btnMenu = document.getElementById('btnMenu');
-    const drawer = document.getElementById('drawer');
-    if (btnMenu && drawer){
-      btnMenu.addEventListener('click', ()=>{
-        console.log('ハンバーガーメニューがクリックされました');
-        const opened = drawer.style.display==='block';
-        drawer.style.display = opened ? 'none' : 'block';
-        drawer.setAttribute('aria-hidden', opened ? 'true':'false');
-        console.log('ドロワーメニューの表示状態:', opened ? '非表示' : '表示');
-      });
-      drawer.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>{
-        console.log('ドロワーメニューのリンクがクリックされました:', a.textContent);
-        drawer.style.display='none'; 
-        drawer.setAttribute('aria-hidden','true');
-      }));
-    }
 
     // Hero slider (auto + dots)
     (function(){
@@ -1390,7 +1307,7 @@
         const roleText = role === 'golf' ? 'ゴルフ場' : 'キャディ';
         
         loginHeading.textContent = roleText + 'ログイン';
-        signupLink.href = `login.html?role=${role}&mode=signup`;
+        signupLink.href = `login/index.html?role=${role}&mode=signup`;
         modal.style.display = 'flex';
       };
       
@@ -1405,6 +1322,15 @@
       closeBtn.addEventListener('click', closeModal);
       modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
+      });
+      
+      // ログインボタンのクリックイベントを設定
+      document.addEventListener('click', (e) => {
+        if (e.target.id === 'loginModalTrigger') {
+          e.preventDefault();
+          // デフォルトでゴルフ場ログインを表示
+          openModal('golf');
+        }
       });
       
       // ドロップダウンクリック処理
