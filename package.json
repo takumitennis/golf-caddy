@@ -4,15 +4,11 @@
   "description": "Golf Caddy Matching Platform with LINE Integration",
   "main": "index.js",
   "scripts": {
-    "dev": "netlify dev",
     "build": "echo 'Build complete'",
-    "deploy": "netlify deploy --prod"
+    "deploy": "wrangler pages deploy ."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0"
-  },
-  "devDependencies": {
-    "netlify-cli": "^17.0.0"
   },
   "keywords": [
     "golf",
