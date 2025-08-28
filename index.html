@@ -1092,36 +1092,25 @@
             }, 100);
           });
           
-          // タッチイベント（モバイル）- 改善版
-          let touchStartTime = 0;
-          let touchStartY = 0;
-          
-          item.addEventListener('touchstart', (e) => {
-            touchStartTime = Date.now();
-            touchStartY = e.touches[0].clientY;
-          });
-          
-          item.addEventListener('touchend', (e) => {
-            const touchEndTime = Date.now();
-            const touchDuration = touchEndTime - touchStartTime;
-            const touchEndY = e.changedTouches[0].clientY;
-            const touchDistance = Math.abs(touchEndY - touchStartY);
+          // クリックイベント（PC版とモバイル版両対応）
+          item.addEventListener('click', (e) => {
+            // ログインモーダルの場合は処理しない
+            if (e.target.id === 'loginModalTrigger' || e.target.matches('[data-role]')) {
+              return;
+            }
             
-            // 短時間のタッチ（タップ）のみを処理
-            if (touchDuration < 300 && touchDistance < 10) {
-              e.preventDefault();
-              e.stopPropagation();
-              
-              // 他のドロップダウンを閉じる
-              closeAllDropdowns();
-              
-              // 現在のドロップダウンの表示/非表示を切り替え
-              const isVisible = dropdown.style.visibility === 'visible';
-              if (isVisible) {
-                closeDropdown(dropdown);
-              } else {
-                openDropdown(dropdown);
-              }
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 他のドロップダウンを閉じる
+            closeAllDropdowns();
+            
+            // 現在のドロップダウンの表示/非表示を切り替え
+            const isVisible = dropdown.style.visibility === 'visible';
+            if (isVisible) {
+              closeDropdown(dropdown);
+            } else {
+              openDropdown(dropdown);
             }
           });
           
@@ -1137,13 +1126,6 @@
       
       // 画面外クリックでドロップダウンを閉じる
       document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav-item')) {
-          closeAllDropdowns();
-        }
-      });
-      
-      // 画面外タッチでドロップダウンを閉じる
-      document.addEventListener('touchend', (e) => {
         if (!e.target.closest('.nav-item')) {
           closeAllDropdowns();
         }
