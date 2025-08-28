@@ -35,9 +35,174 @@
       background: var(--bg-light);
     }
 
+    /* 統一されたヘッダーのCSS */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      height: 80px;
+      background: rgba(0,0,0,0.28);
+      backdrop-filter: blur(2px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
+    .top-nav.scrolled { background: rgba(0,0,0,0.7); }
 
-    /* Navigation - ホームページのCSSを使用するため削除 */
+    .brand {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      height: 60px;
+      width: auto;
+      filter: brightness(1.1);
+    }
+
+    .nav-main {
+      display: flex;
+      gap: clamp(0.5rem, 2vw, 1.5rem);
+      align-items: center;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+
+    .nav-item {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .nav-tab {
+      color: #fff;
+      text-decoration: none;
+      padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: block;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-1px);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 10px;
+      min-width: 220px;
+      opacity: 0;
+      visibility: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3);
+      border: 1px solid rgba(255,255,255,0.12);
+      z-index: 1000;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      margin-top: 0.25rem;
+      padding: 6px 0;
+    }
+
+    .nav-item:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 14px;
+      font-size: .86rem;
+      font-weight: 500;
+      border: none;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .dropdown-item:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+
+    /* モバイル対応 */
+    @media (max-width: 768px) {
+      .top-nav { 
+        padding: 0.5rem 1rem; 
+        height: 70px;
+        justify-content: space-between; 
+      }
+      
+      .brand-logo {
+        height: 50px;
+        width: auto;
+      }
+      
+      .nav-main {
+        gap: clamp(0.3rem, 1.5vw, 0.8rem);
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .nav-item {
+        flex-shrink: 0;
+      }
+      
+      .nav-tab {
+        padding: 0.4rem 0.6rem;
+        font-size: clamp(0.6rem, 2.2vw, 0.8rem);
+        white-space: nowrap;
+        border-radius: 6px;
+      }
+      
+      .dropdown-menu {
+        min-width: auto;
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) translateY(0) !important;
+        padding: 4px 0;
+        background: rgba(0,0,0,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 8px !important;
+        z-index: 1000 !important;
+      }
+      
+      .dropdown-item {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+    }
 
     /* Main Content */
     .main-content {
@@ -503,50 +668,51 @@
   </style>
 </head>
 <body>
-
-
-  <!-- Navigation -->
-  <nav class="top-nav">
+    <!-- 統一されたヘッダー -->
+    <header>
+      <nav class="top-nav">
+        <div class="brand">
+          <img src="images/キャディ.jpg" alt="CaddyPlus" class="brand-logo">
+        </div>
+        
         <div class="nav-main">
-            <div class="nav-item">
-          <a href="index.html#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
-                <div class="dropdown-menu">
-            <a href="index.html#golf-course-benefits" class="dropdown-item">メリット</a>
-            <a href="index.html#features" class="dropdown-item">機能紹介</a>
-            <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
-                </div>
+          <div class="nav-item">
+            <a href="index.html#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
+            <div class="dropdown-menu">
+              <a href="index.html#golf-course-benefits" class="dropdown-item">メリット</a>
+              <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
             </div>
-            <div class="nav-item">
-          <a href="index.html#caddy-benefits" class="nav-tab">キャディの方へ</a>
-                <div class="dropdown-menu">
-            <a href="index.html#caddy-benefits" class="dropdown-item">メリット</a>
-            <a href="index.html#features" class="dropdown-item">機能紹介</a>
-            <a href="training-program.html" class="dropdown-item">研修について</a>
-            <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
-                </div>
+          </div>
+          
+          <div class="nav-item">
+            <a href="index.html#caddy-benefits" class="nav-tab">キャディの方へ</a>
+            <div class="dropdown-menu">
+              <a href="index.html#caddy-benefits" class="dropdown-item">メリット</a>
+              <a href="training-program.html" class="dropdown-item">研修について</a>
+              <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
             </div>
+          </div>
 
-            <div class="nav-item">
-              <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
-              <div class="dropdown-menu">
-                <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
-                <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
-              </div>
+          <div class="nav-item">
+            <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
+            <div class="dropdown-menu">
+              <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
+              <a href="partner-golf-courses.html#partnership" class="dropdown-item">パートナー募集</a>
             </div>
+          </div>
 
-            <div class="nav-item">
-              <a class="auth-link nav-tab" href="#" id="loginModalTrigger">ログイン</a>
-              <div class="dropdown-menu auth-dropdown">
-                <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
-                <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
-              </div>
+          <div class="nav-item">
+            <a href="login/index.html" class="nav-tab">ログイン</a>
+            <div class="dropdown-menu auth-dropdown">
+              <a href="login/index.html?role=golf" class="dropdown-item">ゴルフ場</a>
+              <a href="login/index.html?role=caddy" class="dropdown-item">キャディ</a>
             </div>
+          </div>
         </div>
-        </div>
-      <div class="login-section" style="display:none;"></div>
+      </nav>
+    </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
+    <div class="main-content">
     <!-- Golf Clubs Section -->
     <section id="golf-clubs">
       <div class="section-header">
@@ -569,7 +735,7 @@
         <button class="partnership-btn contact-inquiry" onclick="openContactForm()">ゴルフ部/サークルとして問い合わせる</button>
       </div>
     </section>
-  </main>
+  </div>
 
   <!-- Modal -->
   <div class="modal" id="clubModal">
@@ -990,43 +1156,61 @@
       setupDropdownMenus();
     });
     
-    // ドロップダウンメニューの動作を設定する関数（シンプル版）
+    // ドロップダウンメニューの動作を設定する関数（PC版とモバイル版両対応）
     function setupDropdownMenus() {
       const navItems = document.querySelectorAll('.nav-item');
       
-      navItems.forEach(item => {
+      navItems.forEach((item) => {
         const dropdown = item.querySelector('.dropdown-menu');
+        
         if (dropdown) {
           // マウスイベント（デスクトップ）
           item.addEventListener('mouseenter', () => {
-            dropdown.style.opacity = '1';
-            dropdown.style.visibility = 'visible';
-            dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            // 他のドロップダウンを閉じる
+            closeAllDropdowns();
+            // 現在のドロップダウンを開く
+            openDropdown(dropdown);
           });
           
           item.addEventListener('mouseleave', () => {
-            dropdown.style.opacity = '0';
-            dropdown.style.visibility = 'hidden';
-            dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+            // 少し遅延を入れてドロップダウンを閉じる
+            setTimeout(() => {
+              if (!item.matches(':hover')) {
+                closeDropdown(dropdown);
+              }
+            }, 100);
           });
           
-          // タッチイベント（モバイル）- シンプルな実装
+          // タッチイベント（モバイル）- 改善版
+          let touchStartTime = 0;
+          let touchStartY = 0;
+          
           item.addEventListener('touchstart', (e) => {
-            // リンクの場合は何もしない（リンクの動作を妨げない）
-            if (e.target.tagName === 'A') {
-              return;
-            }
+            touchStartTime = Date.now();
+            touchStartY = e.touches[0].clientY;
+          });
+          
+          item.addEventListener('touchend', (e) => {
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchDistance = Math.abs(touchEndY - touchStartY);
             
-            // ドロップダウンの表示/非表示を切り替え
-            const isVisible = dropdown.style.visibility === 'visible';
-            if (isVisible) {
-              dropdown.style.opacity = '0';
-              dropdown.style.visibility = 'hidden';
-              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
-            } else {
-              dropdown.style.opacity = '1';
-              dropdown.style.visibility = 'visible';
-              dropdown.style.transform = 'translateX(-50%) translateY(0)';
+            // 短時間のタッチ（タップ）のみを処理
+            if (touchDuration < 300 && touchDistance < 10) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // 他のドロップダウンを閉じる
+              closeAllDropdowns();
+              
+              // 現在のドロップダウンの表示/非表示を切り替え
+              const isVisible = dropdown.style.visibility === 'visible';
+              if (isVisible) {
+                closeDropdown(dropdown);
+              } else {
+                openDropdown(dropdown);
+              }
             }
           });
           
@@ -1034,12 +1218,45 @@
           dropdown.addEventListener('click', (e) => {
             if (e.target.tagName === 'A') {
               // リンクがクリックされた場合、ドロップダウンを閉じる
-              dropdown.style.opacity = '0';
-              dropdown.style.visibility = 'hidden';
-              dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+              closeAllDropdowns();
             }
           });
         }
+      });
+      
+      // 画面外クリックでドロップダウンを閉じる
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          closeAllDropdowns();
+        }
+      });
+      
+      // 画面外タッチでドロップダウンを閉じる
+      document.addEventListener('touchend', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          closeAllDropdowns();
+        }
+      });
+    }
+    
+    // ドロップダウンを開く関数
+    function openDropdown(dropdown) {
+      dropdown.style.opacity = '1';
+      dropdown.style.visibility = 'visible';
+      dropdown.style.transform = 'translateX(-50%) translateY(0)';
+    }
+    
+    // ドロップダウンを閉じる関数
+    function closeDropdown(dropdown) {
+      dropdown.style.opacity = '0';
+      dropdown.style.visibility = 'hidden';
+      dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+    }
+    
+    // すべてのドロップダウンを閉じる関数
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        closeDropdown(menu);
       });
     }
   </script>
