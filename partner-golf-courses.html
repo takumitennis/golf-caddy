@@ -201,7 +201,7 @@
       }
       
       .main-content {
-        padding: 6rem 0.5rem 3rem;
+        padding: 6rem 0 3rem;
         margin: 0;
         max-width: 100%;
       }
@@ -210,17 +210,19 @@
         grid-template-columns: 1fr;
         gap: 1rem;
         margin: 0 0 2rem 0;
+        padding: 0;
       }
 
       .golf-course-card {
         margin: 0;
         width: 100%;
         max-width: none;
+        border-radius: 0;
       }
 
       .section-header {
         margin-bottom: 2rem;
-        padding: 0 0.5rem;
+        padding: 0 1rem;
       }
 
       .section-header h2 {
@@ -248,7 +250,7 @@
     /* 小さいモバイル画面対応 */
     @media (max-width: 480px) {
       .main-content {
-        padding: 6rem 0.25rem 2rem;
+        padding: 6rem 0 2rem;
       }
 
       .golf-courses-grid {
@@ -257,7 +259,7 @@
       }
 
       .golf-course-card {
-        border-radius: 8px;
+        border-radius: 0;
       }
 
       .course-content {
@@ -336,6 +338,7 @@
       font-size: 3rem;
       position: relative;
       overflow: hidden;
+      text-align: center;
     }
 
     .course-image img {
