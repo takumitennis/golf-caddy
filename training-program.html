@@ -151,6 +151,11 @@
         padding: 0.5rem 1rem; 
         height: 70px;
         justify-content: space-between; 
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
       }
       
       .brand-logo {
@@ -197,6 +202,40 @@
         padding: 8px 12px;
         font-size: 0.75rem;
         white-space: nowrap;
+      }
+      
+      .container {
+        padding: 0 15px;
+        padding-top: 6rem; /* 固定ヘッダーの高さ分 */
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .content-section {
+        padding: 1.5rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .step-item {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .step-number {
+        margin: 0 0 1rem 0;
+      }
+
+      .benefits-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-section {
+        padding: 2rem 1.5rem;
       }
     }
 
@@ -403,41 +442,6 @@
     .cta-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(255,255,255,0.3);
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 15px;
-      }
-
-      .header h1 {
-        font-size: 1.8rem;
-      }
-
-      .content-section {
-        padding: 1.5rem;
-      }
-
-      .section-title {
-        font-size: 1.5rem;
-      }
-
-      .step-item {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .step-number {
-        margin: 0 0 1rem 0;
-      }
-
-      .benefits-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .cta-section {
-        padding: 2rem 1.5rem;
-      }
     }
   </style>
 </head>
