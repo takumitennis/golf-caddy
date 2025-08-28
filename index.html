@@ -91,17 +91,6 @@
       animation: fadeInUp 1s ease-out;
     }
     
-    /* モバイル用のヒーローコンテンツ調整 */
-    @media (max-width: 768px) {
-      .hero-content {
-        padding: 100px 1.5rem 0;
-      }
-      
-      .hero-text {
-        margin-bottom: 1rem;
-      }
-    }
-
     /* ロゴ背後のスポットは不要になったため無効化 */
     .hero-spot { display:none; }
 
@@ -125,16 +114,6 @@
       opacity: 0;
       filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
       animation: logoFade 700ms ease-out 120ms forwards;
-    }
-
-    /* モバイル版でのロゴ非表示 */
-    @media (max-width: 768px) {
-      .hero-logo { 
-        display: none; /* モバイル版ではロゴを非表示 */
-      }
-      .brand-logo {
-        display: none; /* モバイル版ではヘッダーロゴも非表示 */
-      }
     }
 
     /* ロゴを少し上げ、左寄せ配置（PC） */
@@ -706,7 +685,10 @@
         white-space: nowrap;
       }
       
-      .hero-content{ max-width: 96%; padding: 100px 1rem 0; }
+      .hero-content{ 
+        max-width: 96%; 
+        padding: 80px 1rem 0; /* 固定ヘッダーの高さ(70px) + 余白(10px) */
+      }
       
       .hero-title { 
         font-size: clamp(16px, 4vw, 18px); 
@@ -720,6 +702,7 @@
         word-break: keep-all;
         text-align: center;
       }
+      
       .hero-subtitle { 
         font-size: clamp(0.8rem, 2.5vw, 1rem); 
         line-height: 1.6; 
@@ -764,6 +747,11 @@
 
       .feature {
         padding: 2rem 1.5rem;
+      }
+      
+      /* モバイル版でのヒーローロゴ非表示（ヘッダーロゴは表示） */
+      .hero-logo { 
+        display: none;
       }
     }
 
