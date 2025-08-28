@@ -214,7 +214,21 @@
       transform: translateY(-2px);
     }
 
-    /* Navigation */
+    /* Brand */
+    .brand {
+      display: flex;
+      align-items: center;
+    }
+    
+    .brand-text {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    /* Top Navigation */
     .top-nav {
       position: fixed;
       top: 0;
@@ -240,10 +254,12 @@
       flex-shrink: 0;
     }
 
-    .brand-logo {
-      height: 60px;
-      width: auto;
-      filter: brightness(1.1);
+    .brand-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
     .nav-main {
@@ -639,9 +655,8 @@
         justify-content: space-between; 
       }
       
-      .brand-logo {
-        height: 50px;
-        width: auto;
+      .brand-text {
+        font-size: 1.2rem;
       }
       
       .nav-main {
@@ -828,46 +843,46 @@
 <body>
   <header>
     <div class="hero-bg" aria-hidden="true"></div>
-    <nav class="top-nav">
-      <div class="brand">
-        <img src="images/キャディ.jpg" alt="CaddyPlus" class="brand-logo">
-      </div>
-      
-      <div class="nav-main">
-        <div class="nav-item">
-          <a href="#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
-          <div class="dropdown-menu">
-            <a href="#golf-course-benefits" class="dropdown-item">メリット</a>
-            <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
-          </div>
+      <nav class="top-nav">
+        <div class="brand">
+          <span class="brand-text">CaddyPlus</span>
         </div>
         
-        <div class="nav-item">
-          <a href="#caddy-benefits" class="nav-tab">キャディの方へ</a>
-          <div class="dropdown-menu">
-            <a href="#caddy-benefits" class="dropdown-item">メリット</a>
-            <a href="training-program.html" class="dropdown-item">研修について</a>
-            <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
+        <div class="nav-main">
+          <div class="nav-item">
+            <a href="#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
+            <div class="dropdown-menu">
+              <a href="#golf-course-benefits" class="dropdown-item">メリット</a>
+              <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
+            </div>
           </div>
-        </div>
+          
+          <div class="nav-item">
+            <a href="#caddy-benefits" class="nav-tab">キャディの方へ</a>
+            <div class="dropdown-menu">
+              <a href="#caddy-benefits" class="dropdown-item">メリット</a>
+              <a href="training-program.html" class="dropdown-item">研修について</a>
+              <a href="partner-golf-clubs.html" class="dropdown-item">パートナー募集</a>
+            </div>
+          </div>
 
-        <div class="nav-item">
-          <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
-          <div class="dropdown-menu">
-            <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
-            <a href="partner-golf-courses.html#partnership" class="dropdown-item">パートナー募集</a>
+          <div class="nav-item">
+            <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
+            <div class="dropdown-menu">
+              <a href="partner-golf-courses.html" class="dropdown-item">ゴルフ場一覧</a>
+              <a href="partner-golf-courses.html" class="dropdown-item">パートナー募集</a>
+            </div>
           </div>
-        </div>
 
-        <div class="nav-item">
-          <a href="#" class="nav-tab" id="loginModalTrigger">ログイン</a>
-          <div class="dropdown-menu auth-dropdown">
-            <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
-            <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
+          <div class="nav-item">
+            <a href="login/index.html" class="nav-tab">ログイン</a>
+            <div class="dropdown-menu auth-dropdown">
+              <a href="login/index.html?role=golf" class="dropdown-item">ゴルフ場</a>
+              <a href="login/index.html?role=caddy" class="dropdown-item">キャディ</a>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
     <div class="hero-content">
       <div class="hero-row hero-slider" style="display:flex; flex-direction:column; align-items:center;">
@@ -1244,134 +1259,7 @@
       restart();
     })();
 
-    // Login Modal
-    (function(){
-      // ログインモーダルのHTML作成
-      const modalHTML = `
-        <div id="loginModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000;">
-          <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:400px; text-align:center; position:relative;">
-            <button id="closeModal" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
-            
-            <div id="loginForm">
-              <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333; font-size:1.2rem; font-weight:bold;">ログイン</h3>
-              
-              <div style="margin-bottom:1rem; text-align:left;">
-                <label style="display:block; margin-bottom:0.5rem; font-weight:500;">ログインID</label>
-                <input id="modalEmail" type="email" placeholder="メールアドレスを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
-              </div>
-              
-              <div style="margin-bottom:1.5rem; text-align:left;">
-                <label style="display:block; margin-bottom:0.5rem; font-weight:500;">パスワード</label>
-                <input id="modalPassword" type="password" placeholder="パスワードを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
-              </div>
-              
-              <button id="modalLoginBtn" style="width:100%; background:#2e7d32; color:white; border:none; padding:0.875rem; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1rem;">
-                ログイン
-              </button>
-              
-              <a href="#" id="modalSignupLink" style="color:#2e7d32; text-decoration:none; font-size:0.9rem;">
-                新規登録はこちら
-              </a>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // モーダルをbodyに追加
-      document.body.insertAdjacentHTML('beforeend', modalHTML);
-      
-      const modal = document.getElementById('loginModal');
-      const closeBtn = document.getElementById('closeModal');
-      const loginHeading = document.getElementById('loginHeading');
-      const signupLink = document.getElementById('modalSignupLink');
-      const loginBtn = document.getElementById('modalLoginBtn');
-      let currentRole = '';
-      
-      // モーダルを開く関数
-      const openModal = (role) => {
-        currentRole = role;
-        const roleText = role === 'golf' ? 'ゴルフ場' : 'キャディ';
-        
-        loginHeading.textContent = roleText + 'ログイン';
-        signupLink.href = `login/index.html?role=${role}&mode=signup`;
-        modal.style.display = 'flex';
-      };
-      
-      // モーダルを閉じる関数
-      const closeModal = () => {
-        modal.style.display = 'none';
-        document.getElementById('modalEmail').value = '';
-        document.getElementById('modalPassword').value = '';
-      };
-      
-      // イベントリスナー設定
-      closeBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-      });
-      
-      // ログインボタンのクリックイベントを設定
-      document.addEventListener('click', (e) => {
-        if (e.target.id === 'loginModalTrigger') {
-          e.preventDefault();
-          // デフォルトでゴルフ場ログインを表示
-          openModal('golf');
-        }
-      });
-      
-      // ドロップダウンクリック処理
-      document.addEventListener('click', (e) => {
-        if (e.target.matches('[data-role]')) {
-          e.preventDefault();
-          const role = e.target.getAttribute('data-role');
-          openModal(role);
-        }
-      });
-      
-      // ログインボタン処理
-      loginBtn.addEventListener('click', async () => {
-        const email = document.getElementById('modalEmail').value;
-        const password = document.getElementById('modalPassword').value;
-        
-        if (!email || !password) {
-          alert('メールアドレスとパスワードを入力してください');
-          return;
-        }
-        
-        // 既存のlogin.htmlを利用したログイン処理
-        try {
-          loginBtn.textContent = 'ログイン中...';
-          loginBtn.disabled = true;
-          
-          // Supabaseログイン（既存のlogin.htmlと同じ処理）
-          const { data, error } = await supabase.auth.signInWithPassword({ 
-            email: email,
-            password: password 
-          });
-          
-          if (error) {
-            throw error;
-          } else {
-            // ログイン成功時の処理（既存のlogin.htmlと同じ）
-            setTimeout(() => {
-              location.href = currentRole === 'golf' ? 'golf_dashboard.html' : 'caddy_dashboard.html';
-            }, 600);
-          }
-        } catch (error) {
-          console.error('Login error:', error);
-          alert('ログインに失敗しました: ' + error.message);
-          loginBtn.textContent = 'ログイン';
-          loginBtn.disabled = false;
-        }
-      });
-      
-      // Enterキーでログイン
-      document.getElementById('modalPassword').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          loginBtn.click();
-        }
-      });
-    })();
+
   </script>
 </body>
 </html>
