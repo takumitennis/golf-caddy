@@ -669,10 +669,6 @@
 
           <div class="nav-item">
             <a href="#" class="nav-tab" id="loginModalTrigger">ログイン</a>
-            <div class="dropdown-menu auth-dropdown">
-              <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
-              <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
-            </div>
           </div>
         </div>
       </nav>
@@ -1218,19 +1214,14 @@
       document.addEventListener('click', (e) => {
         if (e.target.id === 'loginModalTrigger') {
           e.preventDefault();
-          // デフォルトでゴルフ場ログインを表示
-          openModal('golf');
+          // ログイン選択メニューを表示
+          loginHeading.textContent = 'ログイン';
+          signupLink.href = `login/index.html?mode=signup`;
+          modal.style.display = 'flex';
         }
       });
       
-      // ドロップダウンクリック処理
-      document.addEventListener('click', (e) => {
-        if (e.target.matches('[data-role]')) {
-          e.preventDefault();
-          const role = e.target.getAttribute('data-role');
-          openModal(role);
-        }
-      });
+
       
       // ログインボタン処理
       loginBtn.addEventListener('click', async () => {
