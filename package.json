@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "echo 'Build complete'",
-    "deploy": "wrangler pages deploy ."
+    "deploy": "wrangler pages deploy . --project-name golf-caddy",
+    "deploy:prod": "wrangler pages deploy . --project-name golf-caddy --commit-dirty=true"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0"

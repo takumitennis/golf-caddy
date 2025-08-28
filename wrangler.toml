@@ -3,15 +3,18 @@ name = "golf-caddy"
 compatibility_date = "2024-01-01"
 
 # Pages用の設定
-[build]
-command = ""
-upload_dir = "."
+pages_build_output_dir = "."
+
+# 自動デプロイ設定
+[env.production]
+name = "golf-caddy"
+compatibility_date = "2024-01-01"
 
 # 環境変数（実際の値はCloudflare Pages設定画面で入力）
-[env.production]
-vars = { }
+[env.production.vars]
+NODE_VERSION = "18"
 
-# Secrets（実際の値はCloudflare Pages設定画面で入力）
+# Secrets（実際の値はCloudflare Pages設定画面で設定）
 # 以下の環境変数をCloudflare Pages設定画面で設定してください：
 # 1. LINE_CHANNEL_ACCESS_TOKEN: LINE Developers Consoleで取得したChannel Access Token
 # 2. LINE_CHANNEL_SECRET: LINE Developers Consoleで取得したChannel Secret

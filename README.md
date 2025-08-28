@@ -1,5 +1,39 @@
 # Golf-Caddy Matching Service
 
+## 🚀 デプロイ方法
+
+### 自動デプロイ（推奨）
+GitHubのmainブランチにプッシュすると、自動的にCloudflare Pagesにデプロイされます。
+
+```bash
+git add .
+git commit -m "更新内容の説明"
+git push origin main
+```
+
+### 手動デプロイ
+Cloudflare CLIを使用して手動でデプロイできます：
+
+```bash
+# Cloudflare CLIにログイン
+wrangler login
+
+# デプロイ実行
+npm run deploy
+
+# または直接実行
+wrangler pages deploy . --project-name golf-caddy
+```
+
+### 環境変数の設定
+Cloudflare Pagesのダッシュボードで以下の環境変数を設定してください：
+
+1. `LINE_CHANNEL_ACCESS_TOKEN`: LINE Developers Consoleで取得
+2. `LINE_CHANNEL_SECRET`: LINE Developers Consoleで取得  
+3. `SUPABASE_URL`: SupabaseプロジェクトのURL
+4. `SUPABASE_SERVICE_KEY`: Supabaseのservice_role key
+5. `RESEND_API_KEY`: ResendのAPIキー（メール送信用）
+
 ## 🏌️ プロジェクト概要
 
 キャディタスは、ゴルフ場とキャディを効率的にマッチングするサービスです。
