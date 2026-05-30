@@ -1,0 +1,17 @@
+# 戦略・ドラフト資料（公開リポジトリに置かない）
+.progress.md
+*.backup
+brand-identity.md
+design-feedback-*.md
+legal-foundation*.md
+visual-assets-spec.md
+research/
+assets/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Dependencies (将来用)
+node_modules/

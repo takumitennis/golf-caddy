@@ -1,0 +1,29 @@
+# すべての旧URLをトップ(準備中ページ)へリダイレクト
+# サイトリニューアル準備中のため、旧ページ群へのアクセスを遮断
+
+/dashboard          /  302
+/caddy_dashboard    /  302
+/golf_dashboard     /  302
+/profile            /  302
+/booking-flow       /  302
+/partner-golf-clubs    /  302
+/partner-golf-courses  /  302
+/training-program   /  302
+/rating-system      /  302
+/notifications      /  302
+/notification-system /  302
+/database-test      /  302
+/login              /  302
+/login/*            /  302
+/dashboard.html     /  302
+/caddy_dashboard.html /  302
+/golf_dashboard.html  /  302
+/profile.html       /  302
+/booking-flow.html  /  302
+/partner-golf-clubs.html  /  302
+/partner-golf-courses.html /  302
+/training-program.html /  302
+/rating-system.html /  302
+/notifications.html /  302
+/notification-system.html /  302
+/database-test.html /  302
