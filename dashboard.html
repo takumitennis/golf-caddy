@@ -167,6 +167,7 @@
 
       // テーブル row が存在するかチェック（OAuth 初回ログインなら無いはず）
       const table = role === "golf" ? "golf_courses" : "caddies";
+      const targetDashboard = role === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html";
       setStatus("ステップ5: " + table + " テーブル検索中… (email=" + user.email + ")");
       let profile = null;
       let timeoutHit = false;
@@ -174,32 +175,31 @@
         // .maybeSingle() の特殊な Accept ヘッダーを避けるため limit(1) で受ける
         const res = await withTimeout(
           sb.from(table).select("email").eq("email", user.email).limit(1),
-          25000,
+          8000,
           table + " query"
         );
         if (res.error) {
-          setStatus("ステップ5: クエリエラー (" + res.error.message + ") → 未登録扱いで続行");
+          setStatus("ステップ5: クエリエラー (" + res.error.message + ") → 実ダッシュボードに委譲");
           profile = null;
         } else {
           profile = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
         }
       } catch (e) {
         timeoutHit = true;
-        setStatus("ステップ5: timeout 発生 (" + e.message + ") → 未登録扱いで登録確認画面へ");
+        setStatus("ステップ5: timeout (" + e.message + ") → 実ダッシュボードに委譲 (登録判定は dashboard 側で行う)");
       }
 
       routed = true;
-      if (!profile) {
-        // 未登録（または timeout で確認不能）→ 確認カードを表示
-        if (!timeoutHit) setStatus("ステップ6: " + table + " に登録無し → 登録確認カード表示");
-        showRegisterPrompt(role, user);
+      if (timeoutHit || profile) {
+        // timeout または登録ありなら、実ダッシュボードへ直接送る。
+        // 実ダッシュボードは行が無ければ inline で createProfile フォームを描画する仕様なので、
+        // 「未登録なのに実ダッシュボードに送ってしまう」リスクは無い。
+        setStatus("ステップ6: " + targetDashboard + " へ");
+        window.location.href = targetDashboard;
       } else {
-        setStatus("ステップ6: 登録あり → " + (role === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html") + " へ");
-        if (role === "golf") {
-          window.location.href = "/golf_dashboard.html";
-        } else {
-          window.location.href = "/caddy_dashboard.html";
-        }
+        // 確実に未登録（クエリ成功で row 無し）→ 確認カードを表示
+        setStatus("ステップ6: " + table + " に登録無し → 登録確認カード表示");
+        showRegisterPrompt(role, user);
       }
     }
 

@@ -584,10 +584,21 @@
     }
 
     // 1. Check login & role and initialize everything
-    sb.auth.getUser().then(async ({ data }) => {
-      if (!data.user) { location.href = "/"; return; }
-      const role = data.user.user_metadata?.role;
-      if (role !== "golf") { location.href = "dashboard.html"; return; }
+    // getUser はサーバ呼び出しで重い環境があるため getSession (localStorage 即読み) に置換
+    sb.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user;
+      if (!user) { location.href = "/"; return; }
+      // role 確定: user_metadata 優先、無ければ URL/sessionStorage の fallback
+      let role = user.user_metadata?.role;
+      if (role !== "caddy" && role !== "golf") {
+        const urlRole = new URLSearchParams(location.search).get("role");
+        let stashedRole = null;
+        try { stashedRole = sessionStorage.getItem("oauth_role"); } catch (_) {}
+        role = urlRole || stashedRole;
+      }
+      if (role !== "golf") { location.href = role === "caddy" ? "/caddy_dashboard.html" : "/"; return; }
+      // 以降のコードが data.user 参照のままでも動くようにする
+      data.user = user;
 
       // get golf_courses row to fetch gid & name
       const { data: rows } = await sb

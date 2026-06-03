@@ -448,8 +448,9 @@
       }
 
       alert("登録完了！");
-      // 絶対パスでダッシュボードハブへ
-      location.href = "/dashboard.html";
+      // dashboard.html ハブを経由するとテーブル検索が重い環境で詰まるため、
+      // role に応じた実ダッシュボードへ直接遷移する
+      location.href = role === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html";
     };
 
     /* ==== 3. ユーザー統計情報の読み込み ==== */
