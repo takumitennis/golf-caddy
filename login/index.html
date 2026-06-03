@@ -404,7 +404,9 @@
           googleBtn.disabled = true;
           // role が "golf" でも "caddy" でも、現在の URL の role をそのまま引き継ぐ
           const targetRole = (role === "golf" || role === "caddy") ? role : "caddy";
+          // sessionStorage はタブ間で消えるので localStorage にも控える二重保存
           try { sessionStorage.setItem("oauth_role", targetRole); } catch (_) {}
+          try { localStorage.setItem("oauth_role", targetRole); } catch (_) {}
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
@@ -431,8 +433,10 @@
           const { authorize_url, state } = await res.json();
           // state は cookie で保持されるので localStorage にも控えだけ残す（CSRF 二重防御）
           try { sessionStorage.setItem("line_login_state", state); } catch (_) {}
-          // ロール情報を callback で参照するために localStorage に置く
+          // ロール情報を callback 後の dashboard で参照するため localStorage / sessionStorage 二重保存
           try { sessionStorage.setItem("line_login_role", "caddy"); } catch (_) {}
+          try { sessionStorage.setItem("oauth_role", "caddy"); } catch (_) {}
+          try { localStorage.setItem("oauth_role", "caddy"); } catch (_) {}
           location.href = authorize_url;
         } catch (err) {
           console.error("[login] line login init error:", err);

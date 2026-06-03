@@ -138,18 +138,17 @@
       if (!user) return;
       setStatus("ステップ2: ユーザー判定中 (email=" + (user.email || "?") + ")");
 
-      // URL クエリの role が user_metadata より優先される（OAuth callback で渡してくるケース）
-      // OAuth プロバイダ側で query が落とされるケースに備え、sessionStorage を fallback として使う
       const urlRole = new URLSearchParams(location.search).get("role");
       let stashedRole = null;
+      let localStashedRole = null;
       try { stashedRole = sessionStorage.getItem("oauth_role"); } catch (_) {}
-      const incomingRole = urlRole || stashedRole;
+      try { localStashedRole = localStorage.getItem("oauth_role"); } catch (_) {}
+      const incomingRole = urlRole || stashedRole || localStashedRole;
       let role = user.user_metadata?.role;
-      setStatus("ステップ3: role=" + (role || "なし") + " incoming=" + (incomingRole || "なし"));
+      setStatus("ステップ3: meta.role=" + (role || "なし") + " / URL.role=" + (urlRole || "なし") + " / stash.role=" + (stashedRole || "なし") + " / local.role=" + (localStashedRole || "なし"));
 
       // user_metadata に role が無い OAuth ユーザー → URL/stash から拾う
-      // updateUser はサーバ呼び出しで遅いので await しない（fire-and-forget でバックグラウンド書込み）。
-      // ルーティング自体はメモリ上の role で進める。
+      // updateUser はサーバ呼び出しで遅いので await しない（fire-and-forget でバックグラウンド書込み）
       if (!role && (incomingRole === "golf" || incomingRole === "caddy")) {
         role = incomingRole;
         sb.auth.updateUser({ data: { role: incomingRole } })
@@ -158,10 +157,12 @@
       }
 
       try { sessionStorage.removeItem("oauth_role"); } catch (_) {}
+      try { localStorage.removeItem("oauth_role"); } catch (_) {}
 
       if (role !== "golf" && role !== "caddy") {
-        setStatus("エラー: role が確定できません → / に戻ります");
-        setTimeout(() => { window.location.href = "/"; }, 2000);
+        // どこからも role が拾えなかった → ユーザーに手動選択させる救済 UI を出す
+        setStatus("どの立場でご利用ですか？以下からお選びください");
+        showRoleChooser(user);
         return;
       }
 
@@ -201,6 +202,35 @@
         setStatus("ステップ6: " + table + " に登録無し → 登録確認カード表示");
         showRegisterPrompt(role, user);
       }
+    }
+
+    // role が URL/stash/metadata のいずれからも取れなかった時の救済 UI
+    function showRoleChooser(user) {
+      routed = true;
+      document.getElementById("loadingView").style.display = "none";
+
+      // registerPrompt を流用して、中身だけ差し替える
+      const card = document.getElementById("registerPrompt");
+      card.classList.add("is-visible");
+      card.querySelector(".register-prompt__title").textContent = "どちらの立場でご利用ですか？";
+      const body = card.querySelector(".register-prompt__body");
+      body.innerHTML = `アカウント (<strong>${user.email || "認証済み"}</strong>) は確認できました。<br>続けるには立場をお選びください。`;
+      const actions = card.querySelector(".register-prompt__actions");
+      actions.innerHTML = `
+        <button id="chooseGolf" class="btn btn--primary btn--lg">ゴルフ場として続ける</button>
+        <button id="chooseCaddy" class="btn btn--primary btn--lg" style="background:var(--color-primary-deep,#1B4332);">キャディとして続ける</button>
+        <button id="chooseCancel" class="btn--ghost">ログアウト</button>
+      `;
+      const goWith = (r) => {
+        sb.auth.updateUser({ data: { role: r } }).catch(() => {});
+        location.href = r === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html";
+      };
+      document.getElementById("chooseGolf").onclick = () => goWith("golf");
+      document.getElementById("chooseCaddy").onclick = () => goWith("caddy");
+      document.getElementById("chooseCancel").onclick = async () => {
+        try { await sb.auth.signOut(); } catch (_) {}
+        location.href = "/";
+      };
     }
 
     function showRegisterPrompt(role, user) {
