@@ -80,18 +80,26 @@
       if (!user) return;
 
       // URL クエリの role が user_metadata より優先される（OAuth callback で渡してくるケース）
+      // OAuth プロバイダ側で query が落とされるケースに備え、sessionStorage を fallback として使う
       const urlRole = new URLSearchParams(location.search).get("role");
+      let stashedRole = null;
+      try { stashedRole = sessionStorage.getItem("oauth_role"); } catch (_) {}
+      const incomingRole = urlRole || stashedRole;
       let role = user.user_metadata?.role;
 
-      // user_metadata に role が無い OAuth ユーザー → URL から拾って Supabase に書く
-      if (!role && (urlRole === "golf" || urlRole === "caddy")) {
+      // user_metadata に role が無い OAuth ユーザー → URL/stash から拾って Supabase に書く
+      if (!role && (incomingRole === "golf" || incomingRole === "caddy")) {
         try {
-          await sb.auth.updateUser({ data: { role: urlRole } });
-          role = urlRole;
+          await sb.auth.updateUser({ data: { role: incomingRole } });
+          role = incomingRole;
         } catch (e) {
           console.error("[dashboard] updateUser failed:", e);
+          role = incomingRole; // updateUser に失敗してもこのセッション中はメモリ上で扱う
         }
       }
+
+      // 役割が確定した時点で stash は消す
+      try { sessionStorage.removeItem("oauth_role"); } catch (_) {}
 
       if (role !== "golf" && role !== "caddy") {
         console.warn("[dashboard] no role → /");

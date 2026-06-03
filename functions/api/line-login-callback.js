@@ -337,8 +337,8 @@ function successHtml({ siteOrigin, supabaseUrl, supabaseAnonKey, email, tokenHas
 (async () => {
   try {
     const sb = window.supabase.createClient(${JSON.stringify(supabaseUrl)}, ${JSON.stringify(supabaseAnonKey)});
+    // Supabase v2 仕様: token_hash を渡す時は email を含めてはいけない
     const { data, error } = await sb.auth.verifyOtp({
-      email: ${JSON.stringify(email)},
       token_hash: ${JSON.stringify(tokenHash)},
       type: "magiclink"
     });

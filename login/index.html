@@ -400,6 +400,8 @@
       googleBtn.onclick = async () => {
         try {
           googleBtn.disabled = true;
+          // OAuth 戻りで URL から role が落ちても拾えるよう sessionStorage に保存
+          try { sessionStorage.setItem("oauth_role", "golf"); } catch (_) {}
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
