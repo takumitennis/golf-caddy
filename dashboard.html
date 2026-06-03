@@ -172,29 +172,29 @@
       const table = role === "golf" ? "golf_courses" : "caddies";
       setStatus("ステップ5: " + table + " テーブル検索中… (email=" + user.email + ")");
       let profile = null;
-      let profileError = null;
+      let timeoutHit = false;
       try {
+        // .maybeSingle() の特殊な Accept ヘッダーを避けるため limit(1) で受ける
         const res = await withTimeout(
-          sb.from(table).select("email").eq("email", user.email).maybeSingle(),
-          10000,
+          sb.from(table).select("email").eq("email", user.email).limit(1),
+          25000,
           table + " query"
         );
-        profile = res.data;
-        profileError = res.error;
+        if (res.error) {
+          setStatus("ステップ5: クエリエラー (" + res.error.message + ") → 未登録扱いで続行");
+          profile = null;
+        } else {
+          profile = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+        }
       } catch (e) {
-        setStatus("エラー (テーブル検索 timeout/失敗): " + e.message);
-        return;
-      }
-
-      if (profileError) {
-        setStatus("エラー (profileError): " + profileError.message);
-        return;
+        timeoutHit = true;
+        setStatus("ステップ5: timeout 発生 (" + e.message + ") → 未登録扱いで登録確認画面へ");
       }
 
       routed = true;
       if (!profile) {
-        // 未登録 → 確認カードを表示
-        setStatus("ステップ6: " + table + " に登録無し → 登録確認カード表示");
+        // 未登録（または timeout で確認不能）→ 確認カードを表示
+        if (!timeoutHit) setStatus("ステップ6: " + table + " に登録無し → 登録確認カード表示");
         showRegisterPrompt(role, user);
       } else {
         setStatus("ステップ6: 登録あり → " + (role === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html") + " へ");

@@ -200,6 +200,23 @@
 
       <a href="/" class="back-link">← ホームに戻る</a>
 
+      <!-- OAuth 認証情報の確認バナー（LINE / Google でログインした人向け） -->
+      <div id="oauthBanner" class="card prof-section" style="display:none;padding:var(--space-4) var(--space-5);">
+        <div style="display:flex;align-items:center;gap:var(--space-4);">
+          <img id="oauthAvatar" alt="" style="display:none;width:48px;height:48px;border-radius:50%;border:1px solid var(--color-border);object-fit:cover;" />
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:var(--fs-micro);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-ink-mute);margin-bottom:4px;">
+              <span id="oauthProvider">LINE</span> で認証済み
+            </div>
+            <div id="oauthName" style="font-size:var(--fs-body);font-weight:700;color:var(--color-ink);line-height:1.4;">—</div>
+            <div id="oauthEmail" style="font-size:var(--fs-small);color:var(--color-ink-sub);line-height:1.4;margin-top:2px;"></div>
+          </div>
+        </div>
+        <p style="margin:var(--space-3) 0 0;font-size:var(--fs-small);color:var(--color-ink-sub);line-height:1.6;">
+          以下の情報は <span id="oauthProvider2">LINE</span> から取得した内容です。<br>必要に応じて編集してから登録してください。
+        </p>
+      </div>
+
       <!-- プロフィール登録フォーム -->
       <div class="card prof-section">
         <h2 class="card__title prof-section__title">基本情報</h2>
@@ -320,6 +337,58 @@
     });
     form.insertAdjacentHTML("beforeend",
       `<button type="submit" class="btn btn--primary">登録</button>`);
+
+    /* ==== 1-b. OAuth 取得情報のプリフィル ====
+       LINE Login → user_metadata.name / picture / line_user_id（emailは合成値 line_xxx@caddygate.local）
+       Google OAuth → user_metadata.full_name or name / avatar_url / picture / email は実アドレス
+       メール+パスワード → 何も入っていないので skip */
+    try {
+      const { data: { user: oauthUser } } = await supabase.auth.getUser();
+      if (oauthUser) {
+        const meta = oauthUser.user_metadata || {};
+        const appMeta = oauthUser.app_metadata || {};
+        const provider = meta.provider || appMeta.provider || ""; // "line" | "google" | "email" | ""
+        const isLine = provider === "line";
+        const isGoogle = provider === "google";
+
+        // OAuth 由来でない場合は banner を出さない
+        if (isLine || isGoogle) {
+          const oauthName = meta.full_name || meta.name || "";
+          const oauthEmail = isLine ? "" : (oauthUser.email || ""); // LINEは合成 email なので表示しない
+          const oauthPicture = meta.avatar_url || meta.picture || "";
+          const providerLabel = isLine ? "LINE" : "Google";
+
+          // banner 表示
+          const banner = document.getElementById("oauthBanner");
+          document.getElementById("oauthProvider").textContent = providerLabel;
+          document.getElementById("oauthProvider2").textContent = providerLabel;
+          document.getElementById("oauthName").textContent = oauthName || "(取得できませんでした)";
+          const emailEl = document.getElementById("oauthEmail");
+          if (oauthEmail) emailEl.textContent = oauthEmail;
+          else emailEl.style.display = "none";
+          if (oauthPicture) {
+            const av = document.getElementById("oauthAvatar");
+            av.src = oauthPicture;
+            av.style.display = "block";
+          }
+          banner.style.display = "block";
+
+          // フォーム入力欄へプリフィル
+          const setIfEmpty = (id, value) => {
+            const el = document.getElementById(id);
+            if (el && !el.value && value) el.value = value;
+          };
+          if (role === "caddy") {
+            setIfEmpty("name", oauthName);
+          } else if (role === "golf") {
+            // ゴルフ場名は別物なので OAuth name は contact_name に入れる
+            setIfEmpty("contact_name", oauthName);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[profile] OAuth prefill failed:", e);
+    }
 
     /* ==== 2. 送信処理 ==== */
     form.onsubmit = async e => {
