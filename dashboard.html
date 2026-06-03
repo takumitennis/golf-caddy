@@ -51,14 +51,59 @@
       line-height: 1.5;
       margin-bottom: var(--space-6);
     }
+
+    /* 未登録者向け「登録しますか？」カード */
+    .register-prompt { display: none; }
+    .register-prompt.is-visible { display: block; }
+    .register-prompt__title {
+      font-size: var(--fs-large);
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: var(--space-3);
+      letter-spacing: 0.02em;
+    }
+    .register-prompt__body {
+      font-size: var(--fs-small);
+      color: var(--color-ink-sub);
+      line-height: 1.6;
+      margin-bottom: var(--space-5);
+    }
+    .register-prompt__provider {
+      font-weight: 700;
+      color: var(--color-ink);
+    }
+    .register-prompt__actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .register-prompt__actions .btn { width: 100%; }
   </style>
 </head>
 <body>
   <div class="hub-wrap">
     <div class="hub-card">
       <div class="hub-card__brand"><img src="/assets/logo-wordmark.png?v=3" alt="Caddygate" /></div>
-      <div class="hub-card__status" id="welcome">読み込み中…</div>
-      <button id="logout" class="btn--ghost">ログアウト</button>
+
+      <!-- 通常ロード中 / ステータス表示 -->
+      <div id="loadingView">
+        <div class="hub-card__status" id="welcome">読み込み中…</div>
+        <button id="logout" class="btn--ghost">ログアウト</button>
+      </div>
+
+      <!-- 未登録者向け「登録しますか？」カード -->
+      <div id="registerPrompt" class="register-prompt">
+        <div class="register-prompt__title">まだ登録が完了していません</div>
+        <div class="register-prompt__body">
+          <span id="providerLabel" class="register-prompt__provider">LINE</span> での認証は通りましたが、
+          <span id="roleLabel">キャディ</span>としてのプロフィール登録がまだ完了していません。<br>
+          このまま<span id="roleLabel2">キャディ</span>として登録しますか？
+        </div>
+        <div class="register-prompt__actions">
+          <button id="registerYes" class="btn btn--primary btn--lg">登録手続きを続ける</button>
+          <button id="registerNo" class="btn--ghost">いいえ、別のアカウントでやり直す</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -148,8 +193,9 @@
 
       routed = true;
       if (!profile) {
-        setStatus("ステップ6: " + table + " に登録無し → /profile.html?role=" + role + " へ");
-        window.location.href = `/profile.html?role=${role}`;
+        // 未登録 → 確認カードを表示
+        setStatus("ステップ6: " + table + " に登録無し → 登録確認カード表示");
+        showRegisterPrompt(role, user);
       } else {
         setStatus("ステップ6: 登録あり → " + (role === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html") + " へ");
         if (role === "golf") {
@@ -158,6 +204,30 @@
           window.location.href = "/caddy_dashboard.html";
         }
       }
+    }
+
+    function showRegisterPrompt(role, user) {
+      const providerName = (user.user_metadata?.provider === "line") ? "LINE"
+                         : (user.app_metadata?.provider === "google") ? "Google"
+                         : (user.app_metadata?.provider === "line") ? "LINE"
+                         : "メール";
+      const roleName = role === "golf" ? "ゴルフ場" : "キャディ";
+
+      document.getElementById("loadingView").style.display = "none";
+      document.getElementById("providerLabel").textContent = providerName;
+      document.getElementById("roleLabel").textContent = roleName;
+      document.getElementById("roleLabel2").textContent = roleName;
+      document.getElementById("registerPrompt").classList.add("is-visible");
+
+      document.getElementById("registerYes").onclick = () => {
+        window.location.href = `/profile.html?role=${role}`;
+      };
+      document.getElementById("registerNo").onclick = async () => {
+        try {
+          await sb.auth.signOut();
+        } catch (_) {}
+        window.location.href = "/login/?role=" + role;
+      };
     }
 
     // OAuth / メール認証 callback も SIGNED_IN を発火するので拾う
