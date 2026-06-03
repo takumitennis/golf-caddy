@@ -215,6 +215,17 @@
         <p style="margin:var(--space-3) 0 0;font-size:var(--fs-small);color:var(--color-ink-sub);line-height:1.6;">
           以下の情報は <span id="oauthProvider2">LINE</span> から取得した内容です。<br>必要に応じて編集してから登録してください。
         </p>
+
+        <!-- LINE 連携ステータス（LINE Login ユーザーのみ） -->
+        <div id="lineNotifyStatus" style="display:none;margin-top:var(--space-4);padding:var(--space-3) var(--space-4);background:var(--color-primary-soft-bg, #E8F2E8);border-radius:var(--radius-sm);">
+          <div style="font-size:var(--fs-small);font-weight:700;color:var(--color-primary-deep);line-height:1.5;">
+            ✓ LINE 通知が有効です
+          </div>
+          <div style="font-size:var(--fs-micro);color:var(--color-ink-sub);line-height:1.6;margin-top:4px;">
+            マッチ成立・予約確定・シフト提出のリマインドなどが、自動でこの LINE アカウントに届きます。<br>
+            ※ LINE ID（@xxx）は別物で通知には使わないため、登録不要です。
+          </div>
+        </div>
       </div>
 
       <!-- プロフィール登録フォーム -->
@@ -287,8 +298,15 @@
     const statsSection = document.getElementById("statsSection");
     const golfCoursesSection = document.getElementById("golfCoursesSection");
 
+    /* ==== ログインプロバイダの先読み ==== */
+    /*   line_id フィールドの出し分けに使うので、FIELDS 定義より前で取得 */
+    const { data: { user: _provUser } } = await supabase.auth.getUser();
+    const _provider = _provUser?.user_metadata?.provider || _provUser?.app_metadata?.provider || "";
+    const isLineLoginUser = (_provider === "line");
+
     /* ==== 項目定義 ====
-       section プロパティで「基本情報」「キャディ条件」など見出しを分割 */
+       section プロパティで「基本情報」「キャディ条件」など見出しを分割
+       LINE Login ユーザーは line_user_id を既に保持してるので line_id 欄は出さない */
     const FIELDS = {
       golf: [
         {id:"name",                 label:"ゴルフ場名",                                     section:"基本情報"},
@@ -298,10 +316,11 @@
         {id:"caddy_duration_hours", label:"拘束時間（時間）",                       type:"number", section:"キャディ条件"},
         {id:"perks",                label:"キャディ特典（例：打ちっぱなし無料）",            section:"キャディ条件"}
       ],
-      caddy:[
+      caddy: [
         {id:"name",        label:"氏名"},
         {id:"phone",       label:"電話番号"},
-        {id:"line_id",     label:"LINE ID"},
+        // LINE Login 経由なら line_user_id を既に持っているので LINE ID 入力欄は省略
+        ...(!isLineLoginUser ? [{id:"line_id", label:"LINE ID"}] : []),
         {id:"golf_years",  label:"ゴルフ歴(年)",  type:"number"},
         {id:"caddy_years", label:"キャディ歴(年)", type:"number"}
       ]
@@ -372,6 +391,12 @@
             av.style.display = "block";
           }
           banner.style.display = "block";
+
+          // LINE Login ユーザーには「LINE 通知有効」ステータスを追加表示
+          if (isLine) {
+            const statusEl = document.getElementById("lineNotifyStatus");
+            if (statusEl) statusEl.style.display = "block";
+          }
 
           // フォーム入力欄へプリフィル
           const setIfEmpty = (id, value) => {
