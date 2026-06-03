@@ -2822,10 +2822,23 @@
       const grid = document.getElementById('golfCourseGrid');
       if (!grid) return;
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</div>';
-      const { data: courses, error } = await sb
+      // address / prefecture / homepage_url / gallery_urls は MIGRATE_2026_06_03.sql 適用前は存在しないため、
+      // まず full set で試して失敗したら最小カラムでフォールバックする二段階クエリ
+      const FULL_COLS = 'gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description,address,prefecture,homepage_url,gallery_urls';
+      const SAFE_COLS = 'gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description';
+      let { data: courses, error } = await sb
         .from('golf_courses')
-        .select('gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description,address')
+        .select(FULL_COLS)
         .order('name', { ascending: true });
+      if (error && /column .* does not exist|schema cache/i.test(error.message || '')) {
+        console.warn('[caddy] golf_courses 新カラム未適用、SAFE_COLS で再取得');
+        const fallback = await sb
+          .from('golf_courses')
+          .select(SAFE_COLS)
+          .order('name', { ascending: true });
+        courses = fallback.data;
+        error = fallback.error;
+      }
       if (error) {
         grid.innerHTML = `<div style="grid-column:1/-1;color:var(--color-accent);">エラー: ${error.message}</div>`;
         return;

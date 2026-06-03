@@ -37,11 +37,15 @@ FOR SELECT USING (true);
 
 -- ────────────────────────────────────────
 -- 2. golf_courses に新カラム追加
+--    - address: 住所全文 (既存コードは select しているが列が無く 'column does not exist' エラー)
 --    - prefecture: 都道府県（キャディ側の絞り込み検索用）
+--    - city: 市区町村
 --    - homepage_url: ゴルフ場の公式 HP URL
 --    - gallery_urls: 追加写真 (Supabase Storage の URL を text[] で保持)
 -- ────────────────────────────────────────
-ALTER TABLE public.golf_courses ADD COLUMN IF NOT EXISTS prefecture TEXT;
+ALTER TABLE public.golf_courses ADD COLUMN IF NOT EXISTS address      TEXT;
+ALTER TABLE public.golf_courses ADD COLUMN IF NOT EXISTS prefecture   TEXT;
+ALTER TABLE public.golf_courses ADD COLUMN IF NOT EXISTS city         TEXT;
 ALTER TABLE public.golf_courses ADD COLUMN IF NOT EXISTS homepage_url TEXT;
 ALTER TABLE public.golf_courses ADD COLUMN IF NOT EXISTS gallery_urls TEXT[];
 
@@ -58,9 +62,17 @@ SELECT
   EXISTS (SELECT 1 FROM information_schema.tables
           WHERE table_schema='public' AND table_name='training_availability') AS exists
 UNION ALL
+SELECT 'golf_courses.address',
+       EXISTS (SELECT 1 FROM information_schema.columns
+               WHERE table_schema='public' AND table_name='golf_courses' AND column_name='address')
+UNION ALL
 SELECT 'golf_courses.prefecture',
        EXISTS (SELECT 1 FROM information_schema.columns
                WHERE table_schema='public' AND table_name='golf_courses' AND column_name='prefecture')
+UNION ALL
+SELECT 'golf_courses.city',
+       EXISTS (SELECT 1 FROM information_schema.columns
+               WHERE table_schema='public' AND table_name='golf_courses' AND column_name='city')
 UNION ALL
 SELECT 'golf_courses.homepage_url',
        EXISTS (SELECT 1 FROM information_schema.columns
