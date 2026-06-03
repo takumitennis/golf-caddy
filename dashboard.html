@@ -147,17 +147,14 @@
       let role = user.user_metadata?.role;
       setStatus("ステップ3: role=" + (role || "なし") + " incoming=" + (incomingRole || "なし"));
 
-      // user_metadata に role が無い OAuth ユーザー → URL/stash から拾って Supabase に書く
+      // user_metadata に role が無い OAuth ユーザー → URL/stash から拾う
+      // updateUser はサーバ呼び出しで遅いので await しない（fire-and-forget でバックグラウンド書込み）。
+      // ルーティング自体はメモリ上の role で進める。
       if (!role && (incomingRole === "golf" || incomingRole === "caddy")) {
-        setStatus("ステップ4: updateUser で role 書込み中…");
-        try {
-          await withTimeout(sb.auth.updateUser({ data: { role: incomingRole } }), 10000, "updateUser");
-          role = incomingRole;
-        } catch (e) {
-          console.error("[dashboard] updateUser failed:", e);
-          setStatus("ステップ4 警告: " + e.message + " → メモリ上で続行");
-          role = incomingRole;
-        }
+        role = incomingRole;
+        sb.auth.updateUser({ data: { role: incomingRole } })
+          .then(() => console.log("[dashboard] role 書込み完了 (bg):", incomingRole))
+          .catch((e) => console.warn("[dashboard] role 書込み失敗 (bg):", e?.message || e));
       }
 
       try { sessionStorage.removeItem("oauth_role"); } catch (_) {}
@@ -240,29 +237,26 @@
     });
 
     // 初期チェック（既にセッションがある場合）
+    // getSession() は localStorage から即時復元するためサーバ呼び出し不要。
+    // getUser() を使うとサーバの /auth/v1/user を叩くため、ネットワーク不安定時にタイムアウトする。
     (async () => {
-      setStatus("ステップ1: getUser 実行中…");
+      setStatus("ステップ1: セッション復元中…");
       try {
-        const userRes = await withTimeout(sb.auth.getUser(), 8000, "getUser");
-        const user = userRes.data?.user;
-        const authErr = userRes.error;
-        console.log("[dashboard] initial user:", user, "authErr:", authErr);
+        const { data: { session } } = await sb.auth.getSession();
+        const user = session?.user || null;
+        console.log("[dashboard] initial session:", session ? "あり" : "なし", "user:", user);
 
         if (!user) {
           setStatus("ステップ1: セッション無し、1.5秒待って onAuthStateChange に委譲");
           setTimeout(async () => {
             if (routed) return;
-            try {
-              const r2 = await withTimeout(sb.auth.getUser(), 8000, "getUser(retry)");
-              const u2 = r2.data?.user;
-              if (!u2) {
-                setStatus("セッションが見つかりません → / に戻ります");
-                setTimeout(() => { window.location.href = "/"; }, 2000);
-              } else {
-                await routeUser(u2);
-              }
-            } catch (e) {
-              setStatus("エラー (retry getUser): " + e.message);
+            const { data: { session: s2 } } = await sb.auth.getSession();
+            const u2 = s2?.user || null;
+            if (!u2) {
+              setStatus("セッションが見つかりません → / に戻ります");
+              setTimeout(() => { window.location.href = "/"; }, 2000);
+            } else {
+              await routeUser(u2);
             }
           }, 1500);
           return;
