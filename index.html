@@ -592,6 +592,33 @@
 <body>
 
   <!-- ═══════════════════════════════════════════
+       OAuth エラー検知バナー
+       Supabase が OAuth エラーで Site URL ("/" = ここ) にフォールバックして来た時に、
+       URL の ?error=... / #error=... を読んで上に表示する
+  ═══════════════════════════════════════════ -->
+  <div id="oauthErrorBanner" style="display:none;position:sticky;top:0;left:0;right:0;z-index:9999;background:#FEF2F2;border-bottom:1px solid #FCA5A5;padding:12px 16px;color:#991B1B;font-family:'Noto Sans JP',sans-serif;font-size:14px;line-height:1.6;">
+    <strong id="oauthErrorTitle" style="display:block;font-weight:700;margin-bottom:4px;">ログインに失敗しました</strong>
+    <span id="oauthErrorDetail"></span>
+    <button onclick="document.getElementById('oauthErrorBanner').style.display='none';history.replaceState(null,'',location.pathname);" style="margin-left:12px;border:1px solid #991B1B;background:transparent;color:#991B1B;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:12px;">閉じる</button>
+  </div>
+  <script>
+    (function(){
+      // URL ?error=... と URL #error=... を両方拾う
+      const search = new URLSearchParams(location.search);
+      const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
+      const err = search.get("error") || hash.get("error") || search.get("error_code") || hash.get("error_code");
+      const errDesc = search.get("error_description") || hash.get("error_description");
+      if (err) {
+        const banner = document.getElementById("oauthErrorBanner");
+        document.getElementById("oauthErrorTitle").textContent = "ログイン失敗: " + err;
+        document.getElementById("oauthErrorDetail").textContent = errDesc ? decodeURIComponent(errDesc).replace(/\+/g, " ") : "(詳細メッセージなし)";
+        banner.style.display = "block";
+        console.error("[index] OAuth error from URL:", { err, errDesc, fullSearch: location.search, fullHash: location.hash });
+      }
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════════════════
        HEADER — Sticky Navigation
        components.md §2
   ═══════════════════════════════════════════ -->
