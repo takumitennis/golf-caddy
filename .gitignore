@@ -6,7 +6,7 @@ design-feedback-*.md
 legal-foundation*.md
 visual-assets-spec.md
 research/
-assets/
+# 2026-06-03: assets/ は本番デプロイで必要なので除外解除（ロゴ・hero 画像など）
 
 # OS / Editor
 .DS_Store
