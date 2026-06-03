@@ -3569,7 +3569,16 @@
         .order('date', { ascending: true })
         .limit(60);
       if (error) {
-        container.innerHTML = `<p style="color:var(--color-accent);">エラー: ${error.message}</p>`;
+        // training_availability テーブル自体が無いケース (schema cache miss) は「準備中」扱い
+        const isMissingTable = /could not find the table|relation .* does not exist|schema cache/i.test(error.message || "");
+        container.innerHTML = isMissingTable
+          ? `<div class="empty">
+              <i data-lucide="graduation-cap" class="empty__icon"></i>
+              <div class="empty__title">研修制度は準備中です</div>
+              <div class="empty__desc">提携ゴルフ場と調整のうえ、順次公開予定です。</div>
+            </div>`
+          : `<p style="color:var(--color-accent);">エラー: ${error.message}</p>`;
+        if (window.lucide) lucide.createIcons();
         return;
       }
       if (!avail || avail.length === 0) {
