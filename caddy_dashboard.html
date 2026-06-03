@@ -2,401 +2,494 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Caddy Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5" />
+  <title>キャディマイページ | Caddygate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- LP framework を先に、dashboard を後に -->
+  <link rel="stylesheet" href="/design-system/framework.css?v=2">
+  <link rel="stylesheet" href="/design-system/dashboard-framework.css?v=2">
+
   <style>
-    body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa}
-    h1{margin:0;padding:20px 24px;background:#34495e;color:#fff;font-size:1.4rem}
-    .container{padding:24px}
-    .card{background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.08);padding:20px;margin-bottom:24px}
-    .tabs-main{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      margin: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .tabs-main button{
-      background: #fff;
-      border: 1px solid #e9ecef;
-      padding: 16px 12px;
-      font-weight: 500;
-      font-size: 0.8rem;
-      line-height: 1.3;
-      border-radius: 12px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-      min-height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .tabs-main button.active{
-      background: #27ae60;
-      color: #fff;
-      border-color: #27ae60;
-      box-shadow: 0 4px 12px rgba(39,174,96,0.25);
-      transform: translateY(-2px);
-    }
-    .tabs-main button:hover:not(.active){
-      background: #f8f9fa;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-    }
-    .tabs-main button.active:hover{
-      background: #229954;
-      box-shadow: 0 6px 16px rgba(39,174,96,0.3);
-    }
-    #logoutBtn{
-      background: #dc3545 !important;
-      color: #fff !important;
-      border-color: #dc3545 !important;
-      box-shadow: 0 2px 4px rgba(220,53,69,0.15) !important;
-    }
-    #logoutBtn:hover{
-      background: #c82333 !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(220,53,69,0.25) !important;
-    }
-    table.calendar{background:#fff;border-radius:6px;overflow:hidden}
-    .calendar th,.calendar td{width:14%;padding:6px;text-align:center;border:1px solid #ccc}
-    .cal-ok{background:#ffffff;cursor:pointer}
-    .ok-circle{display:inline-block;width:16px;height:16px;border:2px solid #4caf50;border-radius:50%}
-    .cal-ng{background:#eeeeee;cursor:pointer}
-    .cal-booked{background:#e8f5e9;border:2px solid #81c784;cursor:default}
-    .locked{opacity:0.5;cursor:not-allowed}
-    
-    /* キャディ予定タブのスタイル */
-    #mainAssigned .calendar-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    #mainAssigned .calendar-nav button {
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      color: #333;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-    }
-    
-    #mainAssigned .calendar-nav button:hover {
-      background: #f0f0f0;
-      color: #000;
-    }
-    
-    #mainAssigned .calendar-nav button:active {
-      background: #e0e0e0;
-    }
-    
-    #mainAssigned #aCalTitle {
-      font-weight: normal;
-      font-size: 16px;
-      color: #333;
-      min-width: 120px;
-      text-align: center;
-    }
-    /* --- LINE風チャットUI --- */
-    #mainMessages {
-      display: flex;
-      flex-direction: column;
-      height: 70vh;
-      max-height: 600px;
-      background: #f7f7f7;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      overflow: hidden;
-      position: relative;
-    }
-    #messagesList {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px 16px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #f7f7f7;
-    }
-    .chat-bubble {
-      max-width: 70%;
-      padding: 12px 16px;
-      border-radius: 18px;
-      font-size: 1rem;
-      line-height: 1.5;
-      position: relative;
-      word-break: break-word;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-      margin-bottom: 2px;
-    }
-    .chat-bubble.sent {
-      background: #d1f5d3;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .chat-bubble.received {
-      background: #fff;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-      border: 1px solid #e0e0e0;
-    }
-    .chat-meta {
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 2px;
-      text-align: right;
-    }
-    .chat-meta.received {
-      text-align: left;
-    }
-    #chatInputArea {
-      display: flex;
-      gap: 8px;
-      padding: 12px 16px;
-      background: #fff;
-      border-top: 1px solid #e0e0e0;
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-    }
-    #chatInput {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      outline: none;
-    }
-    #sendChatBtn {
-      background: #27ae60;
-      color: #fff;
-      border: none;
-      border-radius: 20px;
-      padding: 0 20px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    #sendChatBtn:hover {
-      background: #219150;
-    }
-    /* 既読未読バッジ */
-    .chat-badge {
+    /* ── hidden utility (既存JSが style.display を直接使うため共存させる) ── */
+    .hidden { display: none !important; }
+
+    /* ── 既存 JS が参照するカレンダークラスを token で維持 ── */
+    .cal-ok   { background: var(--color-surface); cursor: pointer; }
+    .cal-ng   { background: var(--color-gray-soft); cursor: pointer; }
+    .cal-booked { background: var(--color-primary-soft-bg); cursor: default; }
+    .locked   { opacity: 0.5; cursor: not-allowed !important; }
+    .ok-circle {
       display: inline-block;
-      font-size: 0.7rem;
-      color: #fff;
-      background: #aaa;
-      border-radius: 8px;
-      padding: 1px 6px;
-      margin-left: 6px;
-      vertical-align: middle;
+      width: 14px; height: 14px;
+      border: 2px solid var(--color-primary);
+      border-radius: 50%;
     }
-    .chat-badge.unread {
-      background: #e74c3c;
+
+    /* ── calendar table ── */
+    .calendar th, .calendar td {
+      width: 14%; padding: var(--space-2);
+      text-align: center; border: 1px solid var(--color-border);
     }
-    .chat-badge.read {
-      background: #27ae60;
+    .calendar th {
+      background: var(--color-surface-alt);
+      color: var(--color-ink-sub);
+      font-size: var(--fs-nano); font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: var(--space-3) var(--space-2);
+      line-height: 1;
     }
-    /* Utility */
-    .hidden{ display:none; }
-    
-    /* モバイル版のレスポンシブデザイン */
-    @media (max-width: 768px) {
-      .tabs-main {
-        padding: 12px;
-        gap: 6px;
-        margin: 12px;
-      }
-      .tabs-main button {
-        padding: 8px 10px;
-        font-size: 0.8rem;
-        min-height: 50px;
-        flex: 1;
-        min-width: 90px;
-        max-width: 120px;
-      }
-      h1 {
-        font-size: 1.2rem;
-        padding: 16px 20px;
-      }
+    .calendar td { height: 60px; vertical-align: middle; }
+
+    /* ── chat bubble 互換 ── */
+    .chat-bubble.sent  { background: var(--color-primary-soft-bg); align-self: flex-end; border-bottom-right-radius: var(--radius-sm); }
+    .chat-bubble.received { background: var(--color-surface); align-self: flex-start; border: 1px solid var(--color-border); border-bottom-left-radius: var(--radius-sm); }
+    .chat-meta { font-size: var(--fs-micro); color: var(--color-ink-mute); margin-top: 2px; text-align: right; }
+    .chat-meta.received { text-align: left; }
+    .chat-badge { display: inline-block; font-size: 10px; color: #fff; background: var(--color-ink-mute); border-radius: var(--radius-pill); padding: 1px 6px; margin-left: 4px; vertical-align: middle; }
+    .chat-badge.unread { background: var(--color-accent); }
+    .chat-badge.read   { background: var(--color-primary); }
+
+    /* ── ゴルフ場詳細 modal（JS が style.display='flex' で開く） ── */
+    #courseDetailModal {
+      position: fixed; inset: 0;
+      background: rgba(26,26,26,0.4);
+      align-items: center; justify-content: center;
+      z-index: var(--z-modal, 1000);
+    }
+
+    /* ── sub nav for shift/assign tab ── */
+    .sub-tabs-nav {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+    .sub-tabs-nav button {
+      background: transparent; border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm); padding: 6px 12px;
+      font-size: var(--fs-small); font-weight: 500;
+      cursor: pointer; color: var(--color-ink-sub); line-height: 1.4;
+    }
+    .sub-tabs-nav button:hover { background: var(--color-bg); color: var(--color-ink); }
+    .sub-tabs-nav span {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-ink);
+      padding: 0 var(--space-2);
+    }
+
+    /* ── assigned schedule list item ── */
+    .schedule-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex; align-items: center; gap: var(--space-4);
+      cursor: pointer;
+      transition: background var(--t-fast);
+    }
+    .schedule-item:hover { background: var(--color-bg); }
+
+    /* ── LINE 設定カード ── */
+    #lineNotConnected, #lineConnected { margin-top: var(--space-3); }
+
+    /* ── mobile safe ── */
+    @media (max-width: 767px) {
+      #courseDetailModal > div { width: 92%; }
     }
   </style>
 </head>
 <body>
-  <h1>キャディマイページ<!-- v=2025-08-10-01 --></h1>
-  <div class="tabs-main">
-    <button id="btnMainProf" class="active">プロフィール</button>
-    <button id="btnMainShift">シフト編集</button>
-    <button id="btnMainAssign">キャディ予定</button>
-    <button id="btnMainLine">LINE設定</button>
-    <button id="btnMainNotice">お知らせ</button>
-    <button id="logoutBtn">ログアウト</button>
-  </div>
-  <div id="welcome" style="margin-top:10px;"></div>
-  <div id="mainProfile" style="margin-top:15px;"></div>
-  <div id="mainShift" class="hidden" style="margin-top:15px;">
-    <div id="lockInfo" style="margin:8px 0;color:#d32f2f;display:none;"></div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="prevMonth">◀</button>
-      <span id="calTitle"></span>
-      <button id="nextMonth">▶</button>
-    </div>
-    <table class="calendar" id="calTable" style="margin-top:10px;border-collapse:collapse;width:100%"></table>
-    <div style="display:flex;align-items:center;gap:12px;margin-top:6px;">
-      <small>○ = 空きあり / ❌ = 空きなし（編集は「シフトを編集する」を押してから）</small>
-  </div>
-    <div style="margin-top:12px;display:flex;gap:8px;">
-      <button id="editShiftBtn" style="padding:8px 16px;">シフトを編集する</button>
-      <button id="saveShiftBtn" style="padding:8px 16px;" disabled>確定する</button>
+  <div class="dash-shell">
+
+    <!-- 1. Desktop Sidebar -->
+    <aside class="dash-sidebar">
+      <a href="/" class="dash-sidebar__brand" aria-label="Caddygate ホーム">
+        <img src="/assets/logo-wordmark.png?v=3" alt="Caddygate" />
+      </a>
+
+      <div class="dash-sidebar__group">
+        <div class="dash-sidebar__group-label">メニュー</div>
+        <button class="dash-nav-item is-active" id="sideNavProf" onclick="switchMain('prof')">
+          <i data-lucide="user" class="dash-nav-item__icon"></i>
+          プロフィール
+        </button>
+        <button class="dash-nav-item" id="sideNavSearch" onclick="switchMain('search')">
+          <i data-lucide="search" class="dash-nav-item__icon"></i>
+          仕事を探す
+        </button>
+        <button class="dash-nav-item" id="sideNavShift" onclick="switchMain('shift')">
+          <i data-lucide="calendar-check" class="dash-nav-item__icon"></i>
+          シフト
+        </button>
+        <button class="dash-nav-item" id="sideNavTraining" onclick="switchMain('training')">
+          <i data-lucide="graduation-cap" class="dash-nav-item__icon"></i>
+          研修
+        </button>
       </div>
-    </div>
-  <!-- 新タブ: キャディ予定 -->
-  <div id="mainAssigned" class="hidden" style="margin-top:15px;">
-    <div class="calendar-nav">
-      <button id="aPrevMonth">◀</button>
-      <span id="aCalTitle"></span>
-      <button id="aNextMonth">▶</button>
-    </div>
-    <div style="color:#666; font-size:0.9rem; margin-top:6px;">予約が入っている日はゴルフ場名が表示されます（クリックで詳細）</div>
-    
-    <!-- 予定のリスト表示 -->
-    <div id="assignedScheduleList" style="margin-top:15px;">
-      <!-- 予定がここに表示されます -->
-    </div>
-  </div>
-  
-  <!-- ゴルフ場詳細モーダル -->
-  <div id="courseDetailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:120;">
-    <div style="background:#fff; width:92%; max-width:520px; border-radius:10px; padding:16px;">
-      <h3 id="cdmName" style="margin:0 0 8px;">ゴルフ場</h3>
-      <img id="cdmImage" src="" alt="course" style="width:100%; max-height:180px; object-fit:cover; border-radius:6px; display:none; margin:6px 0 10px;" />
-      <div style="color:#666; font-size:0.9rem; margin-bottom:10px;" id="cdmAddress">住所: 未設定</div>
-      <div style="white-space:pre-wrap; background:#f8f9fa; border:1px solid #eee; padding:10px; border-radius:6px; margin-bottom:10px;" id="cdmDescription">説明: 未設定</div>
-      <div style="background:#f8fff2; border:1px solid #e3f3d6; padding:10px; border-radius:6px; margin-bottom:12px;" id="cdmPerks">特典: なし</div>
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
-        <button id="cdmClose" style="background:#eee; border:1px solid #ddd; border-radius:6px; padding:8px 12px; cursor:pointer;">閉じる</button>
-        <button id="cdmChat" style="background:#27ae60; color:#fff; border:none; border-radius:6px; padding:8px 12px; cursor:pointer;">チャットを開始する</button>
+
+      <div class="dash-sidebar__footer">
+        <div class="dash-header__user" id="welcome"></div>
+        <a class="btn--ghost" href="/password.html" style="text-align:center;text-decoration:none;display:block;">
+          パスワード変更
+        </a>
+        <button id="logoutBtn" class="btn--ghost">
+          ログアウト
+        </button>
       </div>
-      </div>
-      </div>
-      <div id="mainMessages" class="hidden" style="margin-top:15px;">
-        <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-          <h3 style="margin:0 0 15px;color:#333;display:flex;align-items:center;gap:8px;">
-            💬 メッセージ
-          </h3>
-          
-          <!-- 予約情報表示エリア -->
-          <div id="bookingInfo" style="display:none;background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:20px;border-left:4px solid #27ae60;">
-            <div id="bookingTitle" style="font-weight:600;color:#333;margin-bottom:8px;"></div>
-            <div id="bookingDate" style="font-size:14px;color:#666;"></div>
-      </div>
-          
-          <!-- メッセージリスト -->
-          <div id="messagesList" style="min-height:300px;background:#f8f9fa;border-radius:8px;padding:15px;">
-            <div style="text-align:center;color:#666;padding:40px;">
-              <div style="font-size:18px;margin-bottom:8px;">💬</div>
-              <div>予定を選択すると、その予約のメッセージが表示されます</div>
-    </div>
+    </aside>
+
+    <!-- 2. Main -->
+    <main class="dash-main">
+      <header class="dash-header">
+        <h1 class="dash-header__title" id="mainHeaderTitle">プロフィール</h1>
+        <div class="dash-header__actions">
+          <span class="dash-header__user show-mobile" id="welcomeMobile"></span>
+        </div>
+      </header>
+
+      <!-- ====== SECTION: プロフィール ====== -->
+      <div id="mainProfile" style="margin-top:var(--space-4);">
+        <nav class="dash-tabs" role="tablist" aria-label="プロフィールタブ">
+          <button id="btnProfBasic" class="dash-tab is-active" role="tab" aria-selected="true" onclick="switchSubTab('prof','basic')">基本情報</button>
+          <button id="btnProfPayment" class="dash-tab" role="tab" aria-selected="false" onclick="switchSubTab('prof','payment')">報酬・実績</button>
+        </nav>
+        <div id="subProfBasic" class="dash-section"></div>
+        <!-- 旧シフト編集サブタブ。中身はシフトセクションの「シフトを提出」に移動。互換のため空ラッパで残置 -->
+        <div id="subProfShift" class="hidden dash-section" aria-hidden="true"></div>
+        <div id="subProfPayment" class="hidden dash-section">
+          <div class="dash-section__head">
+            <h2 class="dash-section__title">報酬・出勤実績</h2>
           </div>
-          
-          <!-- チャット入力エリア -->
-          <div id="chatInputArea" style="display:none;margin-top:15px;">
-            <div style="display:flex;gap:10px;">
-              <input id="chatInput" type="text" placeholder="メッセージを入力..." autocomplete="off" 
-                     style="flex:1;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;" />
-              <button id="sendChatBtn" style="background:#27ae60;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;">
-                送信
-              </button>
+          <table class="dash-table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>年月</th>
+                <th class="col-num">出勤回数</th>
+                <th class="col-num">報酬合計</th>
+                <th>ステータス</th>
+              </tr>
+            </thead>
+            <tbody id="caddyPaymentBody">
+              <tr><td colspan="4" style="padding:0;border:0;">
+                <div class="empty">
+                  <i data-lucide="file-text" class="empty__icon"></i>
+                  <div class="empty__title">報酬・実績データは準備中です</div>
+                  <div class="empty__desc">月次の出勤回数と報酬合計が集計され次第、ここに表示されます。</div>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: 仕事を探す ====== -->
+      <div id="mainSearch" class="hidden" style="margin-top:var(--space-4);">
+        <!-- KPI Strip（キャディ側：仕事を探す上部のみ表示） -->
+        <section class="kpi-strip" id="statsSection">
+          <article class="kpi-card">
+            <div class="kpi-card__label">今週の出勤</div>
+            <div class="kpi-card__value" id="kpiThisWeek">—<span class="kpi-card__unit">件</span></div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-card__label">来週の出勤</div>
+            <div class="kpi-card__value" id="kpiNextWeek">—<span class="kpi-card__unit">件</span></div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-card__label">応募可能な仕事</div>
+            <div class="kpi-card__value" id="kpiOpenJobs">—<span class="kpi-card__unit">件</span></div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-card__label">受講中の研修</div>
+            <div class="kpi-card__value" id="kpiTrainingActive">—<span class="kpi-card__unit">件</span></div>
+          </article>
+        </section>
+
+        <!-- Sub Tabs（underline型） -->
+        <nav class="dash-tabs" role="tablist" aria-label="仕事を探すタブ">
+          <button id="btnTabOpenDates" class="dash-tab is-active" role="tab" aria-selected="true" onclick="switchSubTab('search','openDates')">募集中の日付</button>
+          <button id="btnTabGolfCourses" class="dash-tab" role="tab" aria-selected="false" onclick="switchSubTab('search','golfCourses')">ゴルフ場一覧から</button>
+        </nav>
+
+        <!-- Sub: 募集中の日付 -->
+        <div id="tabOpenDates" class="dash-section">
+          <div class="sub-tabs-nav">
+            <button id="caddyJobPrev">◀</button>
+            <span id="caddyJobCalTitle"></span>
+            <button id="caddyJobNext">▶</button>
+          </div>
+          <div class="cal-shell">
+            <table class="calendar cal-grid" id="caddyJobCal" style="border-collapse:separate;border-spacing:0;width:100%"></table>
+            <div class="cal-legend">
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-surface)"></span> ○ 応募可（クリックで応募）
+              </span>
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-primary-soft-bg)"></span> ✓ 応募済み
+              </span>
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-gray-soft)"></span> × 募集なし
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub: ゴルフ場一覧から -->
+        <div id="tabGolfCourses" class="hidden dash-section">
+          <div class="dash-section__head">
+            <h2 class="dash-section__title">登録ゴルフ場一覧</h2>
+            <div class="dash-section__actions">
+              <button id="golfCourseListReload" class="btn--ghost">再読み込み</button>
+            </div>
+          </div>
+          <div id="golfCourseGrid" class="dash-grid-2"></div>
+        </div>
+      </div>
+
+      <!-- ====== SECTION: シフト ====== -->
+      <div id="mainShift" class="hidden" style="margin-top:var(--space-4);">
+        <nav class="dash-tabs" role="tablist" aria-label="シフトタブ">
+          <button id="btnShiftSubmit" class="dash-tab is-active" role="tab" aria-selected="true" onclick="switchSubTab('shift','submit')">シフトを提出</button>
+          <button id="btnShiftCheck" class="dash-tab" role="tab" aria-selected="false" onclick="switchSubTab('shift','check')">シフトを確認</button>
+        </nav>
+
+        <!-- Sub: シフトを提出（旧プロフィール「シフト編集」UI を移管） -->
+        <div id="subShiftSubmit" class="dash-section">
+          <div class="dash-section__head">
+            <h2 class="dash-section__title">出勤可能日カレンダー</h2>
+            <div class="dash-section__actions">
+              <button id="editShiftBtn" class="btn--ghost">編集</button>
+              <button id="saveShiftBtn" class="btn btn--primary" disabled>確定</button>
+            </div>
+          </div>
+          <div id="lockInfo" style="display:none;font-size:var(--fs-small);color:var(--color-ink-sub);margin-bottom:var(--space-2);"></div>
+          <div class="sub-tabs-nav">
+            <button id="prevMonth">◀</button>
+            <span id="calTitle"></span>
+            <button id="nextMonth">▶</button>
+          </div>
+          <div class="cal-shell">
+            <table class="calendar cal-grid" id="calTable" style="border-collapse:separate;border-spacing:0;width:100%"></table>
+            <div class="cal-legend">
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-surface)"></span> ○ 出勤可
+              </span>
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-primary-soft-bg)"></span> 予定確定
+              </span>
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-gray-soft)"></span> × 不可
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub: シフトを確認（旧「確定済み」「確定待ち」を統合した1リスト） -->
+        <div id="subShiftCheck" class="hidden dash-section">
+          <div class="sub-tabs-nav">
+            <button id="schedulePrev">◀</button>
+            <span id="scheduleTitle"></span>
+            <button id="scheduleNext">▶</button>
+            <button id="scheduleReload" class="btn--ghost" style="margin-left:auto;">再読み込み</button>
+          </div>
+          <table class="dash-table" style="margin-top:var(--space-3);width:100%;">
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>ゴルフ場</th>
+                <th>開始時間</th>
+                <th>ステータス</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="shiftCheckBody"></tbody>
+          </table>
+          <!-- 既存JS互換のためのダミー tbody（旧 scheduleBody / pendingBody 参照を壊さない） -->
+          <table style="display:none;" aria-hidden="true">
+            <tbody id="scheduleBody"></tbody>
+            <tbody id="pendingBody"></tbody>
+          </table>
+          <button id="pendingReload" style="display:none;" aria-hidden="true"></button>
+        </div>
+      </div>
+
+      <!-- 互換 alias: 旧 mainSchedule 参照を壊さない -->
+      <div id="mainSchedule" style="display:none;" aria-hidden="true"></div>
+
+      <!-- ====== SECTION: 研修 ====== -->
+      <div id="mainTraining" class="hidden" style="margin-top:var(--space-4);">
+        <nav class="dash-tabs" role="tablist" aria-label="研修タブ">
+          <button id="btnTrainingOpen" class="dash-tab is-active" role="tab" aria-selected="true" onclick="switchSubTab('training','open')">募集中の研修</button>
+          <button id="btnTrainingApplied" class="dash-tab" role="tab" aria-selected="false" onclick="switchSubTab('training','applied')">応募済み</button>
+          <button id="btnTrainingCompleted" class="dash-tab" role="tab" aria-selected="false" onclick="switchSubTab('training','completed')">研修済み</button>
+        </nav>
+
+        <!-- Sub: 募集中の研修 -->
+        <div id="subTrainingOpen" class="dash-section">
+          <div id="trainingOpenList"></div>
+        </div>
+
+        <!-- Sub: 応募済み -->
+        <div id="subTrainingApplied" class="hidden dash-section">
+          <div id="trainingAppliedList"></div>
+        </div>
+
+        <!-- Sub: 研修済み -->
+        <div id="subTrainingCompleted" class="hidden dash-section">
+          <div id="trainingCompletedList"></div>
+        </div>
+      </div>
+
+      <!-- ====== Legacy DOM（既存JSのwrapper参照を維持） ====== -->
+      <div id="mainAssigned" style="display:none;">
+        <div class="sub-tabs-nav">
+          <button id="aPrevMonth">◀</button>
+          <span id="aCalTitle"></span>
+          <button id="aNextMonth">▶</button>
+        </div>
+        <div id="assignedScheduleList" class="dash-list"></div>
+      </div>
+
+      <!-- Messages Tab -->
+      <div id="mainMessages" style="display:none;margin-top:var(--space-4);">
+        <div class="card" style="padding:var(--space-4);">
+          <div id="bookingInfo" style="display:none;background:var(--color-primary-soft-bg);padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);margin-bottom:var(--space-4);border-left:3px solid var(--color-primary);">
+            <div id="bookingTitle" style="font-weight:600;color:var(--color-ink);margin-bottom:var(--space-1);"></div>
+            <div id="bookingDate" style="font-size:var(--fs-small);color:var(--color-ink-sub);"></div>
+          </div>
+          <div class="chat-shell">
+            <div class="chat-list" id="messagesList">
+              <div class="empty">
+                <div class="empty__title">予定を選択してください</div>
+                <div class="empty__desc">予定を選ぶとメッセージが表示されます</div>
+              </div>
+            </div>
+            <div class="chat-input-area" id="chatInputArea" style="display:none;">
+              <input id="chatInput" type="text" class="chat-input" placeholder="メッセージを入力..." autocomplete="off" />
+              <button id="sendChatBtn" class="btn btn--primary">送信</button>
             </div>
           </div>
         </div>
       </div>
-    <!-- LINE連携設定 -->
-    <div id="mainLineSettings" class="hidden" style="margin-top:15px;">
-      <div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-        <h3 style="margin:0 0 15px;color:#333;display:flex;align-items:center;gap:8px;">
-          📱 LINE通知設定
-        </h3>
-        
-        <div id="lineNotConnected" style="display:block;">
-          <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-bottom:15px;">
-            <p style="margin:0 0 8px;color:#666;line-height:1.5;">
-              キャディ確定やキャンセルなどの重要な通知をLINEで受け取ることができます。
-            </p>
-            <p style="margin:0;font-size:0.9rem;color:#888;">
-              ※ 通知を受け取るには、キャディプラス公式LINEを友達追加して連携設定を行ってください。
-            </p>
-          </div>
-          
-          <button id="connectLineBtn" style="background:#00B900;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">
-            🤝 LINE連携を設定する
-          </button>
-        </div>
-        
-        <div id="lineConnected" style="display:none;">
-          <div style="background:#e8f5e8;padding:15px;border-radius:8px;margin-bottom:15px;">
-            <p style="margin:0 0 8px;color:#2d5a27;font-weight:600;">
-              ✅ LINE連携済み
-            </p>
-            <p style="margin:0;font-size:0.9rem;color:#4a7c59;">
-              重要な通知をLINEで受け取ることができます。
-            </p>
-          </div>
-          
-          <div style="display:flex;gap:10px;">
-            <button id="testLineNotificationBtn" style="background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">
-              テスト通知
-            </button>
-            <button id="disconnectLineBtn" style="background:#e74c3c;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">
-              連携解除
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- お知らせ（運営から） -->
-    <div id="mainNotice" class="hidden" style="margin-top:15px;">
-      <iframe src="notifications.html" style="width:100%;height:70vh;border:1px solid #e0e0e0;border-radius:8px;background:#fff;"></iframe>
-    </div>
-    
-    <!-- 予約一覧（キャディ予定のリスト表示用） -->
-    <div id="assignedListContainer" class="hidden" style="margin-top:15px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button id="alPrevMonth" onclick="window.alNav && window.alNav(-1)">◀</button>
-        <span id="alTitle" style="font-weight:600;"></span>
-        <button id="alNextMonth" onclick="window.alNav && window.alNav(1)">▶</button>
+      <!-- LINE設定 -->
+      <div id="mainLineSettings" style="display:none;margin-top:var(--space-4);">
+        <div class="card">
+          <h3 class="card__title">LINE通知設定</h3>
+          <div id="lineNotConnected" style="display:block;">
+            <p style="color:var(--color-ink-sub);font-size:var(--fs-body);line-height:var(--lh-snug);margin-bottom:var(--space-3);">
+              キャディ確定やキャンセルなどの重要な通知をLINEで受け取ることができます。<br>
+              <span style="font-size:var(--fs-small);color:var(--color-ink-mute);">※ 通知を受け取るには、公式LINEを友達追加して連携設定を行ってください。</span>
+            </p>
+            <button id="connectLineBtn" style="background:#00B900;color:white;border:none;padding:var(--space-3) var(--space-5);border-radius:var(--radius-md);font-size:var(--fs-body);font-weight:600;cursor:pointer;width:100%;">
+              LINE連携を設定する
+            </button>
+          </div>
+          <div id="lineConnected" style="display:none;">
+            <div style="background:var(--color-primary-soft-bg);padding:var(--space-4);border-radius:var(--radius-md);margin-bottom:var(--space-4);">
+              <p style="margin:0 0 var(--space-1);color:var(--color-primary-deep);font-weight:600;">LINE連携済み</p>
+              <p style="margin:0;font-size:var(--fs-small);color:var(--color-ink-sub);">重要な通知をLINEで受け取ることができます。</p>
+            </div>
+            <div style="display:flex;gap:var(--space-2);">
+              <button id="testLineNotificationBtn" class="btn--ghost" style="flex:1;">テスト通知</button>
+              <button id="disconnectLineBtn" class="btn--danger" style="flex:1;">連携解除</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <table style="margin-top:10px; width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">日付</th>
-            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">ゴルフ場</th>
-            <th style="text-align:left; padding:6px; border-bottom:1px solid #eee;">メッセージ</th>
-          </tr>
-        </thead>
-        <tbody id="assignedListBody"></tbody>
-      </table>
+
+      <!-- お知らせ -->
+      <div id="mainNotice" style="display:none;margin-top:var(--space-4);">
+        <iframe src="notifications.html" style="width:100%;height:70vh;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);"></iframe>
+      </div>
+
+      <!-- 予約一覧（キャディ予定のリスト表示用） -->
+      <div id="assignedListContainer" style="display:none;margin-top:var(--space-4);">
+        <div class="sub-tabs-nav">
+          <button id="alPrevMonth" onclick="window.alNav && window.alNav(-1)">◀</button>
+          <span id="alTitle" style="font-weight:600;"></span>
+          <button id="alNextMonth" onclick="window.alNav && window.alNav(1)">▶</button>
+        </div>
+        <table class="dash-table" style="margin-top:var(--space-3);width:100%;">
+          <thead>
+            <tr>
+              <th>日付</th>
+              <th>ゴルフ場</th>
+              <th>メッセージ</th>
+            </tr>
+          </thead>
+          <tbody id="assignedListBody"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- 3. Mobile Bottom Nav -->
+    <nav class="dash-bottom-nav">
+      <button class="dash-bottom-nav__item is-active" id="mNavProf" onclick="switchMain('prof')">
+        <i data-lucide="user"></i>
+        プロフィール
+      </button>
+      <button class="dash-bottom-nav__item" id="mNavSearch" onclick="switchMain('search')">
+        <i data-lucide="search"></i>
+        仕事
+      </button>
+      <button class="dash-bottom-nav__item" id="mNavShift" onclick="switchMain('shift')">
+        <i data-lucide="calendar-check"></i>
+        シフト
+      </button>
+      <button class="dash-bottom-nav__item" id="mNavTraining" onclick="switchMain('training')">
+        <i data-lucide="graduation-cap"></i>
+        研修
+      </button>
+    </nav>
   </div>
+
+  <!-- ゴルフ場詳細 Modal -->
+  <div id="courseDetailModal" style="display:none;">
+    <div class="modal" style="max-width:520px;">
+      <h3 id="cdmName" class="modal__title">ゴルフ場</h3>
+      <img id="cdmImage" src="" alt="course" style="width:100%;max-height:180px;object-fit:cover;border-radius:var(--radius-md);display:none;margin-bottom:var(--space-3);" />
+      <div style="color:var(--color-ink-sub);font-size:var(--fs-small);margin-bottom:var(--space-2);" id="cdmAddress">住所: 未設定</div>
+      <div style="white-space:pre-wrap;background:var(--color-bg);border:1px solid var(--color-border);padding:var(--space-3);border-radius:var(--radius-sm);margin-bottom:var(--space-2);font-size:var(--fs-small);" id="cdmDescription">説明: 未設定</div>
+      <div style="background:var(--color-primary-soft-bg);border:1px solid var(--color-border);padding:var(--space-3);border-radius:var(--radius-sm);margin-bottom:var(--space-4);font-size:var(--fs-small);" id="cdmPerks">特典: なし</div>
+      <div class="modal__actions">
+        <button id="cdmClose" class="btn--ghost">閉じる</button>
+        <button id="cdmChat" class="btn btn--primary">チャットを開始する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirm Modal -->
+  <div class="modal-backdrop" id="logoutBackdrop" data-open="false">
+    <div class="modal" role="dialog" aria-labelledby="caddyLogoutModalTitle">
+      <h2 class="modal__title" id="caddyLogoutModalTitle">ログアウトしますか？</h2>
+      <p class="modal__body">未保存の入力は保存されません。</p>
+      <div class="modal__actions">
+        <button class="btn--ghost" id="logoutCancel">キャンセル</button>
+        <button class="btn btn--primary" id="logoutConfirm">ログアウト</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast stack -->
+  <div class="toast-stack" id="toastStack"></div>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      "https://vqjxajzaasuqfgvhvxci.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    const sb = window.supabase.createClient(
+      "https://dfvxzwrqkxklfutlzqiq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmdnh6d3Jxa3hrbGZ1dGx6cWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTI4NzUsImV4cCI6MjA5NTgyODg3NX0.rRPwIqVfsdjGRkghv2X269oP75fOLm_w4Js16yWeh-Q"
     );
 
     let cid;
+    let currentCaddyName = '';
     let calMonth=new Date().getMonth(), calYear=new Date().getFullYear();
     // 古い変数は削除（新カレンダーシステムで置き換え）
     
@@ -498,7 +591,7 @@
         });
         
         // 2. 予約データを取得
-        const { data: bookings, error } = await supabase
+        const { data: bookings, error } = await sb
           .from('bookings')
           .select(`
             booking_id,
@@ -613,7 +706,7 @@
       
       try {
         // 予約情報を取得
-        const { data: booking, error: bookingError } = await supabase
+        const { data: booking, error: bookingError } = await sb
           .from('bookings')
           .select(`
             booking_id,
@@ -774,21 +867,22 @@
     const pendingDeletes = new Set();
     const lockInfo=document.getElementById('lockInfo');
 
-    supabase.auth.getUser().then(async ({ data })=>{
+    sb.auth.getUser().then(async ({ data })=>{
       if(!data.user){location.href="/";return;}
       const role=data.user.user_metadata?.role;
       if(role!=="caddy"){location.href="dashboard.html";return;}
-      const { data: row } = await supabase.from('caddies').select('cid,name,avatar_url,birth_date,phone,university,golf_years,caddy_years,appeal,rating,rate,trained_courses').eq('email',data.user.email).single();
+      const { data: row } = await sb.from('caddies').select('cid,name,avatar_url,birth_date,phone,university,golf_years,caddy_years,appeal,rating,rate,trained_courses').eq('email',data.user.email).single();
       if(!row){
         renderProfileForm();
       } else {
         cid=row.cid;
+        currentCaddyName = row.name || '';
         renderProfileDisplay(row);
       }
       // 派遣回数を取得（rowが存在する場合のみ）
       let dispatchCount = 0;
       if (row && row.cid) {
-        const { count, error: countError } = await supabase
+        const { count, error: countError } = await sb
           .from('booking_caddies')
           .select('*', { count: 'exact', head: true })
           .eq('cid', row.cid);
@@ -861,7 +955,7 @@
 
       // Step 1: Golf course selection
       newReqBtn.onclick = async () => {
-        const { data: courses } = await supabase.from('golf_courses').select('gid,name,email');
+        const { data: courses } = await sb.from('golf_courses').select('gid,name,email');
         const sel = document.getElementById('courseSelect');
         sel.innerHTML = courses.map(c => `<option value='${c.gid}' data-email='${c.email}' data-name='${c.name}'>${c.name}</option>`).join('');
         
@@ -924,27 +1018,36 @@
         
         try {
           // まず、training_requestsテーブルが存在するか確認
-          const { data: tableCheck, error: tableError } = await supabase
+          const { data: tableCheck, error: tableError } = await sb
             .from('training_requests')
             .select('id')
             .limit(1);
           
           console.log('Table check result:', { tableCheck, tableError });
           
-          const { data, error } = await supabase.from('training_requests').insert({ 
-            cid, 
-            gid: selectedGolfCourse.gid, 
+          const { data, error } = await sb.from('training_requests').insert({
+            cid,
+            gid: selectedGolfCourse.gid,
             training_date: selectedTrainingDate,
             status: 'pending'
           });
-          
+
           console.log('Training request insert result:', { data, error });
-          
+
           if (error) {
             console.error('Training request insert error:', error);
             throw error;
           }
-          
+
+          // ゴルフ場に LINE 通知
+          try {
+            const name = currentCaddyName || (row.name) || 'キャディ';
+            await notifyGolfByGid(
+              selectedGolfCourse.gid,
+              `【Caddygate】${name} さんが ${selectedTrainingDate} の研修に応募しました`
+            );
+          } catch (e) { console.error('LINE notify (legacy training apply) error:', e); }
+
           window.open(`mailto:${selectedGolfCourse.email}?subject=キャディ研修希望&body=キャディID:${cid}%0A氏名:${row.name || ''}%0A希望研修日:${selectedTrainingDate}%0A研修を希望しています。`);
           alert('研修希望を送信しました');
           modal.style.display = 'none';
@@ -961,7 +1064,7 @@
         document.getElementById('trainingCalTitle2').textContent = `${trainingCalYear2}年 ${trainingCalMonth2 + 1}月`;
         
         // Fetch available training dates for selected golf course
-        const { data: availData, error } = await supabase
+        const { data: availData, error } = await sb
           .from('training_availability')
           .select('date')
           .eq('gid', selectedGolfCourse.gid)
@@ -1056,10 +1159,12 @@
     if (nm) nm.onclick=()=>{ if(++calMonth>11){calMonth=0;calYear++;} renderCal(); };
 
     function isMonthLocked(y, m){
-      // y: 年, m: 月(0-11)。対象月の編集締切は「前月15日」
-      const deadline = new Date(y, m-1, 15);
+      // 2026-06-02: 月単位ロック廃止。
+      // 過去月のみロック、当月・未来月は全て編集可（1週間後の日付も提出可能に）
+      const lastDayOfMonth = new Date(y, m + 1, 0);
       const today = new Date();
-      return today > deadline;
+      today.setHours(0, 0, 0, 0);
+      return lastDayOfMonth < today;
     }
 
     function setInitialEditableMonth(){
@@ -1091,7 +1196,7 @@
       console.log(`キャディID: ${cid}`);
 
       // fetch own availability
-      const { data, error } = await supabase.from('caddy_availability')
+      const { data, error } = await sb.from('caddy_availability')
          .select('date')
          .eq('cid', cid)
          .gte('date', first.toISOString().slice(0,10))
@@ -1110,7 +1215,7 @@
       }
 
       // fetch booked days for current month (bookings joined)
-      const { data: assigns } = await supabase
+      const { data: assigns } = await sb
         .from('bookings')
         .select('date, booking_caddies!inner (cid), golf_courses(name)')
         .eq('booking_caddies.cid', cid)
@@ -1207,7 +1312,7 @@
       table.appendChild(headerRow);
 
       // 予約データ取得（cidで絞込み）。月の範囲はJS側でフィルタ
-      const { data: assigns, error } = await supabase
+      const { data: assigns, error } = await sb
         .from('bookings')
         .select(`
           booking_id,
@@ -1314,7 +1419,7 @@
       const lastDate = new Date(alYear, alMonth+1, 0).getDate();
       const last = `${alYear}-${String(alMonth+1).padStart(2,'0')}-${String(lastDate).padStart(2,'0')}`;
 
-      const { data: bookings, error } = await supabase
+      const { data: bookings, error } = await sb
         .from('bookings')
         .select(`
           booking_id,date,
@@ -1332,7 +1437,7 @@
         // 最新メッセージのプレビューを取得（該当ゴルフ場との当該予約）
         let preview = '';
         try {
-          const { data: msgs } = await supabase
+          const { data: msgs } = await sb
             .from('messages')
             .select('content, created_at')
             .eq('booking_id', b.booking_id)
@@ -1445,55 +1550,176 @@
     if (btnMainAssignEl) btnMainAssignEl.onclick=()=>switchMain('assign');
     if (btnMainLineEl) btnMainLineEl.onclick=()=>switchMain('line');
     if (btnMainNoticeEl) btnMainNoticeEl.onclick=()=>switchMain('notice');
-    function switchMain(k){
-      const mainLineSettings=document.getElementById('mainLineSettings');
-      const map={prof:mainProf,shift:mainShift,assign:mainAssigned,msg:mainMsg,notice:mainNotice,line:mainLineSettings};
-      // hide all
-      Object.values(map).forEach(el=>{el.style.display='none';});
-      // 予約リスト（新UI）も確実に隠す
-      const assignedListContainer = document.getElementById('assignedListContainer');
-      if (assignedListContainer) assignedListContainer.style.display = 'none';
-      btnMainProfEl?.classList.remove('active');
-      btnMainShiftEl?.classList.remove('active');
-      btnMainAssignEl?.classList.remove('active');
-      btnMainLineEl?.classList.remove('active');
-      btnMainNoticeEl?.classList.remove('active');
+    // ── セクションタイトル（dash-header__title 動的設定） ──
+    const SECTION_TITLES = {
+      prof: 'プロフィール',
+      search: '仕事を探す',
+      shift: 'シフト',
+      training: '研修'
+    };
 
-      // show selected
-      if(map[k]){map[k].style.display='block';}
-      if(k==='prof') btnMainProfEl?.classList.add('active');
-      if(k==='shift'){
-        btnMainShiftEl?.classList.add('active');
-        // 初回は編集可能な直近月をセットしてから描画
-        setInitialEditableMonth();
-        editMode = false; // シフトタブ入場時は通常モード
-        pendingInserts.clear(); pendingDeletes.clear();
-        const saveBtn = document.getElementById('saveShiftBtn');
-        const editBtn = document.getElementById('editShiftBtn');
-        if (saveBtn) saveBtn.disabled = true;
-        if (editBtn) editBtn.disabled = false;
-        renderCal();
-      }
-      if(k==='assign'){
-        btnMainAssignEl?.classList.add('active');
-        console.log('キャディ予定タブ選択');
-        
-        // 新しい予定リストシステムを使用
-        if (simpleSchedule) {
-          console.log('simpleSchedule で予定リスト更新開始');
-          simpleSchedule.updateScheduleList();
-        } else {
-          console.error('simpleSchedule が見つかりません');
-          // フォールバック: 古い方法で表示
-        renderAssignedList();
-        }
-      } 
-      if(k==='line'){
-        btnMainLineEl?.classList.add('active');
-        checkLineConnectionStatus();
-      } 
-      if(k==='notice'){btnMainNoticeEl?.classList.add('active');}
+    // ── sidebar nav active state helper ──
+    function setSideNavActive(mode) {
+      document.querySelectorAll('.dash-nav-item').forEach(el => el.classList.remove('is-active'));
+      document.querySelectorAll('.dash-bottom-nav__item').forEach(el => el.classList.remove('is-active'));
+      const sideIdMap = {
+        prof: 'sideNavProf',
+        search: 'sideNavSearch',
+        shift: 'sideNavShift',
+        training: 'sideNavTraining'
+      };
+      const mobileIdMap = {
+        prof: 'mNavProf',
+        search: 'mNavSearch',
+        shift: 'mNavShift',
+        training: 'mNavTraining'
+      };
+      if (sideIdMap[mode]) document.getElementById(sideIdMap[mode])?.classList.add('is-active');
+      if (mobileIdMap[mode]) document.getElementById(mobileIdMap[mode])?.classList.add('is-active');
+      const titleEl = document.getElementById('mainHeaderTitle');
+      if (titleEl && SECTION_TITLES[mode]) titleEl.textContent = SECTION_TITLES[mode];
     }
+
+    // ── tab active state helper（親 nav.dash-tabs スコープに限定） ──
+    function setTabActive(btnId) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const navEl = btn.closest('.dash-tabs');
+      const scope = navEl ? navEl : document;
+      scope.querySelectorAll('.dash-tab').forEach(t => {
+        t.classList.remove('is-active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
+    }
+
+    // ── 各セクション内サブタブ切替 ──
+    function switchSubTab(section, subKey) {
+      // 互換: 旧 section 'schedule' → 'shift'
+      if (section === 'schedule') {
+        section = 'shift';
+        if (subKey === 'confirmed' || subKey === 'pending') subKey = 'check';
+      }
+      if (section === 'prof') {
+        const basic = document.getElementById('subProfBasic');
+        const payment = document.getElementById('subProfPayment');
+        // 互換: 旧 'shift' サブキーは無視（IAから消えた）
+        if (subKey === 'shift') subKey = 'basic';
+        [basic, payment].forEach(el => el && el.classList.add('hidden'));
+        if (subKey === 'basic') {
+          if (basic) basic.classList.remove('hidden');
+          setTabActive('btnProfBasic');
+        } else if (subKey === 'payment') {
+          if (payment) payment.classList.remove('hidden');
+          setTabActive('btnProfPayment');
+          if (typeof loadCaddyEarnings === 'function') {
+            try { loadCaddyEarnings(); } catch (e) { console.warn('loadCaddyEarnings:', e); }
+          }
+        }
+      } else if (section === 'search') {
+        const a = document.getElementById('tabOpenDates');
+        const b = document.getElementById('tabGolfCourses');
+        [a, b].forEach(el => el && el.classList.add('hidden'));
+        if (subKey === 'openDates') {
+          if (a) a.classList.remove('hidden');
+          setTabActive('btnTabOpenDates');
+          renderCaddyJobCal();
+        } else if (subKey === 'golfCourses') {
+          if (b) b.classList.remove('hidden');
+          setTabActive('btnTabGolfCourses');
+          renderGolfCourseGrid();
+        }
+      } else if (section === 'shift') {
+        const a = document.getElementById('subShiftSubmit');
+        const b = document.getElementById('subShiftCheck');
+        [a, b].forEach(el => el && el.classList.add('hidden'));
+        if (subKey === 'submit') {
+          if (a) a.classList.remove('hidden');
+          setTabActive('btnShiftSubmit');
+          // シフト編集UI初期化（既存JSの renderCal / 締切設定をそのまま呼ぶ）
+          try {
+            if (typeof setInitialEditableMonth === 'function') setInitialEditableMonth();
+            if (typeof renderCal === 'function') renderCal();
+          } catch (e) {
+            console.warn('シフト提出タブ初期化エラー:', e?.message || e);
+          }
+        } else if (subKey === 'check') {
+          if (b) b.classList.remove('hidden');
+          setTabActive('btnShiftCheck');
+          if (typeof renderShiftCheck === 'function') renderShiftCheck();
+        }
+      } else if (section === 'training') {
+        const a = document.getElementById('subTrainingOpen');
+        const b = document.getElementById('subTrainingApplied');
+        const c = document.getElementById('subTrainingCompleted');
+        [a, b, c].forEach(el => el && el.classList.add('hidden'));
+        if (subKey === 'open') {
+          if (a) a.classList.remove('hidden');
+          setTabActive('btnTrainingOpen');
+          renderTrainingOpenList();
+        } else if (subKey === 'applied') {
+          if (b) b.classList.remove('hidden');
+          setTabActive('btnTrainingApplied');
+          renderTrainingAppliedList();
+        } else if (subKey === 'completed') {
+          if (c) c.classList.remove('hidden');
+          setTabActive('btnTrainingCompleted');
+          renderTrainingCompletedList();
+        }
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+    window.switchSubTab = switchSubTab;
+
+    // ── 4 key: 'prof' | 'search' | 'shift' | 'training' ──
+    // 旧 key の互換: schedule/assign→shift, msg/messages→shift, line/notice→training
+    function switchMain(k){
+      // 互換マップ（旧キーを新キーに寄せる）
+      if (k === 'schedule') k = 'shift';
+      if (k === 'assign') k = 'shift';
+      if (k === 'msg' || k === 'messages') {
+        // メッセージはシフト経由で展開されるので shift に寄せる
+        k = 'shift';
+      }
+      if (k === 'notice' || k === 'line') {
+        // お知らせ・LINE設定は新IAでは sidebar から外したが、互換のため training に寄せる
+        k = 'training';
+      }
+      if (!['prof','search','shift','training'].includes(k)) k = 'prof';
+
+      const mainProfileDiv  = document.getElementById('mainProfile');
+      const mainSearchDiv   = document.getElementById('mainSearch');
+      const mainShiftDiv    = document.getElementById('mainShift');
+      const mainTrainingDiv = document.getElementById('mainTraining');
+
+      // 旧セクションも確実に非表示
+      const legacyIds = ['mainSchedule','mainAssigned','mainMessages','mainLineSettings','mainNotice','assignedListContainer'];
+      legacyIds.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+
+      // hide all primary sections
+      [mainProfileDiv, mainSearchDiv, mainShiftDiv, mainTrainingDiv]
+        .forEach(el => el && el.classList.add('hidden'));
+
+      if (k === 'prof') {
+        if (mainProfileDiv) mainProfileDiv.classList.remove('hidden');
+        setSideNavActive('prof');
+        switchSubTab('prof', 'basic');
+      } else if (k === 'search') {
+        if (mainSearchDiv) mainSearchDiv.classList.remove('hidden');
+        setSideNavActive('search');
+        switchSubTab('search', 'openDates');
+      } else if (k === 'shift') {
+        if (mainShiftDiv) mainShiftDiv.classList.remove('hidden');
+        setSideNavActive('shift');
+        switchSubTab('shift', 'submit');
+      } else if (k === 'training') {
+        if (mainTrainingDiv) mainTrainingDiv.classList.remove('hidden');
+        setSideNavActive('training');
+        switchSubTab('training', 'open');
+      }
+    }
+    window.switchMain = switchMain;
 
     // 初期表示（プロフィールが描画済みであればprof、それ以外はshiftにフォールバック）
     try { switchMain('prof'); } catch(e) { switchMain('shift'); }
@@ -1521,7 +1747,16 @@
       setupMessageSending();
 
 
-    document.getElementById('logoutBtn').onclick=async()=>{await supabase.auth.signOut();location.href='/';};
+    // logout with confirm modal (D-11)
+    document.getElementById('logoutBtn').onclick=()=>{
+      document.getElementById('logoutBackdrop').dataset.open='true';
+    };
+    document.getElementById('logoutCancel').onclick=()=>{
+      document.getElementById('logoutBackdrop').dataset.open='false';
+    };
+    document.getElementById('logoutConfirm').onclick=async()=>{
+      await sb.auth.signOut(); location.href='/';
+    };
 
     // シフト編集/確定ボタン
     const editBtn = document.getElementById('editShiftBtn');
@@ -1548,7 +1783,7 @@
         if (pendingDeletes.size>0){
           const dates = Array.from(pendingDeletes);
           console.log(`削除処理開始: ${dates}`);
-          const deleteResult = await supabase.from('caddy_availability').delete().eq('cid', cid).in('date', dates);
+          const deleteResult = await sb.from('caddy_availability').delete().eq('cid', cid).in('date', dates);
           console.log(`削除結果:`, deleteResult);
           if (deleteResult.error) {
             console.error(`削除エラー:`, deleteResult.error);
@@ -1559,7 +1794,7 @@
         if (pendingInserts.size>0){
           const rows = Array.from(pendingInserts).map(d=>({ cid, date: d }));
           console.log(`追加処理開始: ${rows}`);
-          const insertResult = await supabase.from('caddy_availability').insert(rows);
+          const insertResult = await sb.from('caddy_availability').insert(rows);
           console.log(`追加結果:`, insertResult);
           if (insertResult.error) {
             console.error(`追加エラー:`, insertResult.error);
@@ -1590,7 +1825,10 @@
 
     function renderProfileDisplay(row){
        document.getElementById('welcome').textContent=`ようこそ ${row.name||''} さん`;
-       document.getElementById('mainProfile').innerHTML=`
+       const mobileWelcome = document.getElementById('welcomeMobile');
+       if (mobileWelcome) mobileWelcome.textContent = row.name || '';
+       const profHost = document.getElementById('subProfBasic') || document.getElementById('mainProfile');
+       profHost.innerHTML=`
         <div class="card" style='display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap'>
           <div id='avatarCircle' style='width:110px;height:110px;border-radius:50%;background:#ddd;overflow:hidden;display:flex;align-items:center;justify-content:center;'>
             ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : `<div style='color:#999;font-size:24px;font-weight:bold;'>📷</div>`}
@@ -1617,7 +1855,8 @@
     }
 
     function renderProfileForm(row={}){
-      document.getElementById('mainProfile').innerHTML=`
+      const formHost = document.getElementById('subProfBasic') || document.getElementById('mainProfile');
+      formHost.innerHTML=`
         <div style='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap'>
           <form id='profForm' style='max-width:520px;flex:1 1 320px'>
           <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
@@ -1696,7 +1935,7 @@
         
         // プロフィール情報を保存
         if(row.cid){
-          const { error } = await supabase.from('caddies').update(payload).eq('cid',row.cid);
+          const { error } = await sb.from('caddies').update(payload).eq('cid',row.cid);
           if(error){
             console.error('プロフィール更新エラー:', error);
             alert('プロフィールの更新に失敗しました: ' + error.message);
@@ -1704,15 +1943,16 @@
           }
           console.log('プロフィール更新完了');
         } else {
-          const { data:userData } = await supabase.auth.getUser();
+          const { data:userData } = await sb.auth.getUser();
           const newCid='c'+userData.user.id.slice(0,6);
-          const { error } = await supabase.from('caddies').insert({...payload,cid:newCid,email:userData.user.email});
+          const { error } = await sb.from('caddies').insert({...payload,cid:newCid,email:userData.user.email});
           if(error){
             console.error('プロフィール作成エラー:', error);
             alert('プロフィールの作成に失敗しました: ' + error.message);
             return;
           }
           cid=newCid;
+          currentCaddyName = payload?.name || currentCaddyName;
           console.log('新規プロフィール作成完了, cid:', cid);
         }
       
@@ -1738,7 +1978,7 @@
           const fileName = `avatar_${cid}_${Date.now()}.${fileExt}`;
           
           // Supabaseストレージに画像をアップロード
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await sb.storage
             .from('caddy-avatars')
             .upload(fileName, file, {
               cacheControl: '3600',
@@ -1751,7 +1991,7 @@
           }
           
           // アップロードされた画像のURLを取得
-          const { data: urlData } = supabase.storage
+          const { data: urlData } = sb.storage
             .from('caddy-avatars')
             .getPublicUrl(fileName);
           
@@ -1759,7 +1999,7 @@
           console.log('画像アップロード成功:', imageUrl);
           
           // プロフィールに画像URLを保存
-          const { error: updateError } = await supabase
+          const { error: updateError } = await sb
             .from('caddies')
             .update({ avatar_url: imageUrl })
             .eq('cid', cid);
@@ -1812,7 +2052,7 @@
       messagesList.innerHTML = '<div style="text-align:center;color:#aaa;">読み込み中...</div>';
       
       // キャディの予定を取得
-      const { data: bookings, error } = await supabase
+      const { data: bookings, error } = await sb
                   .from('booking_caddies')
           .select(`
             *,
@@ -1897,7 +2137,7 @@
       document.getElementById('chatInputArea').style.display = 'flex';
 
       // 予定に関連するメッセージを取得
-      const { data: messages, error } = await supabase
+      const { data: messages, error } = await sb
         .from('messages')
         .select('*')
         .or(`and(sender_id.eq.${cid},receiver_id.eq.${chatPartnerId}),and(sender_id.eq.${chatPartnerId},receiver_id.eq.${cid})`)
@@ -1931,7 +2171,7 @@
       const content = input.value.trim();
       if (!content || !chatPartnerId || !currentBookingId) return;
       
-      const { error } = await supabase.from('messages').insert({
+      const { error } = await sb.from('messages').insert({
             sender_type: 'caddy',
             sender_id: cid,
             receiver_type: 'golf_course',
@@ -1964,7 +2204,7 @@
     
     async function checkLineConnectionStatus() {
       try {
-        const { data: lineIntegration } = await supabase
+        const { data: lineIntegration } = await sb
           .from('line_integrations')
           .select('*')
           .eq('cid', cid)
@@ -2040,7 +2280,7 @@
     document.getElementById('disconnectLineBtn')?.addEventListener('click', async () => {
       if (confirm('LINE連携を解除しますか？解除すると通知を受け取れなくなります。')) {
         try {
-          await supabase
+          await sb
             .from('line_integrations')
             .update({ is_active: false })
             .eq('cid', cid);
@@ -2127,7 +2367,7 @@
         expiresAt.setHours(expiresAt.getHours() + 24);
         
         // line_link_tokensテーブルに保存
-        const { error } = await supabase
+        const { error } = await sb
           .from('line_link_tokens')
           .insert({
             cid: cid,
@@ -2141,12 +2381,1315 @@
         }
         
         console.log('Link token saved to database:', cleanToken);
-        
+
       } catch (error) {
         console.error('Error saving link token:', error);
         alert('トークンの保存に失敗しました。再度お試しください。');
       }
     }
+
+    /* =================================================================
+       新IA: render関数群（仕事を探す / 出勤予定 / 研修 / KPI）
+       既存関数（renderProfileDisplay, openCourseDetail, renderCal等）
+       はそのまま残し、新IAから呼び出す形でラップしている。
+       ================================================================= */
+
+    // ── KPI ロード（仕事を探すタブ上部のみ表示） ──
+    async function loadCaddyKpiStats() {
+      if (!cid) return;
+      try {
+        // 週範囲を算出（今週月曜〜日曜、来週月曜〜日曜）
+        const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const today = new Date(); today.setHours(0,0,0,0);
+        const dow = today.getDay(); // 0=日
+        const mondayOffset = dow === 0 ? -6 : 1 - dow;
+        const thisWeekStart = new Date(today); thisWeekStart.setDate(today.getDate() + mondayOffset);
+        const thisWeekEnd = new Date(thisWeekStart); thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+        const nextWeekStart = new Date(thisWeekStart); nextWeekStart.setDate(thisWeekStart.getDate() + 7);
+        const nextWeekEnd = new Date(nextWeekStart); nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+
+        // 自分の確定予約（bookings × booking_caddies）
+        const { data: bookings } = await sb
+          .from('bookings')
+          .select('date, booking_caddies!inner(cid)')
+          .eq('booking_caddies.cid', cid);
+
+        const inRange = (dateStr, s, e) => {
+          if (!dateStr) return false;
+          const d = new Date(dateStr); d.setHours(0,0,0,0);
+          return d >= s && d <= e;
+        };
+        const thisWeek = (bookings||[]).filter(b => inRange(b.date, thisWeekStart, thisWeekEnd)).length;
+        const nextWeek = (bookings||[]).filter(b => inRange(b.date, nextWeekStart, nextWeekEnd)).length;
+
+        // 応募可能な仕事: 今後の status='pending' bookings から
+        // 自分が既に応募済み（booking_caddies に登録済み）の booking_id を除外したもの
+        const todayStr = fmt(today);
+        // 1) 自分の応募済み booking_id 一覧を取得
+        const { data: myBookingRows } = await sb
+          .from('booking_caddies')
+          .select('booking_id')
+          .eq('cid', cid);
+        const myBookingIds = new Set((myBookingRows || []).map(r => r.booking_id));
+        // 2) 今後の pending bookings を取得し、自分の応募済みを JS 側で除外
+        const { data: openRows } = await sb
+          .from('bookings')
+          .select('booking_id')
+          .eq('status', 'pending')
+          .gte('date', todayStr);
+        const openCount = (openRows || []).filter(r => !myBookingIds.has(r.booking_id)).length;
+
+        // 受講中の研修
+        const { count: trainingCount } = await sb
+          .from('training_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('cid', cid)
+          .eq('status', 'confirmed');
+
+        const setVal = (id, val, unit='') => {
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = `${val ?? '—'}<span class="kpi-card__unit">${unit}</span>`;
+        };
+        setVal('kpiThisWeek', thisWeek, '件');
+        setVal('kpiNextWeek', nextWeek, '件');
+        setVal('kpiOpenJobs', openCount ?? '—', '件');
+        setVal('kpiTrainingActive', trainingCount ?? '—', '件');
+      } catch (e) {
+        console.warn('loadCaddyKpiStats failed:', e?.message || e);
+      }
+    }
+
+    // ── 仕事を探す > 募集中の日付 ──
+    let caddyJobMonth = new Date().getMonth();
+    let caddyJobYear = new Date().getFullYear();
+
+    async function renderCaddyJobCal() {
+      const table = document.getElementById('caddyJobCal');
+      const titleEl = document.getElementById('caddyJobCalTitle');
+      if (!table) return;
+      titleEl.textContent = `${caddyJobYear}年 ${caddyJobMonth+1}月`;
+      const first = new Date(caddyJobYear, caddyJobMonth, 1);
+      const last  = new Date(caddyJobYear, caddyJobMonth+1, 0);
+      const firstStr = first.toISOString().slice(0,10);
+      const lastStr  = last.toISOString().slice(0,10);
+
+      // 1) 今月の bookings（status='pending' で枠が空いている可能性のあるもの）
+      const { data: bks } = await sb
+        .from('bookings')
+        .select('booking_id, date, slots, status, booking_caddies(cid)')
+        .gte('date', firstStr)
+        .lte('date', lastStr);
+
+      // 2) 自分の応募状況（caddy_availability）
+      const { data: myAvail } = await sb
+        .from('caddy_availability')
+        .select('date')
+        .eq('cid', cid || '__nocid__')
+        .gte('date', firstStr)
+        .lte('date', lastStr);
+      const mySet = new Set((myAvail||[]).map(r=>r.date));
+
+      // map: date -> {open, applied}
+      const dateMap = new Map();
+      (bks||[]).forEach(b => {
+        const filled = (b.booking_caddies||[]).length;
+        const isOpen = (b.slots||1) > filled && b.status !== 'completed' && b.status !== 'cancelled';
+        const cur = dateMap.get(b.date) || { open: false, full: false };
+        if (isOpen) cur.open = true; else cur.full = true;
+        dateMap.set(b.date, cur);
+      });
+
+      table.innerHTML='';
+      const headerRow = document.createElement('tr');
+      ['日','月','火','水','木','金','土'].forEach(d=>{
+        const th = document.createElement('th'); th.textContent = d; headerRow.appendChild(th);
+      });
+      table.appendChild(headerRow);
+
+      let row = document.createElement('tr');
+      const startWD = first.getDay();
+      for (let i=0; i<startWD; i++) {
+        const td = document.createElement('td'); td.className='cal-outside'; row.appendChild(td);
+      }
+      for (let day=1; day<=last.getDate(); day++) {
+        const dateStr = `${caddyJobYear}-${String(caddyJobMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td = document.createElement('td');
+        const info = dateMap.get(dateStr);
+        const applied = mySet.has(dateStr);
+        td.innerHTML = `<span class="cal-date">${day}</span><span class="cal-mark"></span>`;
+        if (applied) {
+          td.className = 'cal-confirmed';
+          td.style.cursor = 'default';
+          td.title = '応募済み';
+        } else if (info && info.open) {
+          td.className = 'cal-available';
+          td.style.cursor = 'pointer';
+          td.onclick = () => applyToJobDate(dateStr);
+        } else {
+          td.className = 'cal-disabled';
+          td.style.cursor = 'not-allowed';
+        }
+        row.appendChild(td);
+        if ((startWD+day)%7===0) { table.appendChild(row); row = document.createElement('tr'); }
+      }
+      if (row.children.length) {
+        while (row.children.length<7) {
+          const td = document.createElement('td'); td.className='cal-outside'; row.appendChild(td);
+        }
+        table.appendChild(row);
+      }
+    }
+
+    // ── LINE 通知ヘルパー ──
+    // 任意の cid に対して LINE 通知を送る
+    async function notifyCaddyByCid(cid, message) {
+      if (!cid || !message) return { ok: false, reason: 'invalid' };
+      try {
+        const { data: integ } = await sb
+          .from('line_integrations')
+          .select('line_user_id')
+          .eq('cid', cid)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (!integ?.line_user_id) return { ok: false, reason: 'not_linked' };
+        const res = await fetch('/api/send-line-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lineUserId: integ.line_user_id, message })
+        });
+        return { ok: res.ok };
+      } catch (e) {
+        console.error('LINE notify (caddy) error:', e);
+        return { ok: false, reason: 'fetch_failed' };
+      }
+    }
+
+    // 任意の gid に対して LINE 通知を送る
+    async function notifyGolfByGid(gidVal, message) {
+      if (!gidVal || !message) return { ok: false, reason: 'invalid' };
+      try {
+        const { data: integ } = await sb
+          .from('line_integrations')
+          .select('line_user_id')
+          .eq('gid', gidVal)
+          .eq('is_active', true)
+          .maybeSingle();
+        if (!integ?.line_user_id) return { ok: false, reason: 'not_linked' };
+        const res = await fetch('/api/send-line-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lineUserId: integ.line_user_id, message })
+        });
+        return { ok: res.ok };
+      } catch (e) {
+        console.error('LINE notify (golf) error:', e);
+        return { ok: false, reason: 'fetch_failed' };
+      }
+    }
+
+    // 日付からその日に募集中だったゴルフ場の gid を逆引き（bookings から）。
+    // 「募集中の日付」カレンダー経由の応募ではゴルフ場が一意に決まらないため、その日の bookings(pending) 全件に通知。
+    async function notifyAllPendingGolfCoursesForDate(dateStr, message) {
+      try {
+        const { data: bks } = await sb
+          .from('bookings')
+          .select('gid')
+          .eq('date', dateStr)
+          .eq('status', 'pending');
+        const seen = new Set();
+        for (const b of (bks||[])) {
+          if (!b.gid || seen.has(b.gid)) continue;
+          seen.add(b.gid);
+          try { await notifyGolfByGid(b.gid, message); } catch(e) { console.error(e); }
+        }
+      } catch (e) {
+        console.error('notifyAllPendingGolfCoursesForDate error:', e);
+      }
+    }
+
+    async function applyToJobDate(dateStr) {
+      if (!cid) { alert('プロフィール登録後に応募できます'); return; }
+      if (!confirm(`${dateStr} に応募しますか？`)) return;
+      try {
+        // 1) caddy_availability への INSERT（既存ロジック：その日空いてますアピール）
+        //    ON CONFLICT 相当：すでに行があってもエラー無視
+        const { error: avErr } = await sb
+          .from('caddy_availability')
+          .insert({ cid, date: dateStr });
+        if (avErr && !String(avErr.message||'').includes('duplicate')) {
+          // 重複以外のエラーは継続。重複なら問題なし
+          console.warn('caddy_availability insert:', avErr.message);
+        }
+
+        // 2) その日に募集中の bookings を取得し、booking_caddies に pending で応募
+        const { data: openBks } = await sb
+          .from('bookings')
+          .select('booking_id, gid')
+          .eq('date', dateStr)
+          .eq('status', 'pending');
+        const targetBks = openBks || [];
+        for (const b of targetBks) {
+          // 既存行があれば status を pending に戻す（再応募）
+          const { data: exist } = await sb
+            .from('booking_caddies')
+            .select('booking_id, cid, status')
+            .eq('booking_id', b.booking_id)
+            .eq('cid', cid)
+            .maybeSingle();
+          if (exist) {
+            if (exist.status !== 'confirmed') {
+              await sb
+                .from('booking_caddies')
+                .update({ status: 'pending' })
+                .eq('booking_id', b.booking_id)
+                .eq('cid', cid);
+            }
+          } else {
+            await sb
+              .from('booking_caddies')
+              .insert({ booking_id: b.booking_id, cid, status: 'pending' });
+          }
+        }
+
+        alert(targetBks.length > 0
+          ? `応募しました。${targetBks.length}件のゴルフ場で確認待ちです。`
+          : '応募しました。ゴルフ場側で確定されると出勤予定に表示されます。');
+
+        // ゴルフ場に LINE 通知（その日に募集中のゴルフ場全件）
+        try {
+          const name = currentCaddyName || 'キャディ';
+          await notifyAllPendingGolfCoursesForDate(
+            dateStr,
+            `【Caddygate】${name} さんが ${dateStr} に応募しました`
+          );
+        } catch (e) { console.error('LINE notify (apply) error:', e); }
+        await renderCaddyJobCal();
+        await loadCaddyKpiStats();
+        if (typeof renderPendingSchedule === 'function') {
+          try { await renderPendingSchedule(); } catch(e) {}
+        }
+      } catch (e) {
+        alert('応募に失敗しました: ' + (e.message||e));
+      }
+    }
+
+    // ── 仕事を探す > ゴルフ場一覧から ──
+    async function renderGolfCourseGrid() {
+      const grid = document.getElementById('golfCourseGrid');
+      if (!grid) return;
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</div>';
+      const { data: courses, error } = await sb
+        .from('golf_courses')
+        .select('gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description,address')
+        .order('name', { ascending: true });
+      if (error) {
+        grid.innerHTML = `<div style="grid-column:1/-1;color:var(--color-accent);">エラー: ${error.message}</div>`;
+        return;
+      }
+      if (!courses || courses.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;">
+            <div class="empty">
+              <i data-lucide="map-pin" class="empty__icon"></i>
+              <div class="empty__title">登録ゴルフ場はまだありません</div>
+              <div class="empty__desc">ゴルフ場が登録されるとここに表示されます。</div>
+            </div>
+          </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      grid.innerHTML = '';
+      courses.forEach(c => {
+        const initial = (c.name || '?').slice(0, 1);
+        const perksShort = (c.perks || '').slice(0, 50) + ((c.perks || '').length > 50 ? '…' : '');
+        const wageText = c.caddy_wage_per_round != null ? `¥${Number(c.caddy_wage_per_round).toLocaleString()}/ラウンド` : '謝礼未設定';
+        const hoursText = c.caddy_duration_hours != null ? `拘束 ${c.caddy_duration_hours}h` : '';
+        const meta = [wageText, hoursText].filter(Boolean).join(' / ');
+        const card = document.createElement('article');
+        card.className = 'person-card';
+        card.dataset.gid = c.gid;
+        card.innerHTML = `
+          <div class="person-card__avatar">
+            ${c.image_url ? `<img src="${c.image_url}" alt="">` : initial}
+          </div>
+          <div class="person-card__info">
+            <div class="person-card__name">${c.name || '名前未設定'}</div>
+            <div class="person-card__meta">${meta}</div>
+            ${perksShort ? `<div class="person-card__meta" style="margin-top:4px;">特典: ${perksShort}</div>` : ''}
+          </div>
+          <div class="person-card__actions">
+            <button class="btn btn--primary btn--sm gcDetailBtn" data-gid="${c.gid}">詳細を見る</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      Array.from(document.getElementsByClassName('gcDetailBtn')).forEach(btn => {
+        btn.onclick = (e) => {
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          const course = courses.find(x => x.gid === gidVal);
+          if (course) openGolfCourseDetail(course);
+        };
+      });
+    }
+
+    // ── ゴルフ場詳細モーダル（プロフィール + 募集カレンダー）──
+    let gcDetailState = { course: null, month: new Date().getMonth(), year: new Date().getFullYear() };
+
+    function openGolfCourseDetail(course) {
+      const initial = (course.name || '?').slice(0, 1);
+      const wageText = course.caddy_wage_per_round != null ? `¥${Number(course.caddy_wage_per_round).toLocaleString()}/ラウンド` : '謝礼未設定';
+      const hoursText = course.caddy_duration_hours != null ? `拘束 ${course.caddy_duration_hours}h` : '拘束時間未設定';
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.id = 'gcDetailBackdrop';
+      modal.dataset.open = 'true';
+      modal.style.alignItems = 'flex-start';
+      modal.style.overflowY = 'auto';
+      modal.innerHTML = `
+        <div class="modal" role="dialog" style="width:min(640px,100%);max-height:90vh;overflow-y:auto;margin:var(--space-5) 0;">
+          <div style="display:flex;gap:var(--space-4);align-items:center;margin-bottom:var(--space-4);">
+            <div class="person-card__avatar" style="width:72px;height:72px;font-size:1.5rem;">
+              ${course.image_url ? `<img src="${course.image_url}" alt="">` : initial}
+            </div>
+            <div style="flex:1;min-width:0;">
+              <h2 class="modal__title" style="margin-bottom:4px;">${course.name || '名前未設定'}</h2>
+              <div style="font-size:var(--fs-small);color:var(--color-ink-sub);line-height:1.5;">
+                ${course.address || '所在地未登録'}<br>
+                ${wageText} ／ ${hoursText}
+              </div>
+            </div>
+          </div>
+          ${course.description ? `
+            <div style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-3);margin-bottom:var(--space-3);font-size:var(--fs-small);color:var(--color-ink-sub);line-height:var(--lh-snug);white-space:pre-wrap;">${course.description}</div>
+          ` : ''}
+          ${course.perks ? `
+            <div style="background:var(--color-primary-soft-bg);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-3);margin-bottom:var(--space-4);font-size:var(--fs-small);"><strong>特典:</strong> ${course.perks}</div>
+          ` : ''}
+          <div class="dash-section__head" style="margin-bottom:var(--space-3);">
+            <h3 class="dash-section__title" style="font-size:var(--fs-body);">募集中の日付</h3>
+            <div class="dash-section__actions">
+              <button id="gcCalPrev" class="btn--ghost btn--sm">◀</button>
+              <span id="gcCalTitle" style="font-size:var(--fs-small);color:var(--color-ink-sub);font-variant-numeric:tabular-nums;min-width:88px;text-align:center;display:inline-block;"></span>
+              <button id="gcCalNext" class="btn--ghost btn--sm">▶</button>
+            </div>
+          </div>
+          <div class="cal-shell">
+            <table class="calendar cal-grid" id="gcDetailCalTable" style="border-collapse:separate;border-spacing:0;width:100%"></table>
+            <div class="cal-legend">
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-surface)"></span> ○ 募集中（クリックで応募）
+              </span>
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-primary-soft-bg)"></span> ✓ 応募済み
+              </span>
+              <span class="cal-legend__item">
+                <span class="cal-legend__swatch" style="background:var(--color-gray-soft)"></span> × 募集なし
+              </span>
+            </div>
+          </div>
+          <div class="modal__actions" style="margin-top:var(--space-5);">
+            <button id="gcDetailCloseBtn" class="btn--ghost">閉じる</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      gcDetailState.course = course;
+      gcDetailState.month = new Date().getMonth();
+      gcDetailState.year = new Date().getFullYear();
+      document.getElementById('gcDetailCloseBtn').onclick = () => { document.body.removeChild(modal); };
+      modal.addEventListener('click', (e) => { if (e.target === modal) document.body.removeChild(modal); });
+      document.getElementById('gcCalPrev').onclick = () => {
+        if (--gcDetailState.month < 0) { gcDetailState.month = 11; gcDetailState.year--; }
+        renderGolfCourseDetailCal();
+      };
+      document.getElementById('gcCalNext').onclick = () => {
+        if (++gcDetailState.month > 11) { gcDetailState.month = 0; gcDetailState.year++; }
+        renderGolfCourseDetailCal();
+      };
+      renderGolfCourseDetailCal();
+    }
+
+    async function renderGolfCourseDetailCal() {
+      const course = gcDetailState.course;
+      if (!course) return;
+      const y = gcDetailState.year, m = gcDetailState.month;
+      const first = new Date(y, m, 1);
+      const last  = new Date(y, m+1, 0);
+      const firstStr = first.toISOString().slice(0,10);
+      const lastStr  = last.toISOString().slice(0,10);
+      const titleEl = document.getElementById('gcCalTitle');
+      if (titleEl) titleEl.textContent = `${y}年 ${m+1}月`;
+
+      // そのゴルフ場の bookings
+      const { data: bks } = await sb
+        .from('bookings')
+        .select('booking_id, date, slots, status, booking_caddies(cid)')
+        .eq('gid', course.gid)
+        .gte('date', firstStr)
+        .lte('date', lastStr);
+
+      // 自分の応募状況
+      const { data: myAvail } = await sb
+        .from('caddy_availability')
+        .select('date')
+        .eq('cid', cid || '__nocid__')
+        .gte('date', firstStr)
+        .lte('date', lastStr);
+      const mySet = new Set((myAvail||[]).map(r=>r.date));
+
+      const dateMap = new Map();
+      (bks||[]).forEach(b => {
+        const filled = (b.booking_caddies||[]).length;
+        const isOpen = (b.slots||1) > filled && b.status !== 'completed' && b.status !== 'cancelled';
+        const cur = dateMap.get(b.date) || { open: false, full: false };
+        if (isOpen) cur.open = true; else cur.full = true;
+        dateMap.set(b.date, cur);
+      });
+
+      const table = document.getElementById('gcDetailCalTable');
+      if (!table) return;
+      table.innerHTML = '';
+      const headerRow = document.createElement('tr');
+      ['日','月','火','水','木','金','土'].forEach(d => {
+        const th = document.createElement('th'); th.textContent = d; headerRow.appendChild(th);
+      });
+      table.appendChild(headerRow);
+      let row = document.createElement('tr');
+      const startWD = first.getDay();
+      for (let i=0; i<startWD; i++) {
+        const td = document.createElement('td'); td.className='cal-outside'; row.appendChild(td);
+      }
+      for (let day=1; day<=last.getDate(); day++) {
+        const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const td = document.createElement('td');
+        const info = dateMap.get(dateStr);
+        const applied = mySet.has(dateStr);
+        td.innerHTML = `<span class="cal-date">${day}</span><span class="cal-mark"></span>`;
+        if (applied) {
+          td.className = 'cal-confirmed';
+          td.style.cursor = 'default';
+        } else if (info && info.open) {
+          td.className = 'cal-available';
+          td.style.cursor = 'pointer';
+          td.onclick = () => applyToGolfCourse(dateStr, course.gid, course.name);
+        } else {
+          td.className = 'cal-disabled';
+          td.style.cursor = 'not-allowed';
+        }
+        row.appendChild(td);
+        if ((startWD+day)%7===0) { table.appendChild(row); row = document.createElement('tr'); }
+      }
+      if (row.children.length) {
+        while (row.children.length<7) {
+          const td = document.createElement('td'); td.className='cal-outside'; row.appendChild(td);
+        }
+        table.appendChild(row);
+      }
+    }
+
+    async function applyToGolfCourse(dateStr, gidVal, courseName) {
+      if (!cid) { alert('プロフィール登録後に応募できます'); return; }
+      if (!confirm(`${courseName||'このゴルフ場'} の ${dateStr} に応募しますか？`)) return;
+      try {
+        // 1) caddy_availability への INSERT（重複は無視）
+        const { error: avErr } = await sb
+          .from('caddy_availability')
+          .insert({ cid, date: dateStr });
+        if (avErr && !String(avErr.message||'').includes('duplicate')) {
+          console.warn('caddy_availability insert:', avErr.message);
+        }
+
+        // 2) 特定 gid の その日 booking 取得 → booking_caddies に pending 応募
+        const { data: openBks } = await sb
+          .from('bookings')
+          .select('booking_id')
+          .eq('gid', gidVal)
+          .eq('date', dateStr)
+          .eq('status', 'pending');
+        const targetBks = openBks || [];
+        for (const b of targetBks) {
+          const { data: exist } = await sb
+            .from('booking_caddies')
+            .select('booking_id, cid, status')
+            .eq('booking_id', b.booking_id)
+            .eq('cid', cid)
+            .maybeSingle();
+          if (exist) {
+            if (exist.status !== 'confirmed') {
+              await sb
+                .from('booking_caddies')
+                .update({ status: 'pending' })
+                .eq('booking_id', b.booking_id)
+                .eq('cid', cid);
+            }
+          } else {
+            await sb
+              .from('booking_caddies')
+              .insert({ booking_id: b.booking_id, cid, status: 'pending' });
+          }
+        }
+
+        alert(targetBks.length > 0
+          ? '応募しました。ゴルフ場側の確認をお待ちください。'
+          : '応募しました。ゴルフ場側で確定されると出勤予定に表示されます。');
+        // ゴルフ場に LINE 通知（特定 gid）
+        try {
+          const name = currentCaddyName || 'キャディ';
+          await notifyGolfByGid(
+            gidVal,
+            `【Caddygate】${name} さんが ${dateStr} に応募しました`
+          );
+        } catch (e) { console.error('LINE notify (apply golf) error:', e); }
+        await renderGolfCourseDetailCal();
+        await loadCaddyKpiStats();
+        if (typeof renderPendingSchedule === 'function') {
+          try { await renderPendingSchedule(); } catch(e) {}
+        }
+      } catch (e) {
+        alert('応募に失敗しました: ' + (e.message||e));
+      }
+    }
+
+    // ── 出勤予定 ──
+    let scheduleMonth = new Date().getMonth();
+    let scheduleYear  = new Date().getFullYear();
+
+    async function renderSchedule() {
+      const titleEl = document.getElementById('scheduleTitle');
+      const tbody   = document.getElementById('scheduleBody');
+      if (!titleEl || !tbody) return;
+      titleEl.textContent = `${scheduleYear}年 ${scheduleMonth+1}月`;
+
+      const first = `${scheduleYear}-${String(scheduleMonth+1).padStart(2,'0')}-01`;
+      const lastDay = new Date(scheduleYear, scheduleMonth+1, 0).getDate();
+      const last  = `${scheduleYear}-${String(scheduleMonth+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</td></tr>';
+
+      const { data: bookings, error } = await sb
+        .from('bookings')
+        .select('booking_id, date, start_time, status, golf_courses(gid,name,caddy_wage_per_round), booking_caddies!inner(cid,status)')
+        .eq('booking_caddies.cid', cid || '__nocid__')
+        .in('booking_caddies.status', ['confirmed','completed'])
+        .gte('date', first)
+        .lte('date', last)
+        .order('date', { ascending: true });
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="5">エラー: ${error.message}</td></tr>`;
+        return;
+      }
+      if (!bookings || bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:0;border:0;">
+          <div class="empty">
+            <i data-lucide="calendar-x" class="empty__icon"></i>
+            <div class="empty__title">${scheduleYear}年${scheduleMonth+1}月の出勤予定はありません</div>
+            <div class="empty__desc">「仕事を探す」から募集中の日付に応募できます。</div>
+          </div>
+        </td></tr>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      tbody.innerHTML = '';
+      bookings.forEach(b => {
+        const wage = b.golf_courses?.caddy_wage_per_round;
+        const wageText = wage != null ? `¥${Number(wage).toLocaleString()}` : '—';
+        const statusText = b.status === 'pending' ? '仮確定' :
+                           b.status === 'confirmed' ? '確定' :
+                           b.status === 'completed' ? '完了' :
+                           b.status === 'cancelled' ? '取消' : (b.status || '—');
+        const badgeClass = b.status === 'pending' ? 'badge badge--pending' :
+                           b.status === 'confirmed' ? 'badge badge--confirmed' :
+                           b.status === 'completed' ? 'badge badge--completed' : 'badge badge--cancelled';
+        // start_time は TIME 型（"HH:MM:SS" もしくは "HH:MM"）。HH:MM に整形して表示
+        const startTimeText = b.start_time
+          ? String(b.start_time).slice(0, 5)
+          : '—';
+        const canDecline = b.status !== 'cancelled' && b.status !== 'completed';
+        const declineBtn = canDecline
+          ? `<button class="btn--ghost btn--sm scheduleDeclineBtn" data-booking-id="${b.booking_id}" data-date="${b.date}" data-gid="${b.golf_courses?.gid || ''}" data-name="${(b.golf_courses?.name||'').replace(/"/g,'&quot;')}" style="margin-left:var(--space-2);">辞退</button>`
+          : '';
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `
+          <td>${b.date}</td>
+          <td>${b.golf_courses?.name || '—'}</td>
+          <td>${startTimeText}</td>
+          <td class="col-num">${wageText}</td>
+          <td><span class="${badgeClass}">${statusText}</span>${declineBtn}</td>
+        `;
+        tr.onclick = (e) => {
+          // 辞退ボタンクリックは除外
+          if (e.target && e.target.classList && e.target.classList.contains('scheduleDeclineBtn')) return;
+          // メッセージタブを使った既存導線（チャット起動）
+          if (typeof openCourseDetail === 'function' && b.golf_courses) {
+            openCourseDetail({
+              booking_id: b.booking_id,
+              gid: b.golf_courses?.gid,
+              golf_courses: b.golf_courses
+            });
+          }
+        };
+        tbody.appendChild(tr);
+      });
+
+      // 辞退ボタンのバインド
+      Array.from(document.getElementsByClassName('scheduleDeclineBtn')).forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const bookingId = e.currentTarget.getAttribute('data-booking-id');
+          const dateStr = e.currentTarget.getAttribute('data-date');
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          if (!bookingId || !cid) return;
+          if (!confirm(`${dateStr} の予約を辞退しますか？`)) return;
+          try {
+            const { error } = await sb
+              .from('booking_caddies')
+              .update({ status: 'cancelled' })
+              .eq('booking_id', bookingId)
+              .eq('cid', cid);
+            if (error) throw error;
+            // ゴルフ場に LINE 通知
+            if (gidVal) {
+              try {
+                const name = currentCaddyName || 'キャディ';
+                await notifyGolfByGid(
+                  gidVal,
+                  `【Caddygate】${name} さんが ${dateStr} の予約を辞退しました`
+                );
+              } catch (e) { console.error('LINE notify (decline) error:', e); }
+            }
+            alert('辞退しました');
+            await renderSchedule();
+            await loadCaddyKpiStats();
+          } catch (err) {
+            console.error('Decline error:', err);
+            alert('辞退に失敗しました: ' + (err.message || err));
+          }
+        };
+      });
+    }
+
+    // ── 確定待ち（pending 応募）一覧 ──
+    async function renderPendingSchedule() {
+      const tbody = document.getElementById('pendingBody');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</td></tr>';
+      if (!cid) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:0;border:0;">
+          <div class="empty">
+            <i data-lucide="user-x" class="empty__icon"></i>
+            <div class="empty__title">プロフィール登録が必要です</div>
+            <div class="empty__desc">プロフィールを登録すると応募状況が表示されます。</div>
+          </div>
+        </td></tr>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      const { data, error } = await sb
+        .from('booking_caddies')
+        .select('booking_id, cid, status, created_at, bookings!inner(booking_id, gid, date, status, golf_courses(gid,name))')
+        .eq('cid', cid)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="5">エラー: ${error.message}</td></tr>`;
+        return;
+      }
+      const rows = (data||[]).filter(r => r.bookings && r.bookings.status !== 'cancelled');
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:0;border:0;">
+          <div class="empty">
+            <i data-lucide="hourglass" class="empty__icon"></i>
+            <div class="empty__title">確定待ちの応募はありません</div>
+            <div class="empty__desc">「仕事を探す」から募集中の日付に応募できます。</div>
+          </div>
+        </td></tr>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const date = r.bookings?.date || '—';
+        const courseName = r.bookings?.golf_courses?.name || '—';
+        const gidVal = r.bookings?.gid || r.bookings?.golf_courses?.gid || '';
+        const bookingId = r.booking_id;
+        const created = r.created_at ? new Date(r.created_at) : null;
+        const createdText = created
+          ? `${created.getFullYear()}/${String(created.getMonth()+1).padStart(2,'0')}/${String(created.getDate()).padStart(2,'0')} ${String(created.getHours()).padStart(2,'0')}:${String(created.getMinutes()).padStart(2,'0')}`
+          : '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${courseName}</td>
+          <td>${createdText}</td>
+          <td><span class="badge badge--pending">確定待ち</span></td>
+          <td><button class="btn--ghost btn--sm pendingWithdrawBtn"
+                data-booking-id="${bookingId}"
+                data-date="${date}"
+                data-gid="${gidVal}">取下げ</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      Array.from(document.getElementsByClassName('pendingWithdrawBtn')).forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const bookingId = e.currentTarget.getAttribute('data-booking-id');
+          const dateStr = e.currentTarget.getAttribute('data-date');
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          if (!bookingId || !cid) return;
+          if (!confirm(`${dateStr} の応募を取下げますか？`)) return;
+          try {
+            // 既存の辞退/取下げと同じ呼び口：booking_caddies.status = cancelled
+            const { error } = await sb
+              .from('booking_caddies')
+              .update({ status: 'cancelled' })
+              .eq('booking_id', bookingId)
+              .eq('cid', cid);
+            if (error) throw error;
+            if (gidVal) {
+              try {
+                const name = currentCaddyName || 'キャディ';
+                await notifyGolfByGid(
+                  gidVal,
+                  `【Caddygate】${name} さんが ${dateStr} の応募を取下げました`
+                );
+              } catch (e) { console.error('LINE notify (withdraw) error:', e); }
+            }
+            alert('応募を取下げました');
+            await renderPendingSchedule();
+            await loadCaddyKpiStats();
+          } catch (err) {
+            console.error('Withdraw error:', err);
+            alert('取下げに失敗しました: ' + (err.message || err));
+          }
+        };
+      });
+      const reloadBtn = document.getElementById('pendingReload');
+      if (reloadBtn) reloadBtn.onclick = renderPendingSchedule;
+    }
+
+    // ── シフトを確認（旧「確定済み」「確定待ち」を統合した1リスト） ──
+    // booking_caddies で自分の cid を status IN ('pending','confirmed') でまとめて取得し、
+    // bookings / golf_courses を JOIN、月レンジで絞って時系列に並べる。
+    async function renderShiftCheck() {
+      const titleEl = document.getElementById('scheduleTitle');
+      const tbody   = document.getElementById('shiftCheckBody');
+      if (!titleEl || !tbody) return;
+      titleEl.textContent = `${scheduleYear}年 ${scheduleMonth+1}月`;
+
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</td></tr>';
+
+      if (!cid) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:0;border:0;">
+          <div class="empty">
+            <i data-lucide="user-x" class="empty__icon"></i>
+            <div class="empty__title">プロフィール登録が必要です</div>
+            <div class="empty__desc">プロフィールを登録するとシフト状況が表示されます。</div>
+          </div>
+        </td></tr>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const first = `${scheduleYear}-${String(scheduleMonth+1).padStart(2,'0')}-01`;
+      const lastDay = new Date(scheduleYear, scheduleMonth+1, 0).getDate();
+      const last  = `${scheduleYear}-${String(scheduleMonth+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+
+      const { data, error } = await sb
+        .from('booking_caddies')
+        .select('booking_id, cid, status, created_at, bookings!inner(booking_id, gid, date, start_time, status, golf_courses(gid,name,caddy_wage_per_round))')
+        .eq('cid', cid)
+        .in('status', ['pending','confirmed'])
+        .gte('bookings.date', first)
+        .lte('bookings.date', last);
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="5">エラー: ${error.message}</td></tr>`;
+        return;
+      }
+
+      // bookings 側がキャンセルされている行は除外、日付昇順で並べる
+      const rows = (data||[])
+        .filter(r => r.bookings && r.bookings.date && r.bookings.status !== 'cancelled')
+        .sort((a, b) => {
+          const ad = a.bookings.date || '';
+          const bd = b.bookings.date || '';
+          if (ad !== bd) return ad < bd ? -1 : 1;
+          const at = a.bookings.start_time || '';
+          const bt = b.bookings.start_time || '';
+          return at < bt ? -1 : at > bt ? 1 : 0;
+        });
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:0;border:0;">
+          <div class="empty">
+            <i data-lucide="calendar-x" class="empty__icon"></i>
+            <div class="empty__title">${scheduleYear}年${scheduleMonth+1}月のシフトはありません</div>
+            <div class="empty__desc">「仕事を探す」から募集中の日付に応募できます。</div>
+          </div>
+        </td></tr>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const b = r.bookings || {};
+        const date = b.date || '—';
+        const courseName = b.golf_courses?.name || '—';
+        const gidVal = b.gid || b.golf_courses?.gid || '';
+        const startTimeText = b.start_time ? String(b.start_time).slice(0, 5) : '—';
+        const isPending = r.status === 'pending';
+        const badgeClass = isPending ? 'badge badge--pending' : 'badge badge--confirmed';
+        const statusText = isPending ? '確定待ち' : '確定済み';
+        // pending → 取下げ、confirmed → 辞退（既存の onclick 挙動を踏襲）
+        const actionBtn = isPending
+          ? `<button class="btn--ghost btn--sm pendingWithdrawBtn"
+                data-booking-id="${b.booking_id}"
+                data-date="${date}"
+                data-gid="${gidVal}">取下げ</button>`
+          : `<button class="btn--ghost btn--sm scheduleDeclineBtn"
+                data-booking-id="${b.booking_id}"
+                data-date="${date}"
+                data-gid="${gidVal}"
+                data-name="${(b.golf_courses?.name||'').replace(/"/g,'&quot;')}">辞退</button>`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${courseName}</td>
+          <td>${startTimeText}</td>
+          <td><span class="${badgeClass}">${statusText}</span></td>
+          <td>${actionBtn}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // 取下げ（pending）
+      Array.from(document.getElementsByClassName('pendingWithdrawBtn')).forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const bookingId = e.currentTarget.getAttribute('data-booking-id');
+          const dateStr = e.currentTarget.getAttribute('data-date');
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          if (!bookingId || !cid) return;
+          if (!confirm(`${dateStr} の応募を取下げますか？`)) return;
+          try {
+            const { error } = await sb
+              .from('booking_caddies')
+              .update({ status: 'cancelled' })
+              .eq('booking_id', bookingId)
+              .eq('cid', cid);
+            if (error) throw error;
+            if (gidVal) {
+              try {
+                const name = currentCaddyName || 'キャディ';
+                await notifyGolfByGid(
+                  gidVal,
+                  `【Caddygate】${name} さんが ${dateStr} の応募を取下げました`
+                );
+              } catch (e) { console.error('LINE notify (withdraw) error:', e); }
+            }
+            alert('応募を取下げました');
+            await renderShiftCheck();
+            await loadCaddyKpiStats();
+          } catch (err) {
+            console.error('Withdraw error:', err);
+            alert('取下げに失敗しました: ' + (err.message || err));
+          }
+        };
+      });
+
+      // 辞退（confirmed）
+      Array.from(document.getElementsByClassName('scheduleDeclineBtn')).forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const bookingId = e.currentTarget.getAttribute('data-booking-id');
+          const dateStr = e.currentTarget.getAttribute('data-date');
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          if (!bookingId || !cid) return;
+          if (!confirm(`${dateStr} の予約を辞退しますか？`)) return;
+          try {
+            const { error } = await sb
+              .from('booking_caddies')
+              .update({ status: 'cancelled' })
+              .eq('booking_id', bookingId)
+              .eq('cid', cid);
+            if (error) throw error;
+            if (gidVal) {
+              try {
+                const name = currentCaddyName || 'キャディ';
+                await notifyGolfByGid(
+                  gidVal,
+                  `【Caddygate】${name} さんが ${dateStr} の予約を辞退しました`
+                );
+              } catch (e) { console.error('LINE notify (decline) error:', e); }
+            }
+            alert('辞退しました');
+            await renderShiftCheck();
+            await loadCaddyKpiStats();
+          } catch (err) {
+            console.error('Decline error:', err);
+            alert('辞退に失敗しました: ' + (err.message || err));
+          }
+        };
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ── 報酬・実績（月別集計） ──
+    async function loadCaddyEarnings() {
+      const tbody = document.getElementById('caddyPaymentBody');
+      if (!tbody) return;
+      if (!cid) return;
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</td></tr>';
+      // booking_caddies × bookings × golf_courses を結合し、月別に集計
+      const { data, error } = await sb
+        .from('booking_caddies')
+        .select('booking_id, cid, status, bookings!inner(booking_id, date, status, golf_courses(name, caddy_wage_per_round))')
+        .eq('cid', cid)
+        .in('status', ['confirmed','completed']);
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="4">エラー: ${error.message}</td></tr>`;
+        return;
+      }
+      const rows = (data||[]).filter(r => r.bookings && r.bookings.date && r.bookings.status !== 'cancelled');
+      if (rows.length === 0) {
+        // empty-state を維持（既存パターン）
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:0;border:0;">
+          <div class="empty">
+            <i data-lucide="file-text" class="empty__icon"></i>
+            <div class="empty__title">報酬・実績データはまだありません</div>
+            <div class="empty__desc">出勤確定後、月次の出勤回数と報酬合計がここに表示されます。</div>
+          </div>
+        </td></tr>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      // 月別集計
+      const byMonth = new Map(); // ym -> { rounds, total, names: [{name, count, wage}] }
+      rows.forEach(r => {
+        const d = r.bookings.date; // 'YYYY-MM-DD'
+        const ym = d.slice(0,7);
+        const wage = Number(r.bookings.golf_courses?.caddy_wage_per_round || 0);
+        const name = r.bookings.golf_courses?.name || '—';
+        if (!byMonth.has(ym)) byMonth.set(ym, { rounds: 0, total: 0, byName: new Map(), status: r.status });
+        const m = byMonth.get(ym);
+        m.rounds += 1;
+        m.total += wage;
+        const cur = m.byName.get(name) || { count: 0, wage: 0 };
+        cur.count += 1;
+        cur.wage += wage;
+        m.byName.set(name, cur);
+      });
+      const months = Array.from(byMonth.keys()).sort().reverse();
+      tbody.innerHTML = '';
+      months.forEach((ym, idx) => {
+        const m = byMonth.get(ym);
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `
+          <td>${ym.replace('-', '年')}月</td>
+          <td class="col-num">${m.rounds}</td>
+          <td class="col-num">¥${m.total.toLocaleString()}</td>
+          <td><span class="badge badge--confirmed">確定</span> <span style="margin-left:var(--space-2);font-size:var(--fs-small);color:var(--color-ink-sub);">内訳 ▼</span></td>
+        `;
+        tbody.appendChild(tr);
+        // 内訳行（hidden）
+        const detail = document.createElement('tr');
+        detail.className = 'caddyEarningsDetail';
+        detail.style.display = 'none';
+        const detailParts = Array.from(m.byName.entries()).map(([n,v]) =>
+          `${n} × ${v.count}回 / ¥${v.wage.toLocaleString()}`
+        ).join(' ／ ');
+        detail.innerHTML = `<td colspan="4" style="background:var(--color-bg);font-size:var(--fs-small);color:var(--color-ink-sub);padding:var(--space-3) var(--space-4);">${detailParts}</td>`;
+        tbody.appendChild(detail);
+        tr.onclick = () => {
+          detail.style.display = (detail.style.display === 'none') ? '' : 'none';
+        };
+      });
+    }
+
+    // ── 研修 > 募集中の研修 ──
+    async function renderTrainingOpenList() {
+      const container = document.getElementById('trainingOpenList');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center;color:var(--color-ink-mute);padding:var(--space-4);">読み込み中...</div>';
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const { data: avail, error } = await sb
+        .from('training_availability')
+        .select('id, gid, date, max_slots, golf_courses(gid,name,image_url,address)')
+        .gte('date', todayStr)
+        .order('date', { ascending: true })
+        .limit(60);
+      if (error) {
+        container.innerHTML = `<p style="color:var(--color-accent);">エラー: ${error.message}</p>`;
+        return;
+      }
+      if (!avail || avail.length === 0) {
+        container.innerHTML = `
+          <div class="empty">
+            <i data-lucide="graduation-cap" class="empty__icon"></i>
+            <div class="empty__title">募集中の研修はありません</div>
+            <div class="empty__desc">ゴルフ場が研修日を設定するとここに表示されます。</div>
+          </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      // 自分の応募済み一覧
+      let appliedSet = new Set();
+      if (cid) {
+        const { data: mine } = await sb
+          .from('training_requests')
+          .select('gid, training_date, status')
+          .eq('cid', cid);
+        (mine||[]).forEach(r => {
+          if (r.status !== 'cancelled') appliedSet.add(`${r.gid}__${r.training_date}`);
+        });
+      }
+      let html = '';
+      avail.forEach(a => {
+        const key = `${a.gid}__${a.date}`;
+        const applied = appliedSet.has(key);
+        html += `
+          <div class="schedule-item" style="margin-bottom:var(--space-2);">
+            <div style="min-width:80px;text-align:center;">
+              <div style="font-size:1.25rem;font-weight:700;color:var(--color-primary-deep);">${a.date.slice(8)}</div>
+              <div style="font-size:var(--fs-micro);color:var(--color-ink-sub);">${a.date.slice(0,7)}</div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:var(--color-ink);font-size:var(--fs-body);">${a.golf_courses?.name || 'ゴルフ場'}</div>
+              <div style="font-size:var(--fs-small);color:var(--color-ink-sub);">${a.golf_courses?.address || '所在地未登録'} ／ 定員 ${a.max_slots || 1}名</div>
+            </div>
+            <div>
+              ${applied
+                ? `<span class="badge badge--pending">応募済み</span>`
+                : `<button class="btn btn--primary btn--sm trainApplyBtn" data-gid="${a.gid}" data-date="${a.date}" data-name="${(a.golf_courses?.name||'').replace(/"/g,'&quot;')}">応募する</button>`}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+      Array.from(document.getElementsByClassName('trainApplyBtn')).forEach(btn => {
+        btn.onclick = async (e) => {
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          const dateVal = e.currentTarget.getAttribute('data-date');
+          const nameVal = e.currentTarget.getAttribute('data-name');
+          if (!cid) { alert('プロフィール登録後に応募できます'); return; }
+          if (!confirm(`${nameVal||'ゴルフ場'} の研修 (${dateVal}) に応募しますか？`)) return;
+          try {
+            const { error } = await sb.from('training_requests').insert({
+              cid,
+              gid: gidVal,
+              training_date: dateVal,
+              status: 'pending'
+            });
+            if (error) throw error;
+            alert('研修応募を送信しました');
+            // ゴルフ場に LINE 通知
+            try {
+              const name = currentCaddyName || 'キャディ';
+              await notifyGolfByGid(
+                gidVal,
+                `【Caddygate】${name} さんが ${dateVal} の研修に応募しました`
+              );
+            } catch (e) { console.error('LINE notify (training apply) error:', e); }
+            renderTrainingOpenList();
+            loadCaddyKpiStats();
+          } catch (err) {
+            alert('応募に失敗しました: ' + (err.message||err));
+          }
+        };
+      });
+    }
+
+    // ── 研修 > 応募済み ──
+    async function renderTrainingAppliedList() {
+      const container = document.getElementById('trainingAppliedList');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center;color:var(--color-ink-mute);padding:var(--space-4);">読み込み中...</div>';
+      if (!cid) {
+        container.innerHTML = `<p style="color:var(--color-ink-sub);">プロフィール登録後に応募履歴を表示できます。</p>`;
+        return;
+      }
+      const { data, error } = await sb
+        .from('training_requests')
+        .select('id, gid, training_date, status, created_at, golf_courses(name,address)')
+        .eq('cid', cid)
+        .order('training_date', { ascending: false });
+      if (error) {
+        container.innerHTML = `<p style="color:var(--color-accent);">エラー: ${error.message}</p>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        container.innerHTML = `
+          <div class="empty">
+            <i data-lucide="clipboard-list" class="empty__icon"></i>
+            <div class="empty__title">応募済みの研修はありません</div>
+            <div class="empty__desc">「募集中の研修」から応募できます。</div>
+          </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      let html = '';
+      data.forEach(r => {
+        const statusText = r.status === 'pending' ? '審査中' :
+                           r.status === 'confirmed' ? '確定' :
+                           r.status === 'completed' ? '完了' :
+                           r.status === 'cancelled' ? '取消' : (r.status||'—');
+        const badgeClass = r.status === 'pending' ? 'badge badge--pending' :
+                           r.status === 'confirmed' ? 'badge badge--confirmed' :
+                           r.status === 'completed' ? 'badge badge--completed' : 'badge badge--cancelled';
+        const canWithdraw = r.status !== 'cancelled' && r.status !== 'completed';
+        const withdrawBtn = canWithdraw
+          ? `<button class="btn--ghost btn--sm trainingWithdrawBtn" data-id="${r.id}" data-gid="${r.gid||''}" data-date="${r.training_date||''}" style="margin-left:var(--space-2);">取下げ</button>`
+          : '';
+        html += `
+          <div class="schedule-item" style="margin-bottom:var(--space-2);">
+            <div style="min-width:80px;text-align:center;">
+              <div style="font-size:1.25rem;font-weight:700;color:var(--color-primary-deep);">${(r.training_date||'').slice(8)}</div>
+              <div style="font-size:var(--fs-micro);color:var(--color-ink-sub);">${(r.training_date||'').slice(0,7)}</div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:var(--color-ink);font-size:var(--fs-body);">${r.golf_courses?.name || 'ゴルフ場'}</div>
+              <div style="font-size:var(--fs-small);color:var(--color-ink-sub);">${r.golf_courses?.address || '所在地未登録'}</div>
+              <div style="font-size:var(--fs-micro);color:var(--color-ink-mute);margin-top:2px;">申込日: ${(r.created_at||'').slice(0,10)}</div>
+            </div>
+            <div style="display:flex;align-items:center;"><span class="${badgeClass}">${statusText}</span>${withdrawBtn}</div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+
+      // 取下げボタンのバインド
+      Array.from(document.getElementsByClassName('trainingWithdrawBtn')).forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.getAttribute('data-id');
+          const gidVal = e.currentTarget.getAttribute('data-gid');
+          const dateStr = e.currentTarget.getAttribute('data-date');
+          if (!id) return;
+          if (!confirm(`${dateStr || '該当日'} の研修応募を取下げますか？`)) return;
+          try {
+            const { error } = await sb
+              .from('training_requests')
+              .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+              .eq('id', id);
+            if (error) throw error;
+            // ゴルフ場に LINE 通知
+            if (gidVal) {
+              try {
+                const name = currentCaddyName || 'キャディ';
+                await notifyGolfByGid(
+                  gidVal,
+                  `【Caddygate】${name} さんが ${dateStr} の研修応募を取下げました`
+                );
+              } catch (e) { console.error('LINE notify (training withdraw) error:', e); }
+            }
+            alert('応募を取下げました');
+            await renderTrainingAppliedList();
+            await loadCaddyKpiStats();
+          } catch (err) {
+            console.error('Withdraw training error:', err);
+            alert('取下げに失敗しました: ' + (err.message || err));
+          }
+        };
+      });
+    }
+
+    // ── 研修 > 研修済み ──
+    async function renderTrainingCompletedList() {
+      const container = document.getElementById('trainingCompletedList');
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center;color:var(--color-ink-mute);padding:var(--space-4);">読み込み中...</div>';
+      if (!cid) {
+        container.innerHTML = `<p style="color:var(--color-ink-sub);">プロフィール登録後に研修履歴を表示できます。</p>`;
+        return;
+      }
+      const { data, error } = await sb
+        .from('training_requests')
+        .select('id, gid, training_date, golf_courses(name, image_url, contact_name, phone, address)')
+        .eq('cid', cid)
+        .eq('status', 'completed')
+        .order('training_date', { ascending: false });
+      if (error) {
+        container.innerHTML = `<p style="color:var(--color-accent);">エラー: ${error.message}</p>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        container.innerHTML = `
+          <div class="empty">
+            <i data-lucide="award" class="empty__icon"></i>
+            <div class="empty__title">研修済みのゴルフ場はまだありません</div>
+            <div class="empty__desc">研修が完了するとここに表示されます。</div>
+          </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      container.innerHTML = '';
+      const grid = document.createElement('div');
+      grid.className = 'dash-grid-2';
+      data.forEach(r => {
+        const gc = r.golf_courses || {};
+        const initial = (gc.name || '?').slice(0, 1);
+        const contactLine = [gc.contact_name, gc.phone].filter(Boolean).join(' ／ ');
+        const card = document.createElement('article');
+        card.className = 'person-card';
+        card.innerHTML = `
+          <div class="person-card__avatar">
+            ${gc.image_url ? `<img src="${gc.image_url}" alt="">` : initial}
+          </div>
+          <div class="person-card__info">
+            <div class="person-card__name">${gc.name || 'ゴルフ場'}</div>
+            <div class="person-card__meta">研修実施日: ${r.training_date || '—'}</div>
+            ${contactLine ? `<div class="person-card__meta" style="margin-top:4px;">担当: ${contactLine}</div>` : ''}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      container.appendChild(grid);
+    }
+
+    // ── 新IA: イベントハンドラ + 初期化 ──
+    (function bindNewIaHandlers() {
+      const cjPrev = document.getElementById('caddyJobPrev');
+      const cjNext = document.getElementById('caddyJobNext');
+      if (cjPrev) cjPrev.onclick = () => { if (--caddyJobMonth<0){caddyJobMonth=11;caddyJobYear--;} renderCaddyJobCal(); };
+      if (cjNext) cjNext.onclick = () => { if (++caddyJobMonth>11){caddyJobMonth=0;caddyJobYear++;} renderCaddyJobCal(); };
+
+      const sPrev = document.getElementById('schedulePrev');
+      const sNext = document.getElementById('scheduleNext');
+      const sReload = document.getElementById('scheduleReload');
+      if (sPrev) sPrev.onclick = () => { if (--scheduleMonth<0){scheduleMonth=11;scheduleYear--;} renderShiftCheck(); };
+      if (sNext) sNext.onclick = () => { if (++scheduleMonth>11){scheduleMonth=0;scheduleYear++;} renderShiftCheck(); };
+      if (sReload) sReload.onclick = () => renderShiftCheck();
+
+      const gcReload = document.getElementById('golfCourseListReload');
+      if (gcReload) gcReload.onclick = () => renderGolfCourseGrid();
+    })();
+
+    // cid 確定後に KPI を一度ロード（既存のプロフィール初期化が走った後に呼ぶ）
+    (function awaitCidThenLoadKpi(){
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        if (cid) {
+          clearInterval(timer);
+          loadCaddyKpiStats();
+        } else if (tries > 50) {
+          clearInterval(timer);
+        }
+      }, 200);
+    })();
+
+    // 初期表示は新IAでプロフィール
+    try { switchMain('prof'); } catch(e) { console.warn('switchMain init warn:', e?.message || e); }
+  </script>
+  <script>
+    // Lucide アイコン初期化（DOM確定後）
+    if (window.lucide) lucide.createIcons();
   </script>
 </body>
 </html> 

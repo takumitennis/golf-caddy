@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golf-Caddy Matching Service</title><!-- v=2025-08-10-01 -->
+  <style>
+    :root {
+      --primary-color: #2f8f2f;
+      --primary-dark: #1e5f1e;
+      --primary-light: #4caf50;
+      --secondary-color: #ffffff;
+      --accent-color: #ff6b35;
+      --text-color: #333333;
+      --text-light: #666666;
+      --bg-light: #f8f9fa;
+      --bg-dark: #2c3e50;
+      --max-width: 1200px;
+      --border-radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      color: var(--text-color);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Header with improved design */
+    header {
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #6b8e23 100%);
+      color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* 背景: キャディ画像 + ふわっと浮き出るアニメーション */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('images/キャディ.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: brightness(1.06) saturate(1.05);
+      transform: scale(1.06);
+      opacity: 0;
+      animation: heroReveal 1200ms ease-out forwards;
+      will-change: transform, opacity;
+      z-index: -1;
+    }
+    @keyframes heroReveal {
+      from { opacity: 0; transform: scale(1.06); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    header::before {
+        content: '';
+        position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.18); /* 全体を明るく */
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      padding: 100px 3rem 0; /* 固定ナビゲーション分のtop padding追加 */
+      text-align: center;
+      animation: fadeInUp 1s ease-out;
+    }
+    
+    /* ロゴ背後のスポットは不要になったため無効化 */
+    .hero-spot { display:none; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hero logo (centered above title) */
+    .hero-logo {
+      display: block;
+      margin: 60px auto 12px;
+      width: clamp(210px, 45vw, 390px);
+      height: auto;
+      opacity: 0;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
+      animation: logoFade 700ms ease-out 120ms forwards;
+    }
+
+    /* ロゴを少し上げ、左寄せ配置（PC） */
+    @media (min-width: 769px) {
+      .hero-logo { margin-left: 0; margin-right: 0; margin-top: 40px; }
+    }
+
+    @keyframes logoFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-title {
+      font-size: 2rem; /* およそ2/3 */
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      letter-spacing: 0.06em;
+      line-height: 1.2;
+      word-break: keep-all;
+      text-align: center;
+    }
+
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    .hero-line1, .hero-line2 { display: block; opacity: 0; }
+    .hero-line1 { animation: slideInRight 0.7s ease-out 0s forwards; }
+    .hero-line2 { animation: slideInRight 0.7s ease-out 0.18s forwards; }
+
+    .hero-subtitle {
+      font-size: 0.8rem;
+      margin-bottom: 2.2rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      opacity: 0;
+      font-weight: 400;
+      text-wrap: pretty;
+      text-align: center;
+      animation: slideInRight 0.7s ease-out 0.36s forwards;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: var(--transition);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .cta-btn:hover::before {
+      left: 100%;
+    }
+
+    .cta-btn.primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .cta-btn.secondary {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .cta-btn.secondary:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+
+    
+    /* Top Navigation */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      height: 80px;
+      background: rgba(0,0,0,0.28);
+      backdrop-filter: blur(2px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .top-nav.scrolled { background: rgba(0,0,0,0.7); }
+
+
+
+    .nav-main {
+      display: flex;
+      gap: clamp(0.5rem, 2vw, 1.5rem);
+      align-items: center;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+
+    .nav-item {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .nav-tab {
+      color: #fff;
+      text-decoration: none;
+      padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+      transition: var(--transition);
+      display: block;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-1px);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 10px;
+      min-width: 220px;
+      opacity: 0;
+      visibility: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3);
+      border: 1px solid rgba(255,255,255,0.12);
+      z-index: 1000;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      margin-top: 0.25rem;
+      padding: 6px 0;
+    }
+
+    .nav-item:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 14px;
+      font-size: .86rem;
+      font-weight: 500;
+      border: none;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+    .dropdown-item:first-child {
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .login-section {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .nav-login-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: var(--transition);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .nav-login-btn.golf-login-btn {
+      background: rgba(0,106,173,0.8);
+    }
+
+    .nav-login-btn.golf-login-btn:hover {
+      background: rgba(0,106,173,1);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-1px);
+    }
+
+    .nav-login-btn.caddy-login-btn {
+      background: rgba(47,143,47,0.8);
+    }
+
+    .nav-login-btn.caddy-login-btn:hover {
+      background: rgba(47,143,47,1);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-1px);
+    }
+
+    /* Auth dropdown (desktop) */
+    .auth-menu{ position:relative; margin-left:16px; }
+    .auth-link{ 
+      color:#fff; 
+      text-decoration:none; 
+      font-weight:500; 
+      letter-spacing:.02em; 
+      display:block; 
+      padding: 0.75rem 1.5rem; 
+      border-radius: var(--border-radius); 
+      font-size: clamp(0.6rem, 1.8vw, 0.8rem); 
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5); 
+      transition: var(--transition); 
+    }
+    
+
+    .auth-link:hover{ background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+    .auth-dropdown{ position:absolute; top:120%; left:50%; right:auto; background: rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; min-width:220px; padding:6px 0; opacity:0; visibility:hidden; transform: translateX(-50%) translateY(-6px); transition: var(--transition); z-index: 12; box-shadow: 0 10px 30px rgba(0,0,0,.3); backdrop-filter: blur(4px); }
+    .auth-dropdown a{ display:block; color:#fff; text-decoration:none; padding:10px 14px; font-size:.86rem; border:none; text-align:center; }
+    .auth-dropdown a:last-child{ border:none; }
+    .auth-menu:hover .auth-dropdown{ opacity:1; visibility:visible; transform: translateX(-50%) translateY(0); }
+
+    /* Mobile navigation */
+    .hamburger{ 
+      display: none; 
+      position: absolute; 
+      right: 12px; 
+      top: 50%; 
+      transform: translateY(-50%);
+      width: 44px; 
+      height: 40px; 
+      border: 1px solid rgba(255,255,255,.35); 
+      border-radius: 8px; 
+      background: rgba(0,0,0,.25); 
+      z-index: 10000; 
+      cursor: pointer;
+    }
+    .hamburger span{ display:block; height:2px; background:#fff; margin:9px 8px; }
+    
+    .nav-drawer{ 
+      display: none; 
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(10px);
+      z-index: 9998;
+      padding: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-drawer a{ 
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .nav-drawer a:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Content wrapper */
+    .content-wrapper {
+      position: relative;
+      z-index: 2;
+      background: var(--secondary-color);
+    }
+
+    /* Features Section with improved design */
+    .features {
+      background: var(--bg-light);
+      padding: 5rem 1rem;
+    }
+
+    .features .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      gap: 2.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      padding: 0 2rem;
+    }
+
+    .feature {
+      background: var(--secondary-color);
+      padding: 2.5rem 2rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transform: scaleX(0);
+      transition: var(--transition);
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .feature:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature h3 {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .feature p {
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    /* Benefits sections with improved design */
+    .benefits-section {
+      padding: 3rem 0;
+      margin: 0;
+      position: relative;
+      background: #f2f1ee;
+    }
+
+    .benefits-section .container {
+      position: relative;
+      z-index: 2;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .benefits-section.golf-course-benefits { background: #eef7f1 !important; border-top: 1px solid #e4efe8; border-bottom: 1px solid #e4efe8; }
+
+    .benefits-section.golf-course-benefits::after { display:none; }
+
+    .benefits-section.caddy-benefits { background: #e3f2fd !important; border-top: 1px solid #bbdefb; border-bottom: 1px solid #bbdefb; }
+
+    .benefits-section.caddy-benefits::after { display:none; }
+
+    .benefits-section.golfer-benefits { display:none; }
+
+    .benefits-section.golfer-benefits::after { display:none; }
+
+    .benefits-header {
+      text-align: center;
+      margin-bottom: 1.8rem; /* 余白を詰める */
+    }
+
+    .benefits-header h2 { font-size:2rem; margin-bottom:1rem; font-weight:700; color:#111; text-shadow: 3px 3px 10px rgba(0,0,0,0.25); letter-spacing:-0.02em; }
+
+    .benefits-header p { font-size:1rem; color:#333; max-width:800px; margin:0 auto; text-shadow:none; line-height:1.8; }
+
+    /* セクション識別チップ */
+    .section-chip { display:inline-block; padding:4px 10px; font-size:1.2rem; font-weight:700; letter-spacing:.08em; margin-bottom:10px; }
+    .section-chip.gc { color:#2e7d32; }
+    .section-chip.cd { color:#006aad; }
+
+    .benefits-grid { display:block; margin-top:1rem; }
+
+    .benefit-card { background: transparent; padding: 0 0 1.25rem; border:none; box-shadow:none; text-align:left; display:flex; gap:16px; align-items:flex-start; }
+
+    .benefit-thumb { width: 92px; height: 92px; border-radius: 0; overflow: hidden; flex: 0 0 92px; background: #e9ecef; }
+    .benefit-thumb img { width:100%; height:100%; object-fit: cover; display:block; }
+
+    .benefit-content { flex: 1; text-align: left; }
+
+    .benefit-card::before { display:none; }
+
+    .benefit-card:hover { transform:none; box-shadow:none; }
+
+    /* removed hover bar */
+
+    .benefit-title { font-size:1.25rem; font-weight:700; margin-bottom:.5rem; color:#111; }
+
+    .benefit-description { color:#222; line-height:1.8; font-size:1rem; font-weight:400; }
+
+    .golf-course-benefits .benefits-header h2 { color:#111; }
+    .golf-course-benefits .benefit-title { color:#111; }
+
+    .caddy-benefits .benefits-header h2 { color:#111; }
+    .caddy-benefits .benefit-title { color:#111; }
+    /* キャディ向けにも同じ縮小・レイアウト適用 */
+    .caddy-benefits .benefits-header h2 { font-size: 1.35rem; }
+    .caddy-benefits .benefits-header p { font-size: 0.67rem; }
+    .caddy-benefits .benefit-title { font-size: 0.84rem; }
+    .caddy-benefits .benefit-description { font-size: 0.67rem; line-height: 1.6; }
+
+    .golfer-benefits .benefits-header h2 { color: #8b5cf6; }
+    .golfer-benefits .benefit-title { color: #8b5cf6; }
+
+    /* ゴルフ場向けメリット：フォントを約2/3に縮小 */
+    .golf-course-benefits .benefits-header h2 { font-size: 1.35rem; }
+    .golf-course-benefits .benefits-header p { font-size: 0.67rem; }
+    .golf-course-benefits .benefit-title { font-size: 0.84rem; }
+    .golf-course-benefits .benefit-description { font-size: 0.67rem; line-height: 1.6; }
+
+    /* Footer with improved design */
+    footer {
+      background: var(--bg-dark);
+      color: #aaa;
+      text-align: center;
+      padding: 1rem 0.5rem; /* 大幅縮小 */
+      font-size: 0.32rem; /* 約1/3 */
+    }
+
+    .footer-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 0.7rem; /* 縮小 */
+      text-align: left;
+    }
+
+    .footer-section h3 {
+      color: #fff;
+      margin-bottom: 0.35rem;
+      font-size: 0.67rem; /* 他の文字と同じサイズに統一 */
+    }
+
+    .footer-section p, .footer-section a {
+      color: #aaa;
+      text-decoration: none;
+      line-height: 1.4;
+      transition: var(--transition);
+      font-size: 0.67rem;
+    }
+
+    .footer-section a:hover {
+      color: var(--primary-light);
+    }
+
+    .footer-bottom {
+      margin-top: 0.7rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid #444;
+        text-align: center;
+    }
+
+    /* Desktop (Web) scaling: 1.5x */
+    @media (min-width: 769px) {
+      html { font-size: 150%; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .top-nav { 
+        padding: 0.5rem 1rem; 
+        height: 70px;
+        justify-content: center; 
+      }
+      
+      .nav-main {
+        gap: clamp(0.3rem, 1.5vw, 0.8rem);
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .nav-item {
+        flex-shrink: 0;
+      }
+      
+      .nav-tab {
+        padding: 0.4rem 0.6rem;
+        font-size: clamp(0.6rem, 2.2vw, 0.8rem);
+        white-space: nowrap;
+        border-radius: 6px;
+      }
+      
+      .dropdown-menu {
+        min-width: auto;
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) translateY(0) !important;
+        padding: 4px 0;
+        background: rgba(0,0,0,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 8px !important;
+        z-index: 1000 !important;
+      }
+      
+      .dropdown-item {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+      }
+      
+      .hero-content{ 
+        max-width: 96%; 
+        padding: 80px 1rem 0; /* 固定ヘッダーの高さ(70px) + 余白(10px) */
+      }
+      
+      .hero-title { 
+        font-size: clamp(16px, 4vw, 18px); 
+        letter-spacing: 0.02em; 
+        line-height: 1.4; 
+        white-space: normal; 
+        overflow: visible; 
+        max-width: 90vw; 
+        margin: 0 auto 1rem; 
+        text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        word-break: keep-all;
+        text-align: center;
+      }
+      
+      .hero-subtitle { 
+        font-size: clamp(0.8rem, 2.5vw, 1rem); 
+        line-height: 1.6; 
+        margin: 0 auto 1.5rem;
+        max-width: 88vw;
+        text-align: center;
+        word-break: keep-all;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .benefits-header h2 {
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+      }
+
+      .benefits-header p {
+        font-size: 1.1rem;
+      }
+
+      .benefits-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .benefit-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .features .container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .feature {
+        padding: 2rem 1.5rem;
+      }
+      
+      /* モバイル版でのヒーローロゴ非表示（ヘッダーロゴは表示） */
+      .hero-logo { 
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: clamp(18px, 5vw, 20px);
+        line-height: 1.5;
+        margin: 0 auto 1.2rem;
+        max-width: 85vw;
+        text-shadow: 0 3px 10px rgba(0,0,0,0.7);
+        word-break: keep-all;
+        text-align: center;
+      }
+
+      .hero-subtitle {
+        font-size: clamp(1rem, 3vw, 1.1rem);
+        line-height: 1.7;
+        margin: 0 auto 1.8rem;
+        max-width: 82vw;
+        text-align: center;
+        word-break: keep-all;
+      }
+
+      .benefits-header h2 {
+        font-size: 1.8rem;
+      }
+
+      .benefit-card {
+        padding: 1.5rem 1rem;
+      }
+
+      .feature {
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    /* Loading animation */
+    .loading {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+    }
+
+    .loading.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateX(-50%) translateY(0);
+      }
+      40% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+      60% {
+        transform: translateX(-50%) translateY(-5px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero-bg" aria-hidden="true"></div>
+    <nav class="top-nav">
+      <div class="nav-main">
+        <div class="nav-item">
+          <a href="#golf-course-benefits" class="nav-tab">ゴルフ場の方へ</a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="#caddy-benefits" class="nav-tab">キャディの方へ</a>
+        </div>
+
+        <div class="nav-item">
+          <a href="partner-golf-courses.html" class="nav-tab">提携ゴルフ場</a>
+        </div>
+
+        <div class="nav-item">
+          <a href="#" class="nav-tab" id="loginModalTrigger">ログイン</a>
+          <div class="dropdown-menu auth-dropdown">
+            <a href="#" class="dropdown-item" data-role="golf">ゴルフ場</a>
+            <a href="#" class="dropdown-item" data-role="caddy">キャディ</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="hero-content">
+      <div class="hero-row hero-slider" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="hero-text">
+          <h1 class="hero-title" style="margin-bottom:.4rem;">
+            <span class="hero-line1">ゴルフ場に</span>
+            <span class="hero-line2">いつでもキャディを</span>
+          </h1>
+          <p class="hero-subtitle">経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します</p>
+        </div>
+        <div class="hero-nav" id="heroDots" aria-label="slides" style="margin-top: 2rem; display:flex; gap:10px; justify-content:center; z-index:3;"></div>
+      </div>
+      <div class="cta-buttons" style="display:none;">
+        <a href="#features" class="cta-btn primary">サービス詳細</a>
+        <a href="booking-flow.html" class="cta-btn secondary">予約フロー</a>
+            </div>
+            </div>
+
+    <div class="scroll-indicator">
+      <span>↓ スクロールして詳細を見る</span>
+        </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Features Section (removed per request) -->
+
+    <!-- Golf Course Benefits -->
+    <section id="golf-course-benefits" class="benefits-section golf-course-benefits">
+      <div class="container">
+        <div class="benefits-header">
+          <span class="section-chip gc">GOLF</span>
+          <h2>ゴルフ場向けサービス</h2>
+          <p>経験豊富なキャディを効率的に確保し、<br>お客様に最高のゴルフ体験を提供</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card loading">
+            <div class="benefit-thumb" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+              <img src="images/人材不足の解決.png" alt="人材不足の解決" style="width: auto; height: auto; max-width: 100%; max-height: 100px; border-radius: 8px;">
+            </div>
+            <div class="benefit-content">
+            <h3 class="benefit-title">人材不足の解決</h3>
+            <p class="benefit-description">登録キャディから最適な人材を選定し、人材不足の問題を解決します。経験豊富なキャディがいつでも利用可能です。</p>
+            </div>
+          </div>
+          <div class="benefit-card loading">
+            <div class="benefit-thumb" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+              <img src="images/売上向上.png" alt="売り上げ向上" style="width: auto; height: auto; max-width: 100%; max-height: 100px; border-radius: 8px;">
+            </div>
+            <div class="benefit-content">
+            <h3 class="benefit-title">売り上げ向上</h3>
+            <p class="benefit-description">高品質なキャディサービスによりお客様満足度が向上し、リピート率増加と新規顧客獲得を実現。売り上げの大幅な向上を期待できます。</p>
+            </div>
+          </div>
+          <div class="benefit-card loading">
+            <div class="benefit-thumb" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+              <img src="images/サービス品質向上.png" alt="サービス品質向上" style="width: auto; height: auto; max-width: 100%; max-height: 100px; border-radius: 8px;">
+            </div>
+            <div class="benefit-content">
+            <h3 class="benefit-title">サービス品質向上</h3>
+            <p class="benefit-description">厳選されたキャディが提供する高品質なサービスで、お客様満足度の向上とリピート率の向上を実現します。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Caddy Benefits -->
+    <section id="caddy-benefits" class="benefits-section caddy-benefits">
+      <div class="container">
+        <div class="benefits-header">
+          <span class="section-chip cd">CADDY</span>
+          <h2>キャディ向けサービス</h2>
+            <p>自分のスケジュールに合わせて働き、<br>スキル向上の機会を提供</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card loading">
+            <div class="benefit-thumb" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+              <img src="images/柔軟な働き方.png" alt="柔軟な働き方" style="width: auto; height: auto; max-width: 100%; max-height: 100px; border-radius: 8px;">
+            </div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">柔軟な働き方</h3>
+              <p class="benefit-description">自分の都合に合わせてシフトを選択でき、ワークライフバランスを保ちながら働くことができます。</p>
+            </div>
+          </div>
+          <div class="benefit-card loading">
+            <div class="benefit-thumb" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+              <img src="images/収入向上.png" alt="収入向上" style="width: auto; height: auto; max-width: 100%; max-height: 100px; border-radius: 8px;">
+            </div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">収入向上</h3>
+              <p class="benefit-description">複数のゴルフ場で働くことで収入を増やし、スキルに応じた適正な報酬を得ることができます。</p>
+            </div>
+          </div>
+          <div class="benefit-card loading">
+            <div class="benefit-thumb" style="display: flex; justify-content: center; align-items: center; min-height: 120px;">
+              <img src="images/キャリア＆スキルアップ.png" alt="キャリア&スキルアップ" style="width: auto; height: auto; max-width: 100%; max-height: 100px; border-radius: 8px;">
+            </div>
+            <div class="benefit-content">
+              <h3 class="benefit-title">キャリア&スキルアップ</h3>
+              <p class="benefit-description">多様なゴルフ場での豊富な経験と専門研修プログラムを通じて、プロフェッショナルなキャディとしてのキャリア形成とスキル向上を実現します。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Golfer Benefits -->
+    <section id="golfer-benefits" class="benefits-section golfer-benefits">
+      <div class="container">
+        <div class="benefits-header">
+          <h2>ゴルフファー向けサービス</h2>
+          <p>経験豊富なキャディによる最高のゴルフ体験を提供</p>
+        </div>
+        <div class="benefits-grid">
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">高品質なサービス</h3>
+            <p class="benefit-description">厳選された経験豊富なキャディが、お客様一人ひとりに合わせた最高のサービスを提供します。</p>
+            </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">安心の保証</h3>
+            <p class="benefit-description">登録キャディは全て審査を通過しており、安心してサービスをご利用いただけます。</p>
+          </div>
+          <div class="benefit-card loading">
+            <h3 class="benefit-title">カスタマイズ可能</h3>
+            <p class="benefit-description">お客様のニーズに合わせて、最適なキャディをマッチングし、パーソナライズされたサービスを提供します。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>サービス</h3>
+          <p>ゴルフ場とキャディの最適なマッチングを実現し、より良いゴルフ体験を提供します。</p>
+        </div>
+        <div class="footer-section">
+          <h3>お問い合わせ</h3>
+          <p>Email: caddytas@gmail.com</p>
+        </div>
+        <div class="footer-section">
+          <h3>リンク</h3>
+          <p><a href="partner-golf-courses.html">ゴルフ場パートナー募集</a></p>
+          <p><a href="partner-golf-clubs.html">キャディパートナー募集</a></p>
+          <p><a href="training-program.html">研修プログラム</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 Golf-Caddy Matching Service. All rights reserved.</p>
+      </div>
+    </footer>
+</div>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
+  <script>
+    // Supabase configuration (既存のlogin.htmlと同じ設定)
+    const SUPABASE_URL = 'https://vqjxajzaasuqfgvhvxci.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  
+  <script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Navigation background change on scroll (軽い暗幕のみ)
+    window.addEventListener('scroll', function() {
+      const nav = document.querySelector('.top-nav');
+      if (!nav) return;
+      if (window.scrollY > 100) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+    });
+
+    // Loading animation for elements
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('loaded');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all loading elements
+    document.querySelectorAll('.loading').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Add hover effects for interactive elements
+    document.querySelectorAll('.feature, .benefit-card').forEach(el => {
+      el.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+      });
+      
+      el.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+    
+    // ドロップダウンメニューの動作を設定（PC版とモバイル版両対応）
+    function setupDropdownMenus() {
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      navItems.forEach((item) => {
+        const dropdown = item.querySelector('.dropdown-menu');
+        
+        if (dropdown) {
+          // マウスイベント（デスクトップ）
+          item.addEventListener('mouseenter', () => {
+            // 他のドロップダウンを閉じる
+            closeAllDropdowns();
+            // 現在のドロップダウンを開く
+            openDropdown(dropdown);
+          });
+          
+          item.addEventListener('mouseleave', () => {
+            // 少し遅延を入れてドロップダウンを閉じる
+            setTimeout(() => {
+              if (!item.matches(':hover')) {
+                closeDropdown(dropdown);
+              }
+            }, 100);
+          });
+          
+          // ドロップダウンの表示/非表示を制御するための専用ボタンを追加
+          const dropdownToggle = document.createElement('button');
+          dropdownToggle.className = 'dropdown-toggle';
+          dropdownToggle.innerHTML = '▼';
+          dropdownToggle.style.cssText = `
+            background: none;
+            border: none;
+            color: white;
+            font-size: 0.6rem;
+            margin-left: 0.3rem;
+            cursor: pointer;
+            padding: 0.2rem;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+          `;
+          
+          // ドロップダウントグルボタンのクリックイベント
+          dropdownToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 他のドロップダウンを閉じる
+            closeAllDropdowns();
+            
+            // 現在のドロップダウンの表示/非表示を切り替え
+            const isVisible = dropdown.style.visibility === 'visible';
+            if (isVisible) {
+              closeDropdown(dropdown);
+            } else {
+              openDropdown(dropdown);
+            }
+          });
+          
+          // ナビゲーションタブにドロップダウントグルボタンを追加
+          const navTab = item.querySelector('.nav-tab');
+          if (navTab && dropdown) {
+            navTab.appendChild(dropdownToggle);
+          }
+          
+          // ドロップダウンメニュー内のリンククリック
+          dropdown.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+              // リンクがクリックされた場合、ドロップダウンを閉じる
+              closeAllDropdowns();
+            }
+          });
+        }
+      });
+      
+      // 画面外クリックでドロップダウンを閉じる
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-item')) {
+          closeAllDropdowns();
+        }
+      });
+    }
+    
+    // ドロップダウンを開く関数
+    function openDropdown(dropdown) {
+      dropdown.style.opacity = '1';
+      dropdown.style.visibility = 'visible';
+      dropdown.style.transform = 'translateX(-50%) translateY(0)';
+    }
+    
+    // ドロップダウンを閉じる関数
+    function closeDropdown(dropdown) {
+      dropdown.style.opacity = '0';
+      dropdown.style.visibility = 'hidden';
+      dropdown.style.transform = 'translateX(-50%) translateY(-6px)';
+    }
+    
+    // すべてのドロップダウンを閉じる関数
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        closeDropdown(menu);
+      });
+    }
+
+    // ページ読み込み時にドロップダウンメニューを設定
+    document.addEventListener('DOMContentLoaded', () => {
+      setupDropdownMenus();
+    });
+
+    // Hero slider (auto + dots)
+    (function(){
+      const title = document.querySelector('.hero-title');
+      const subtitle = document.querySelector('.hero-subtitle');
+      const dotsWrap = document.getElementById('heroDots');
+      if (!title || !subtitle || !dotsWrap) return;
+      const slides = [
+        {
+          t: '<span class="hero-line1">ゴルフ場に</span><span class="hero-line2">いつでもキャディを</span>',
+          s: '経験豊富なキャディとゴルフ場を繋ぎ、<br>より良いゴルフ体験を提供します',
+          bg: "url('images/キャディ.jpg')"
+        },
+        {
+          t: '<span class="hero-line1">キャディとしての</span><span class="hero-line2">新しい働き方</span>',
+          s: '柔軟なシフト、スキルアップ、<br>自分らしい働き方をサポートします',
+          bg: "url('images/ゴルフ場.jpg')"
+        }
+      ];
+      let idx = 0; let timer=null;
+
+      const renderDots = () => {
+        dotsWrap.innerHTML = '';
+        slides.forEach((_,i)=>{
+          const d=document.createElement('button');
+          d.className='dot'+(i===idx?' active':'');
+          d.style.width='10px'; d.style.height='10px'; d.style.borderRadius='50%';
+          d.style.border='2px solid rgba(255,255,255,.9)'; d.style.boxShadow='0 0 6px rgba(0,0,0,.35)'; d.style.background= i===idx? '#fff':'transparent';
+          if(i===idx){ d.style.transform='scale(1.05)'; }
+          d.setAttribute('aria-label','slide '+(i+1));
+          d.addEventListener('click',()=>{ idx=i; apply(); restart(); });
+          dotsWrap.appendChild(d);
+        });
+      };
+
+      const apply = () => {
+        title.innerHTML = slides[idx].t;
+        subtitle.innerHTML = slides[idx].s;
+        const bg = document.querySelector('.hero-bg');
+        if (bg) bg.style.backgroundImage = slides[idx].bg;
+        renderDots();
+      };
+
+      const restart = () => {
+        if (timer) clearInterval(timer);
+        timer = setInterval(()=>{ idx = (idx+1)%slides.length; apply(); }, 6000);
+      };
+
+      apply();
+      restart();
+    })();
+
+    // Login Modal
+    (function(){
+      // ログインモーダルのHTML作成
+      const modalHTML = `
+        <div id="loginModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000;">
+          <div style="background:white; border-radius:12px; padding:2rem; width:90%; max-width:400px; text-align:center; position:relative;">
+            <button id="closeModal" style="position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:24px; cursor:pointer;">×</button>
+            
+            <div id="loginForm">
+              <h3 id="loginHeading" style="margin-bottom:1.5rem; color:#333; font-size:1.2rem; font-weight:bold;">ログイン</h3>
+              
+              <div style="margin-bottom:1rem; text-align:left;">
+                <label style="display:block; margin-bottom:0.5rem; font-weight:500;">ログインID</label>
+                <input id="modalEmail" type="email" placeholder="メールアドレスを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
+              </div>
+              
+              <div style="margin-bottom:1.5rem; text-align:left;">
+                <label style="display:block; margin-bottom:0.5rem; font-weight:500;">パスワード</label>
+                <input id="modalPassword" type="password" placeholder="パスワードを入力" style="width:100%; padding:0.75rem; border:2px solid #ddd; border-radius:6px; font-size:1rem;" />
+              </div>
+              
+              <button id="modalLoginBtn" style="width:100%; background:#2e7d32; color:white; border:none; padding:0.875rem; border-radius:6px; font-size:1rem; font-weight:600; cursor:pointer; margin-bottom:1rem;">
+                ログイン
+              </button>
+              
+              <a href="#" id="modalSignupLink" style="color:#2e7d32; text-decoration:none; font-size:0.9rem;">
+                新規登録はこちら
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // モーダルをbodyに追加
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      const modal = document.getElementById('loginModal');
+      const closeBtn = document.getElementById('closeModal');
+      const loginHeading = document.getElementById('loginHeading');
+      const signupLink = document.getElementById('modalSignupLink');
+      const loginBtn = document.getElementById('modalLoginBtn');
+      let currentRole = '';
+      
+      // モーダルを開く関数
+      const openModal = (role) => {
+        currentRole = role;
+        const roleText = role === 'golf' ? 'ゴルフ場' : 'キャディ';
+        
+        loginHeading.textContent = roleText + 'ログイン';
+        signupLink.href = `login/index.html?role=${role}&mode=signup`;
+        modal.style.display = 'flex';
+      };
+      
+      // モーダルを閉じる関数
+      const closeModal = () => {
+        modal.style.display = 'none';
+        document.getElementById('modalEmail').value = '';
+        document.getElementById('modalPassword').value = '';
+      };
+      
+      // イベントリスナー設定
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      
+      // ログインボタンのクリックイベントを設定
+      document.addEventListener('click', (e) => {
+        if (e.target.id === 'loginModalTrigger') {
+          e.preventDefault();
+          // デフォルトでゴルフ場ログインを表示
+          openModal('golf');
+        }
+      });
+      
+      // ドロップダウンクリック処理
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-role]')) {
+          e.preventDefault();
+          const role = e.target.getAttribute('data-role');
+          openModal(role);
+        }
+      });
+      
+      // ログインボタン処理
+      loginBtn.addEventListener('click', async () => {
+        const email = document.getElementById('modalEmail').value;
+        const password = document.getElementById('modalPassword').value;
+        
+        if (!email || !password) {
+          alert('メールアドレスとパスワードを入力してください');
+          return;
+        }
+        
+        // 既存のlogin.htmlを利用したログイン処理
+        try {
+          loginBtn.textContent = 'ログイン中...';
+          loginBtn.disabled = true;
+          
+          // Supabaseログイン（既存のlogin.htmlと同じ処理）
+          const { data, error } = await supabase.auth.signInWithPassword({ 
+            email: email,
+            password: password 
+          });
+          
+          if (error) {
+            throw error;
+          } else {
+            // ログイン成功時の処理（既存のlogin.htmlと同じ）
+            setTimeout(() => {
+              location.href = currentRole === 'golf' ? 'golf_dashboard.html' : 'caddy_dashboard.html';
+            }, 600);
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert('ログインに失敗しました: ' + error.message);
+          loginBtn.textContent = 'ログイン';
+          loginBtn.disabled = false;
+        }
+      });
+      
+      // Enterキーでログイン
+      document.getElementById('modalPassword').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          loginBtn.click();
+        }
+      });
+    })();
+
+  </script>
+</body>
+</html>

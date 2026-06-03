@@ -3,129 +3,492 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Login / Sign-up</title>
+  <title>ログイン / 新規登録 | Caddygate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- 既存 design-system のトークンを使用（色は新設しない） -->
+  <link rel="stylesheet" href="/design-system/framework.css?v=2">
+  <link rel="stylesheet" href="/design-system/dashboard-framework.css?v=2">
+
   <style>
-    body{font-family:'Segoe UI',sans-serif;margin:0;background:#f5f6fa;display:flex;justify-content:center;align-items:flex-start;padding-top:60px}
-    .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;width:90%;max-width:380px;padding:32px 32px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
-    h2{margin:0 0 24px;font-size:1.25rem;color:#004b8d;border-left:4px solid #004b8d;padding-left:8px}
-    label{display:block;margin-top:18px;font-weight:600}
-    input{width:calc(100% - 20px);padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:4px;font-size:1rem}
-    input.error{border-color:#e53935;background:#ffebee}
-    .err{color:#e53935;font-size:.85rem;margin-top:4px;display:none}
-    button{width:100%;margin-top:26px;padding:12px;border:none;border-radius:4px;background:#ff7043;color:#fff;font-size:1rem;cursor:pointer}
-    small{display:block;margin-top:14px;color:#004b8d;text-align:right;font-size:.85rem}
+    /* ── 画面全体レイアウト ── */
+    body {
+      background: var(--color-bg);
+      color: var(--color-ink);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .auth-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 400px;
+      padding: var(--space-6) var(--space-6);
+      box-shadow: 0 2px 4px rgba(0,0,0,.05);
+    }
+
+    .auth-card__brand {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--space-5);
+    }
+    .auth-card__brand img {
+      height: 28px;
+      width: auto;
+      display: block;
+    }
+
+    .auth-card__title {
+      margin: 0 0 var(--space-1);
+      font-size: var(--fs-xlarge);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+      color: var(--color-ink);
+      text-align: center;
+    }
+    .auth-card__subtitle {
+      margin: 0 0 var(--space-5);
+      font-size: var(--fs-small);
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      color: var(--color-ink-sub);
+      text-align: center;
+    }
+
+    /* ── OAuth ボタン群 ── */
+    .oauth-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+    .oauth-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      width: 100%;
+      min-height: 44px;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      color: var(--color-ink);
+      font-family: inherit;
+      font-size: var(--fs-body);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: border-color var(--t-fast), background var(--t-fast);
+      position: relative;
+    }
+    .oauth-btn:hover {
+      border-color: var(--color-primary);
+      background: var(--color-surface-alt);
+    }
+    .oauth-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .oauth-btn__icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    .oauth-btn__badge {
+      position: absolute;
+      top: -8px;
+      right: 12px;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-pill);
+      background: var(--color-primary);
+      color: var(--color-surface);
+      font-size: var(--fs-nano);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+    }
+
+    /* ── 区切り線「または」── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin: var(--space-5) 0;
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+    .divider__label {
+      font-size: var(--fs-micro);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-ink-mute);
+    }
+
+    /* ── form ── */
+    .auth-form .form-field {
+      margin-bottom: var(--space-4);
+    }
+    .auth-form .form-input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .auth-form .form-input.is-error {
+      border-color: var(--color-accent);
+    }
+    .field-err {
+      display: none;
+      margin-top: 4px;
+      font-size: var(--fs-micro);
+      color: var(--color-accent);
+      line-height: 1.5;
+    }
+    .field-err.is-visible {
+      display: block;
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: var(--space-3);
+    }
+
+    .toggle-link {
+      display: block;
+      margin-top: var(--space-4);
+      text-align: center;
+      font-size: var(--fs-small);
+      color: var(--color-primary);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+    }
+    .toggle-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    /* ── メール認証案内バナー ── */
+    .notice {
+      display: none;
+      margin-top: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface-alt);
+      font-size: var(--fs-small);
+      line-height: 1.6;
+      color: var(--color-ink);
+    }
+    .notice.is-visible { display: block; }
+    .notice__title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--color-primary-deep);
+    }
+    .notice__body {
+      color: var(--color-ink-sub);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: var(--space-4) var(--space-3); }
+      .auth-card { padding: var(--space-5) var(--space-4); }
+    }
   </style>
 </head>
 <body>
-  <form id="authForm" class="card" novalidate>
+  <form id="authForm" class="auth-card" novalidate>
 
-    <h2 id="title">ログイン</h2>
-    <label id="emailLabel">ログインID
-      <input id="email"  type="email" required />
-      <span class="err" id="errEmail">ログインIDを入力してください。</span>
-    </label>
-    <label id="passwordLabel">パスワード
-      <input id="pass"   type="password" required />
-    </label>
-    <button type="submit">ログイン</button>
-    <small id="toggle" style="cursor:pointer">新規登録はこちら</small>
+    <div class="auth-card__brand">
+      <img src="/assets/logo-wordmark.png?v=3" alt="Caddygate" />
+    </div>
+
+    <h1 class="auth-card__title" id="title">ログイン</h1>
+    <p class="auth-card__subtitle" id="subtitle">アカウントにサインインしてください</p>
+
+    <!-- ロール限定 OAuth -->
+    <div class="oauth-group" id="oauthGroup">
+      <!-- ゴルフ場: Google -->
+      <button type="button" id="googleBtn" class="oauth-btn" style="display:none">
+        <svg class="oauth-btn__icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        <span>Google で続ける</span>
+      </button>
+
+      <!-- キャディ: LINE（おすすめ） -->
+      <button type="button" id="lineBtn" class="oauth-btn" style="display:none">
+        <span class="oauth-btn__badge">おすすめ</span>
+        <svg class="oauth-btn__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#06C755" d="M12 2C5.92 2 1 5.97 1 10.86c0 4.39 3.9 8.06 9.16 8.76.36.08.84.24.96.55.11.28.07.72.04.99l-.16.93c-.05.28-.22 1.08.95.59 1.18-.49 6.34-3.73 8.65-6.39h-.01C22.2 14.55 23 12.81 23 10.86 23 5.97 18.08 2 12 2z"/>
+          <path fill="#FFFFFF" d="M19.27 13.46h-2.06c-.08 0-.14-.06-.14-.14v-3.19c0-.08.06-.14.14-.14h.52c.08 0 .14.06.14.14v2.53h1.4c.08 0 .14.06.14.14v.52c0 .08-.06.14-.14.14zm-3.15 0h-.52c-.08 0-.14-.06-.14-.14v-3.19c0-.08.06-.14.14-.14h.52c.08 0 .14.06.14.14v3.19c0 .08-.06.14-.14.14zm3.43-3.47h-.52c-.08 0-.14.06-.14.14v1.9l-1.46-1.97a.14.14 0 0 0-.11-.07h-.52c-.08 0-.14.06-.14.14v3.19c0 .08.06.14.14.14h.52c.08 0 .14-.06.14-.14v-1.9l1.46 1.98c.01.02.03.03.04.04l.06.02h.53c.08 0 .14-.06.14-.14v-3.19c0-.08-.06-.14-.14-.14zm-5.18 0h-2.06c-.07 0-.14.06-.14.14v3.19c0 .08.06.14.14.14h2.06c.08 0 .14-.06.14-.14v-.52c0-.08-.06-.14-.14-.14h-1.4v-.54h1.4c.08 0 .14-.06.14-.14v-.52c0-.08-.06-.14-.14-.14h-1.4v-.54h1.4c.08 0 .14-.06.14-.14v-.52c0-.07-.06-.13-.14-.13z"/>
+        </svg>
+        <span>LINE で続ける</span>
+      </button>
+    </div>
+
+    <!-- 区切り線 -->
+    <div class="divider" id="divider"><span class="divider__label">または</span></div>
+
+    <!-- メアド + パスワード（既存 signInWithPassword を維持）-->
+    <div class="auth-form">
+      <div class="form-field">
+        <label class="form-field__label" id="emailLabel" for="email">ログインID</label>
+        <input class="form-input" id="email" type="email" autocomplete="email" required />
+        <div class="field-err" id="errEmail">メールアドレスを入力してください。</div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" id="passLabel" for="pass">パスワード</label>
+        <input class="form-input" id="pass" type="password" autocomplete="current-password" required />
+        <div class="field-err" id="errPass">パスワードを入力してください。</div>
+      </div>
+
+      <!-- signup 専用: パスワード確認 -->
+      <div class="form-field" id="passConfirmField" style="display:none">
+        <label class="form-field__label" for="passConfirm">パスワード（確認）</label>
+        <input class="form-input" id="passConfirm" type="password" autocomplete="new-password" />
+        <div class="field-err" id="errPassConfirm">パスワードが一致しません。</div>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--lg submit-btn" id="submitBtn">ログイン</button>
+    </div>
+
+    <small class="toggle-link" id="toggle">新規登録はこちら</small>
+
+    <!-- メール認証案内 -->
+    <div class="notice" id="emailNotice">
+      <div class="notice__title">確認メールを送信しました</div>
+      <div class="notice__body">
+        ご入力のメールアドレス宛に確認メールをお送りしました。<br>
+        メール内のリンクをクリックして登録を完了してください。
+      </div>
+    </div>
   </form>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
   <script>
-    const SUPABASE_URL = "https://vqjxajzaasuqfgvhvxci.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // role=golf / role=caddy を URL クエリ ?role=golf で受け取る
-    const role = new URLSearchParams(location.search).get("role") || "guest";
-
-    let mode = "login";                    // login or signup
-    const form   = document.getElementById("authForm");
-    const toggle = document.getElementById("toggle");
-    const title  = document.getElementById("title");
-
-    // 初期表示でロールに応じたタイトルを設定
-    function updateTitle() {
-      if (mode === "login") {
-        if (role === "golf") {
-          title.textContent = "ゴルフ場ログイン";
-        } else if (role === "caddy") {
-          title.textContent = "キャディログイン";
-        } else {
-          title.textContent = "ログイン";
-        }
-      } else {
-        title.textContent = "新規登録";
+    try {
+      if (!window.supabase || typeof window.supabase.createClient !== "function") {
+        alert("Supabase ライブラリの読み込みに失敗しました。ネットワーク／ブラウザ拡張をご確認ください。");
+        throw new Error("supabase library not loaded");
       }
-    }
-    
-    // 初期表示
-    updateTitle();
-    
-    toggle.onclick = () => {
-      mode  = mode === "login" ? "signup" : "login";
-      updateTitle();
-      toggle.textContent = mode === "login" ? "新規登録はこちら" : "ログインはこちら";
-      
-      // パスワードフィールドの表示/非表示
-      const passwordField = document.getElementById("pass").parentElement;
-      const submitButton = document.querySelector("button[type='submit']");
+
+      const SUPABASE_URL = "https://dfvxzwrqkxklfutlzqiq.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmdnh6d3Jxa3hrbGZ1dGx6cWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTI4NzUsImV4cCI6MjA5NTgyODg3NX0.rRPwIqVfsdjGRkghv2X269oP75fOLm_w4Js16yWeh-Q";
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // role=golf / role=caddy を ?role=golf で受け取る
+      const role = new URLSearchParams(location.search).get("role") || "guest";
+
+      let mode = "login";                    // login or signup
+      const form = document.getElementById("authForm");
+      const toggle = document.getElementById("toggle");
+      const title = document.getElementById("title");
+      const subtitle = document.getElementById("subtitle");
+      const submitBtn = document.getElementById("submitBtn");
       const emailLabel = document.getElementById("emailLabel");
-      
-      if (mode === "signup") {
-        passwordField.style.display = "none";
-        submitButton.textContent = "登録";
-        emailLabel.firstChild.textContent = "メールアドレス";
+      const passLabel = document.getElementById("passLabel");
+      const passConfirmField = document.getElementById("passConfirmField");
+      const passInput = document.getElementById("pass");
+      const passConfirmInput = document.getElementById("passConfirm");
+      const emailInput = document.getElementById("email");
+      const errEmail = document.getElementById("errEmail");
+      const errPass = document.getElementById("errPass");
+      const errPassConfirm = document.getElementById("errPassConfirm");
+      const emailNotice = document.getElementById("emailNotice");
+      const googleBtn = document.getElementById("googleBtn");
+      const lineBtn = document.getElementById("lineBtn");
+      const oauthGroup = document.getElementById("oauthGroup");
+      const divider = document.getElementById("divider");
+
+      // ロールごとに OAuth ボタンの出し分け
+      if (role === "golf") {
+        googleBtn.style.display = "inline-flex";
+      } else if (role === "caddy") {
+        lineBtn.style.display = "inline-flex";
       } else {
-        passwordField.style.display = "block";
-        submitButton.textContent = "ログイン";
-        emailLabel.firstChild.textContent = "ログインID";
-      }
-    };
-
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      
-      // エラークラスをリセット
-      document.getElementById("email").classList.remove("error");
-      document.getElementById("pass").classList.remove("error");
-      
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("pass").value;
-      
-      // バリデーション
-      let hasError = false;
-      if (!email) {
-        document.getElementById("email").classList.add("error");
-        hasError = true;
-      }
-      
-      // ログイン時のみパスワードをチェック
-      if (mode === "login" && !password) {
-        document.getElementById("pass").classList.add("error");
-        hasError = true;
-      }
-      
-      if (hasError) {
-        const message = mode === "login" ? "全ての項目を入力してください" : "メールアドレスを入力してください";
-        alert(message);
-        return;
+        // guest（ロール未指定）の場合は OAuth ブロック自体を非表示
+        oauthGroup.style.display = "none";
+        divider.style.display = "none";
       }
 
-      if (mode === "login") {
-        const res = await supabase.auth.signInWithPassword({ email, password });
-        if (res.error) {
-          alert("ログインに失敗しました: " + res.error.message);
-          document.getElementById("email").classList.add("error");
-          document.getElementById("pass").classList.add("error");
+      function clearErrors() {
+        emailInput.classList.remove("is-error");
+        passInput.classList.remove("is-error");
+        passConfirmInput.classList.remove("is-error");
+        errEmail.classList.remove("is-visible");
+        errPass.classList.remove("is-visible");
+        errPassConfirm.classList.remove("is-visible");
+      }
+
+      function setEmailNoticeVisible(visible) {
+        if (visible) emailNotice.classList.add("is-visible");
+        else emailNotice.classList.remove("is-visible");
+      }
+
+      function updateMode() {
+        clearErrors();
+        setEmailNoticeVisible(false);
+
+        if (mode === "login") {
+          // タイトル・サブタイトル
+          if (role === "golf") {
+            title.textContent = "ゴルフ場ログイン";
+            subtitle.textContent = "登録済みのアカウントでサインイン";
+          } else if (role === "caddy") {
+            title.textContent = "キャディログイン";
+            subtitle.textContent = "登録済みのアカウントでサインイン";
+          } else {
+            title.textContent = "ログイン";
+            subtitle.textContent = "アカウントにサインインしてください";
+          }
+          // ラベル・ボタン文言
+          emailLabel.textContent = "ログインID";
+          passLabel.textContent = "パスワード";
+          submitBtn.textContent = "ログイン";
+          // パスワード確認は非表示
+          passConfirmField.style.display = "none";
+          passInput.autocomplete = "current-password";
+          // トグル文言
+          toggle.textContent = "新規登録はこちら";
         } else {
+          // signup
+          if (role === "golf") {
+            title.textContent = "ゴルフ場 新規登録";
+            subtitle.textContent = "メールアドレスとパスワードを設定";
+          } else if (role === "caddy") {
+            title.textContent = "キャディ 新規登録";
+            subtitle.textContent = "メールアドレスとパスワードを設定";
+          } else {
+            title.textContent = "新規登録";
+            subtitle.textContent = "メールアドレスとパスワードを設定";
+          }
+          emailLabel.textContent = "メールアドレス";
+          passLabel.textContent = "パスワード（6文字以上）";
+          submitBtn.textContent = "登録";
+          passConfirmField.style.display = "block";
+          passInput.autocomplete = "new-password";
+          toggle.textContent = "ログインはこちら";
+        }
+      }
+      updateMode();
+
+      toggle.onclick = () => {
+        mode = mode === "login" ? "signup" : "login";
+        updateMode();
+      };
+
+      // ── 1. Google OAuth（ゴルフ場側） ──
+      googleBtn.onclick = async () => {
+        try {
+          googleBtn.disabled = true;
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: `${location.origin}/dashboard.html?role=golf`,
+              queryParams: { prompt: "select_account" }
+            }
+          });
+          if (error) throw error;
+        } catch (err) {
+          console.error("[login] google oauth error:", err);
+          alert("Google ログインに失敗しました: " + (err && err.message ? err.message : err));
+          googleBtn.disabled = false;
+        }
+      };
+
+      // ── 2. LINE Login（キャディ側） ──
+      lineBtn.onclick = async () => {
+        try {
+          lineBtn.disabled = true;
+          const res = await fetch("/api/line-login-init", { method: "GET" });
+          if (!res.ok) {
+            throw new Error("init failed: " + res.status);
+          }
+          const { authorize_url, state } = await res.json();
+          // state は cookie で保持されるので localStorage にも控えだけ残す（CSRF 二重防御）
+          try { sessionStorage.setItem("line_login_state", state); } catch (_) {}
+          // ロール情報を callback で参照するために localStorage に置く
+          try { sessionStorage.setItem("line_login_role", "caddy"); } catch (_) {}
+          location.href = authorize_url;
+        } catch (err) {
+          console.error("[login] line login init error:", err);
+          alert("LINE ログインの開始に失敗しました: " + (err && err.message ? err.message : err));
+          lineBtn.disabled = false;
+        }
+      };
+
+      // ── 3. メアド + パスワード（signup / login） ──
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const email = emailInput.value.trim();
+        const password = passInput.value;
+        const passwordConfirm = passConfirmInput.value;
+
+        // バリデーション
+        let hasError = false;
+        if (!email) {
+          emailInput.classList.add("is-error");
+          errEmail.classList.add("is-visible");
+          hasError = true;
+        }
+        if (!password) {
+          passInput.classList.add("is-error");
+          errPass.classList.add("is-visible");
+          hasError = true;
+        } else if (mode === "signup" && password.length < 6) {
+          passInput.classList.add("is-error");
+          errPass.textContent = "パスワードは6文字以上で設定してください。";
+          errPass.classList.add("is-visible");
+          hasError = true;
+        }
+        if (mode === "signup") {
+          if (!passwordConfirm || password !== passwordConfirm) {
+            passConfirmInput.classList.add("is-error");
+            errPassConfirm.classList.add("is-visible");
+            // 仕様: 不一致時はリセット
+            passInput.value = "";
+            passConfirmInput.value = "";
+            hasError = true;
+          }
+        }
+        if (hasError) return;
+
+        if (mode === "login") {
+          // 既存の signInWithPassword フロー（温存）
+          const res = await supabase.auth.signInWithPassword({ email, password });
+          if (res.error) {
+            alert("ログインに失敗しました: " + res.error.message);
+            emailInput.classList.add("is-error");
+            passInput.classList.add("is-error");
+            return;
+          }
           // ログイン成功後、ユーザータイプを確認
           const table = role === "golf" ? "golf_courses" : "caddies";
           const { data: profile, error: profileError } = await supabase
             .from(table)
-            .select('email')
-            .eq('email', email)
+            .select("email")
+            .eq("email", email)
             .maybeSingle();
 
           if (profileError) {
@@ -134,47 +497,68 @@
             alert("ログイン確認中にエラーが発生しました。");
             return;
           }
-
           if (!profile) {
-            // 該当するテーブルにユーザーが存在しない場合
             await supabase.auth.signOut();
             const userType = role === "golf" ? "ゴルフ場" : "キャディ";
             const wrongType = role === "golf" ? "キャディ" : "ゴルフ場";
             alert(`IDまたはパスワードが違います。${userType}のログイン画面で${wrongType}のIDでログインすることはできません。`);
-            document.getElementById("email").classList.add("error");
-            document.getElementById("pass").classList.add("error");
+            emailInput.classList.add("is-error");
+            passInput.classList.add("is-error");
             return;
           }
-
-          alert("ログインしました");
-          // 絶対パスでダッシュボードハブへ
           window.location.href = "/dashboard.html";
-        }
-      } else {
-        // 新規登録フロー
-        const tempPassword = Math.random().toString(36).slice(-8) + "Tmp123!";
-        try {
-          const { data, error } = await supabase.auth.signUp({ 
-            email, 
-            password: tempPassword,
-            options: { data: { role: role } }
-          });
-          
-          if (error) {
-            throw error;
+        } else {
+          // 新規登録（メール認証 ON 前提）
+          try {
+            const { data, error } = await supabase.auth.signUp({
+              email,
+              password,
+              options: {
+                data: { role: role },
+                emailRedirectTo: `${location.origin}/dashboard.html?role=${role}&verified=1`
+              }
+            });
+            if (error) throw error;
+
+            // Supabase で confirm email ON のとき、session は null で返る
+            const needsVerification = !data.session;
+
+            if (needsVerification) {
+              setEmailNoticeVisible(true);
+              submitBtn.disabled = true;
+              submitBtn.textContent = "確認メールを送信済み";
+            } else {
+              // メール確認 OFF の場合は即 profile へ
+              alert("登録が完了しました。プロフィール情報入力画面に遷移します。");
+              window.location.href = `/profile.html?role=${role}`;
+            }
+          } catch (err) {
+            console.error("Registration error:", err);
+            alert("登録処理中にエラーが発生しました: " + err.message);
+            emailInput.classList.add("is-error");
           }
-          
-          alert("登録が完了しました。プロフィール情報入力画面に遷移します。");
-          // 絶対パスで直接プロフィール画面へ
-          window.location.href = `/profile.html?role=${role}`;
-          
-        } catch (error) {
-          console.error("Registration error:", error);
-          alert("登録処理中にエラーが発生しました: " + error.message);
-          document.getElementById("email").classList.add("error");
         }
-      }
-    };
+      };
+
+      // ── メール認証直後の SIGNED_IN を捕捉 ──
+      // メール内リンクから戻ってきた時 URL のハッシュに access_token が付くので
+      // Supabase JS が自動でセッション復元する。SIGNED_IN を見てプロフィールへ遷移。
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          // verified=1 が付いていればメール認証直後と判断
+          const verified = new URLSearchParams(location.search).get("verified");
+          if (verified === "1") {
+            location.href = `/profile.html?role=${role}`;
+          }
+        }
+      });
+
+      console.log("[login] initialized. mode=", mode, "role=", role);
+      document.title = "ログイン ✓";
+    } catch (initError) {
+      alert("ログイン画面の初期化に失敗しました：\n" + (initError && initError.message ? initError.message : initError));
+      console.error("[login] init error:", initError);
+    }
   </script>
 </body>
-</html> 
+</html>

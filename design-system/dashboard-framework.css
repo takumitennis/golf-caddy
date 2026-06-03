@@ -1,0 +1,1203 @@
+/* =============================================================
+   Caddygate Dashboard Framework
+   Version: 1.0
+   Author: design-strategist
+   Date: 2026-06-01
+
+   このファイルは framework.css（LP 用）の **後** に読み込むこと。
+   LP の token / utility をそのまま継承し、dashboard 固有の
+   layout / component を追加する。
+
+   読み込み方:
+   <link rel="stylesheet" href="/design-system/framework.css">
+   <link rel="stylesheet" href="/design-system/dashboard-framework.css">
+
+   実装は dashboard-components.md の HTML 構造に従う。
+   ============================================================= */
+
+
+/* ─────────────────────────────────────────────
+   1. ADDITIONAL TOKENS（dash- prefix）
+   ───────────────────────────────────────────── */
+
+:root {
+  /* ── Dashboard token overrides（LP の古紙ベージュ+朱赤 → モダンSaaSパレット）──
+     LP（marketing）と dashboard（business app）はトーンを分離。
+     LP はそのまま温存、dashboard はここで上書きして Linear/Cal.com 系の
+     白基調 + ニュートラル + ダーク緑アクセントへ振り替える。 */
+  --color-bg:              #FFFFFF;   /* was 古紙ベージュ #F5F0E6 */
+  --color-surface:         #FFFFFF;
+  --color-surface-alt:     #F7F7F5;   /* sidebar / zebra 行 / 入力フォーム背景（art-director: warm 微振り）*/
+  --color-primary-deep:    #1F3A2D;   /* art-director 新設: KPI 主役数字 + active 文字色用の深緑 */
+  --color-border:          #E5E7EB;   /* was ベージュ枠 #E8E2D5 → ニュートラル */
+  --color-ink-mute:        #9CA3AF;   /* コントラスト微増 */
+  --color-accent:          #18181B;   /* was 朱赤 #B83A2E → near-black（primary action ボタン用）*/
+  --color-accent-deep:     #0A0A0A;
+  --color-accent-soft:     #F3F4F6;   /* was #F7E5E1 ピンク → ニュートラルグレー */
+
+  /* status soft backgrounds（badge / calendar 用） */
+  --color-primary-soft-bg: #E8F2E8;
+  --color-warn-soft:       #FEF3C7;   /* amber-100 */
+  --color-warn-deep:       #92400E;   /* amber-800 */
+  --color-info-soft:       #DBEAFE;   /* blue-100 */
+  --color-info-deep:       #1E40AF;   /* blue-800 */
+  --color-gray-soft:       #F3F4F6;
+  --color-error-soft:      #FEE2E2;   /* destructive action 専用 */
+  --color-error-deep:      #991B1B;
+
+  /* dashboard layout */
+  --dash-sidebar-w:        240px;
+  --dash-main-max:         1280px;
+  --dash-row-h-compact:    40px;
+  --dash-row-h-normal:     48px;
+  --dash-row-h-tall:       56px;
+  --dash-cal-cell-h:       72px;
+  --dash-header-h:         56px;
+  --dash-bottom-nav-h:     64px;
+
+  /* z-index */
+  --z-drawer:              1100;
+  --z-toast:               1200;
+}
+
+
+/* ─────────────────────────────────────────────
+   2. SHELL（sidebar + main の骨組み）
+   ───────────────────────────────────────────── */
+
+.dash-shell {
+  display: grid;
+  grid-template-columns: var(--dash-sidebar-w) 1fr;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.dash-sidebar {
+  background: var(--color-surface-alt);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-5) var(--space-3);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dash-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3);
+  font-size: 1.125rem;            /* 18px 固定でブランド字を堂々と */
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.015em;       /* 英字ブランドは tight 寄せで pro 感 */
+  line-height: 1.2;
+  margin-bottom: var(--space-4);
+  text-decoration: none;
+}
+.dash-sidebar__brand img {
+  height: 28px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+}
+
+.dash-sidebar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--space-4);
+}
+.dash-sidebar__group-label {
+  font-size: var(--fs-nano);          /* 11px */
+  color: var(--color-ink-mute);
+  font-weight: 700;
+  letter-spacing: 0.08em;             /* uppercase ラベルは広めで品格 */
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+.dash-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-3);
+  font-size: 0.9375rem;              /* 15px nav はやや小さく落ち着かせる */
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  line-height: 1.4;
+  color: var(--color-ink-sub);
+  border-radius: var(--radius-md);
+  transition: background var(--t-fast), color var(--t-fast);
+  cursor: pointer;
+  text-align: left;
+}
+.dash-nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-ink);
+}
+.dash-nav-item[aria-current="page"],
+.dash-nav-item.is-active {
+  background: var(--color-primary-soft-bg);
+  color: var(--color-primary-deep);
+  font-weight: 600;
+  position: relative;
+}
+.dash-nav-item[aria-current="page"]::before,
+.dash-nav-item.is-active::before {
+  /* art-director: active item に左 2px の苔緑バー */
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-primary-deep);
+  border-radius: 2px;
+}
+.dash-nav-item__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke-width: 1.75;
+}
+.dash-nav-item__badge {
+  margin-left: auto;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  padding: 2px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.dash-sidebar__footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dash-main {
+  padding: var(--space-6) var(--space-7);  /* 24/32 → 32/48: pro 感の余白 */
+  max-width: var(--dash-main-max);
+  width: 100%;
+}
+
+
+/* ─────────────────────────────────────────────
+   3. HEADER（main 上部）
+   ───────────────────────────────────────────── */
+
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-5);
+  margin-bottom: var(--space-5);     /* H1 と KPI strip の間に呼吸 */
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  height: var(--dash-header-h);
+}
+.dash-header__title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  color: var(--color-ink);
+  margin: 0;
+}
+.dash-header__actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.dash-header__user {
+  font-size: 0.8125rem;             /* 13px: ユーザー名は控えめ */
+  color: var(--color-ink-sub);
+  padding: var(--space-2) var(--space-3);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+
+/* ─────────────────────────────────────────────
+   4. TABS（underline 型）
+   ───────────────────────────────────────────── */
+
+.dash-tabs {
+  display: flex;
+  gap: var(--space-3);                /* 4px→12px で各タブが独立しつつ呼吸する */
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-6);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dash-tabs::-webkit-scrollbar { display: none; }
+
+.dash-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 14px var(--space-2);       /* 上下14, 左右8: タブ字直下に下線が映える */
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;               /* 15px */
+  font-weight: 400;                   /* Contrast: 400 vs 700 で大胆な差 */
+  letter-spacing: 0.02em;             /* 日本語タブを少し開ける */
+  color: var(--color-ink-sub);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.dash-tab:hover { color: var(--color-ink); }
+.dash-tab[aria-selected="true"],
+.dash-tab.is-active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 700;                   /* 400→700 で明確 */
+}
+
+
+/* ─────────────────────────────────────────────
+   5. KPI STRIP（上部 4 指標）
+   ───────────────────────────────────────────── */
+
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);                  /* 12→16: カード間の独立性を上げる */
+  margin-bottom: var(--space-7);        /* 32→48: 次セクションへの息継ぎ */
+}
+@media (max-width: 767px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+}
+.kpi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-4);  /* 縦 > 横 でけっきょくよはく */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);                  /* label と value のあいだに「呼吸」 */
+}
+.kpi-card__label {
+  font-size: var(--fs-nano);            /* 11px ラベルは小さく */
+  color: var(--color-ink-sub);
+  margin-bottom: 0;                     /* gap で管理 */
+  font-weight: 600;
+  letter-spacing: 0.06em;               /* uppercase 風品格 */
+  line-height: 1.3;
+}
+.kpi-card__value {
+  font-size: var(--fs-stat-md);
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1;                       /* 数字は line-height 1 で締める */
+  letter-spacing: -0.02em;              /* 大きい数字は tight */
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+/* art-director: KPI 主役（1個だけ）には深緑を充当して視線誘導 */
+.kpi-card--hero .kpi-card__value {
+  color: var(--color-primary-deep);
+}
+.kpi-card__unit {
+  font-size: 0.5em;                     /* 数字に対して半分: pro テクニック */
+  color: var(--color-ink-sub);
+  margin-left: 4px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  align-self: baseline;
+}
+.kpi-card__delta {
+  font-size: var(--fs-micro);
+  color: var(--color-ink-mute);
+  margin-top: var(--space-1);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.kpi-card__delta--up   { color: var(--color-primary); }
+.kpi-card__delta--down { color: var(--color-accent); }
+
+
+/* ─────────────────────────────────────────────
+   6. STATUS BADGE（4 セマンティック色）
+   ───────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;                            /* dot とテキストを近接 */
+  padding: 3px 10px;                   /* 4/8→3/10: 横長 pill 風 */
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.badge::before {
+  content: "";
+  width: 5px;                          /* 6→5: 12px font に対し適正 */
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.badge--pending   { background: var(--color-warn-soft);       color: var(--color-warn-deep); }
+.badge--confirmed { background: var(--color-primary-soft-bg); color: var(--color-primary-deep); }
+.badge--completed { background: var(--color-info-soft);       color: var(--color-info-deep); }
+.badge--cancelled { background: var(--color-gray-soft);       color: var(--color-ink-sub); }
+.badge--error     { background: var(--color-accent-soft);     color: var(--color-accent-deep); }
+
+
+/* ─────────────────────────────────────────────
+   7. DATA TABLE（zebra 禁止）
+   ───────────────────────────────────────────── */
+
+.dash-table {
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  font-size: var(--fs-body);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.dash-table thead th {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-alt);
+  color: var(--color-ink-sub);
+  font-size: var(--fs-nano);            /* 11px uppercase 風ラベル */
+  font-weight: 700;
+  text-align: left;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--color-border);
+}
+.dash-table tbody td {
+  padding: var(--space-3) var(--space-4);
+  height: var(--dash-row-h-normal);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+  color: var(--color-ink);
+}
+.dash-table tbody tr:last-child td { border-bottom: 0; }
+.dash-table tbody tr:hover { background: var(--color-bg); }
+.dash-table tbody tr.is-selected { background: var(--color-primary-soft-bg); }
+
+.dash-table .num,
+.dash-table .col-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-table--compact tbody td { height: var(--dash-row-h-compact); padding: var(--space-2) var(--space-4); }
+.dash-table--tall    tbody td { height: var(--dash-row-h-tall); }
+
+
+/* ─────────────────────────────────────────────
+   8. CARDS（3 種類のみ）
+   ───────────────────────────────────────────── */
+
+/* 8-1 標準カード */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);  /* 縦 32 / 横 24: 縦に呼吸 */
+}
+.card__title {
+  font-size: var(--fs-h3);
+  font-weight: 700;                        /* 600→700: H レベルとして締める */
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  margin-bottom: var(--space-4);           /* 12→16 */
+  color: var(--color-ink);
+}
+.card__subtitle {
+  font-size: var(--fs-small);
+  color: var(--color-ink-sub);
+  margin-top: calc(var(--space-3) * -1 + 4px);  /* card__title 直下に寄せる */
+  margin-bottom: var(--space-5);
+  line-height: 1.5;
+}
+.card__section {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-4);
+}
+
+/* 8-2 予約カード */
+.booking-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-4);
+  align-items: center;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.booking-card:hover {
+  background: var(--color-bg);
+  border-color: var(--color-ink-mute);
+}
+.booking-card__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+.booking-card__date-num {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.booking-card__date-month {
+  font-size: var(--fs-micro);
+  color: var(--color-ink-sub);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.booking-card__date-day {
+  font-size: var(--fs-small);
+  color: var(--color-ink-sub);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.booking-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.booking-card__title {
+  font-weight: 600;
+  font-size: var(--fs-body);
+  color: var(--color-ink);
+}
+.booking-card__meta {
+  font-size: var(--fs-small);
+  color: var(--color-ink-sub);
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.booking-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* 8-3 人物カード */
+.person-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  transition: background var(--t-fast);
+}
+.person-card:hover { background: var(--color-bg); }
+
+.person-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary-soft-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--color-primary-deep);
+  flex-shrink: 0;
+  font-size: var(--fs-body);
+}
+.person-card__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.person-card__info {
+  flex: 1;
+  min-width: 0;
+}
+.person-card__name {
+  font-weight: 600;
+  font-size: var(--fs-body);
+  color: var(--color-ink);
+}
+.person-card__meta {
+  font-size: var(--fs-small);
+  color: var(--color-ink-sub);
+  margin-top: 2px;
+}
+.person-card__actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: var(--space-2);
+}
+
+
+/* ─────────────────────────────────────────────
+   9. CALENDAR GRID（4 状態 + アイコン）
+   ───────────────────────────────────────────── */
+
+.cal-shell {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+}
+.cal-toolbar__title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.cal-toolbar__nav {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+.cal-toolbar__nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-ink-sub);
+}
+.cal-toolbar__nav-btn:hover { background: var(--color-bg); color: var(--color-ink); }
+
+.cal-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.cal-grid th {
+  padding: var(--space-3) var(--space-2);
+  background: var(--color-surface);
+  font-size: var(--fs-nano);          /* 11px で品格 */
+  font-weight: 700;
+  color: var(--color-ink-sub);
+  border-bottom: 1px solid var(--color-border);
+  letter-spacing: 0.12em;             /* 「日月火...」を広げて格を上げる */
+  text-align: center;
+  width: calc(100% / 7);
+  line-height: 1;
+}
+.cal-grid td {
+  position: relative;
+  padding: var(--space-2) var(--space-3);  /* 8/12: 横を広く、左右に余韻 */
+  height: var(--dash-cal-cell-h);
+  vertical-align: top;
+  text-align: center;                      /* 日付数字＋マークを中央軸に揃える */
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.cal-grid td:last-child { border-right: 0; }
+.cal-grid tr:last-child td { border-bottom: 0; }
+.cal-grid td:hover:not(.cal-disabled):not(.cal-outside) { background: var(--color-bg); }
+
+.cal-date {
+  display: block;
+  font-size: 0.9375rem;             /* 15px 数字を主役に */
+  font-weight: 600;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+.cal-mark {
+  display: block;
+  margin-top: 6px;                  /* Proximity: 日付数字とマークを近接 */
+  font-size: 0.8125rem;             /* 13px: 日付より一段下 */
+  font-weight: 700;
+  line-height: 1;
+  position: static;                 /* 絶対配置をやめ中央揃え */
+}
+.cal-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--color-ink-sub);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  position: static;
+}
+
+/* 4 状態 */
+.cal-available  { background: var(--color-surface); }
+.cal-available .cal-mark::after { content: "○"; color: var(--color-primary); }
+
+.cal-confirmed  { background: var(--color-primary-soft-bg); }
+.cal-confirmed .cal-mark::after { content: "✓"; color: var(--color-primary-deep); }
+
+.cal-warn       { background: var(--color-warn-soft); }
+.cal-warn .cal-mark::after { content: "△"; color: var(--color-warn-deep); }
+
+.cal-disabled   { background: var(--color-gray-soft); cursor: not-allowed; }
+.cal-disabled .cal-mark::after { content: "×"; color: var(--color-ink-mute); }
+.cal-disabled .cal-date { color: var(--color-ink-mute); }
+
+.cal-outside    { background: var(--color-bg); cursor: default; }
+.cal-outside .cal-date { color: var(--color-ink-mute); opacity: 0.4; }
+
+.cal-today { box-shadow: inset 0 0 0 2px var(--color-primary); }
+
+/* legend */
+.cal-legend {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fs-micro);
+  color: var(--color-ink-sub);
+  flex-wrap: wrap;
+}
+.cal-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.cal-legend__swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+
+/* ─────────────────────────────────────────────
+   10. BOTTOM NAV（mobile）
+   ───────────────────────────────────────────── */
+
+.dash-bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom, 0));
+  z-index: var(--z-sticky);
+  justify-content: space-around;
+  height: var(--dash-bottom-nav-h);
+}
+.dash-bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--color-ink-sub);
+  font-weight: 500;
+  text-align: center;
+}
+.dash-bottom-nav__item svg { width: 22px; height: 22px; stroke-width: 1.75; }
+.dash-bottom-nav__item[aria-current="page"],
+.dash-bottom-nav__item.is-active {
+  color: var(--color-primary);
+}
+
+@media (max-width: 767px) {
+  .dash-shell { grid-template-columns: 1fr; }
+  .dash-sidebar { display: none; }
+  .dash-bottom-nav { display: flex; }
+  .dash-main {
+    padding: var(--space-4) var(--space-4) calc(var(--dash-bottom-nav-h) + var(--space-4));
+  }
+}
+
+
+/* ─────────────────────────────────────────────
+   11. DRAWER（右スライドイン詳細）
+   ───────────────────────────────────────────── */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base);
+  z-index: var(--z-modal);
+}
+.drawer-backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(480px, 92vw);
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  transform: translateX(100%);
+  transition: transform var(--t-slow);
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 24px rgba(26, 26, 26, 0.08);
+}
+.drawer[data-open="true"] { transform: translateX(0); }
+
+.drawer__header {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.drawer__title {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+}
+.drawer__close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-sub);
+}
+.drawer__close:hover { background: var(--color-bg); color: var(--color-ink); }
+.drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+.drawer__footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+@media (max-width: 767px) {
+  .drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 88vh;
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transform: translateY(100%);
+  }
+  .drawer[data-open="true"] { transform: translateY(0); }
+}
+
+
+/* ─────────────────────────────────────────────
+   12. MODAL（critical のみ）
+   ───────────────────────────────────────────── */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base);
+  z-index: var(--z-modal);
+  padding: var(--space-4);
+}
+.modal-backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  width: min(440px, 100%);
+  padding: var(--space-5);
+  transform: scale(0.96);
+  transition: transform var(--t-base);
+  box-shadow: 0 16px 48px rgba(26, 26, 26, 0.16);
+}
+.modal-backdrop[data-open="true"] .modal { transform: scale(1); }
+
+.modal__title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.modal__body {
+  font-size: var(--fs-body);
+  color: var(--color-ink-sub);
+  line-height: var(--lh-snug);
+  margin-bottom: var(--space-5);
+}
+.modal__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+
+/* ─────────────────────────────────────────────
+   13. EMPTY STATE
+   ───────────────────────────────────────────── */
+
+.empty {
+  text-align: center;
+  padding: var(--space-9) var(--space-5);
+  color: var(--color-ink-sub);
+}
+.empty__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-3);
+  color: var(--color-ink-mute);
+  stroke-width: 1.5;
+  display: block;
+}
+.empty__title {
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: var(--space-2);
+}
+.empty__desc {
+  font-size: var(--fs-small);
+  max-width: 360px;
+  margin: 0 auto var(--space-4);
+  line-height: var(--lh-snug);
+}
+
+
+/* ─────────────────────────────────────────────
+   14. FORMS（ダッシュボード向け）
+   ───────────────────────────────────────────── */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;                            /* 8→6: label↔input Proximity 強化 */
+  margin-bottom: var(--space-5);       /* 16→24: フィールド間を広げて呼吸 */
+}
+.form-field__label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  color: var(--color-ink);
+}
+.form-field__hint {
+  font-size: var(--fs-micro);
+  color: var(--color-ink-mute);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+.form-field__error {
+  font-size: var(--fs-micro);
+  color: var(--color-accent);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  appearance: none;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  min-height: 40px;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft-bg);
+}
+.form-textarea { min-height: 96px; resize: vertical; line-height: var(--lh-snug); }
+
+
+/* ─────────────────────────────────────────────
+   15. BUTTONS（ダッシュボード追加バリエーション）
+   ───────────────────────────────────────────── */
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink-sub);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.btn--ghost:hover {
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.btn--icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink-sub);
+  border: 0;
+}
+.btn--icon:hover { background: var(--color-bg); color: var(--color-ink); }
+
+.btn--danger {
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+.btn--danger:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+
+/* ─────────────────────────────────────────────
+   16. CHAT（既存 LINE 風から脱却、業務向け）
+   ───────────────────────────────────────────── */
+
+.chat-shell {
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+  max-height: 600px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-bg);
+}
+.chat-bubble {
+  max-width: 75%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-body);
+  line-height: var(--lh-snug);
+  border-radius: var(--radius-md);
+  word-break: break-word;
+}
+.chat-bubble--sent {
+  background: var(--color-primary-soft-bg);
+  color: var(--color-ink);
+  align-self: flex-end;
+  border-bottom-right-radius: var(--radius-sm);
+}
+.chat-bubble--received {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  align-self: flex-start;
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.chat-meta {
+  font-size: var(--fs-micro);
+  color: var(--color-ink-mute);
+  margin-top: 2px;
+}
+.chat-meta--sent { text-align: right; }
+
+.chat-input-area {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+.chat-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-body);
+  min-height: 40px;
+}
+.chat-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft-bg);
+}
+
+
+/* ─────────────────────────────────────────────
+   17. SECTION / GROUP（dashboard 内のグループ化）
+   ───────────────────────────────────────────── */
+
+.dash-section {
+  margin-bottom: var(--space-7);             /* 32→48: セクション間の息継ぎ */
+}
+.dash-section__head {
+  display: flex;
+  align-items: baseline;                     /* タイトル下端で揃える */
+  justify-content: space-between;
+  margin-bottom: var(--space-5);             /* 16→24: 見出しと内容の間 */
+  gap: var(--space-4);
+}
+.dash-section__title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin: 0;
+}
+.dash-section__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dash-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dash-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+.dash-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+@media (max-width: 767px) {
+  .dash-grid-2,
+  .dash-grid-3 { grid-template-columns: 1fr; }
+}
+
+
+/* ─────────────────────────────────────────────
+   18. TOAST（軽い通知）
+   ───────────────────────────────────────────── */
+
+.toast-stack {
+  position: fixed;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: var(--z-toast);
+  pointer-events: none;
+}
+.toast {
+  background: var(--color-ink);
+  color: var(--color-surface);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-small);
+  box-shadow: 0 8px 24px rgba(26, 26, 26, 0.16);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 360px;
+}
+.toast--success { background: var(--color-primary-deep); }
+.toast--error   { background: var(--color-accent-deep); }
+
+
+/* ─────────────────────────────────────────────
+   19. RESPONSIVE HELPERS
+   ───────────────────────────────────────────── */
+
+.hide-mobile { }
+.show-mobile { display: none; }
+@media (max-width: 767px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: initial; }
+}

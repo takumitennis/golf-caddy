@@ -1,94 +1,1233 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caddygate ｜ 準備中</title>
-  <meta name="description" content="Caddygate は現在サイトリニューアル準備中です。ローンチ情報は追ってご案内いたします。" />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <title>キャディゲート | 九州のゴルフ場と、大学生キャディを結ぶ予約プラットフォーム</title>
+  <meta name="description" content="九州（福岡・長崎）のゴルフ場の支配人さまへ。キャディ不足で組数を絞らずに済む経営を、予約手数料だけで。福岡大学・長崎国際大学のゴルフ部出身を中核に、研修済みの若手キャディが応募します。先着100社・基本料／掲載料 永久無料。">
+
+  <!-- OG -->
+  <meta property="og:title" content="キャディが、開く。— 九州のゴルフ場の朝を、断らない経営へ。">
+  <meta property="og:description" content="九州のゴルフ場 × 大学生キャディの予約プラットフォーム。先着100社・基本料金&掲載料 永久無料。ご利用時のみ、所定のお手数料。資料請求は無料です。">
+  <meta property="og:image" content="/assets/og-image-raw.png">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="キャディが、開く。— 九州のゴルフ場の朝を、断らない経営へ。">
+  <meta name="twitter:description" content="九州のゴルフ場 × 大学生キャディの予約プラットフォーム。先着100社・基本料金&掲載料 永久無料。">
+  <meta name="twitter:image" content="/assets/og-image-raw.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/logo-symbol.png">
+
+  <!-- Fonts (P-04: Inter + Noto Sans JP サンセリフ一本) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- Hero image preload (performance) -->
+  <link rel="preload" as="image" href="/assets/hero-main.png">
+  <link rel="preload" as="image" href="/assets/hero-cart.jpg">
+
+  <!-- Design Framework (P-03/P-04/P-05/P-07/P-08/P-09/P-12/P-14 全原則適用) -->
+  <link rel="stylesheet" href="/design-system/framework.css?v=5">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Helvetica Neue", sans-serif;
-      color: #2C4A3B;
-      background: #F5F0E6;
-      -webkit-font-smoothing: antialiased;
+    /* ═══════════════════════════════════════════
+       Color Override — 2026-06-01 白基調 modern B2B SaaS へ振り替え
+       framework.css の token を白基調にしたので、ここでは override 不要。
+       LP 固有の微調整トークンのみ定義。
+    ═══════════════════════════════════════════ */
+    :root {
+      /* LP 固有: 苔緑 soft の枠カード背景（フレームCTA等で使用）*/
+      --lp-frame-bg: #F7FAF7;        /* 苔緑 5% tint */
+      --lp-frame-border: #DCE7DC;    /* 苔緑 12% tint */
+      --color-error: #B83A2E;         /* エラーだけは赤系維持 */
     }
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
+
+    /* ═══════════════════════════════════════════
+       3カードグリッドの高さ統一（D-2 / E-2）
+       画像のアスペクト比違いで高さがバラつく問題対策
+    ═══════════════════════════════════════════ */
+    .grid--3 .card { display: flex; flex-direction: column; align-items: center; }
+    .grid--3 .card img {
+      display: block;
+      object-fit: contain;
+      object-position: center bottom; /* 画像下端を box 下端に揃え、直下の緑見出し開始位置を一致させる */
+      height: 180px !important;        /* HTML width/height 属性に勝つ */
+      width: 100%;
+      max-width: 180px;
+      margin: 0 auto var(--space-5);
     }
-    .card {
-      max-width: 520px;
+    .grid--3 .card__body { flex: 1; }
+    /* E-2 カードタイトルは全 1 行になったので、シンプルに margin だけ */
+    #benefits-caddie .grid--3 .card__title { margin-bottom: var(--space-3); }
+    /* お金（横長画像）だけ視覚的に小さく見えるので box 内幅を広げる */
+    #benefits-caddie .grid--3 article:nth-child(2) img { max-width: 220px; }
+
+    /* ─── コンテナ padding レスポンシブ拡張 (responsive.md §5) ─── */
+    @media (min-width: 768px) {
+      .container { padding-inline: 32px; }
+    }
+    @media (min-width: 1024px) {
+      .container { padding-inline: 40px; }
+    }
+
+    /* ─── Hero モバイル background-position (responsive.md §7) ─── */
+    @media (max-width: 767px) {
+      .hero__bg { background-position: 30% center; }
+    }
+
+    /* ─── iOS Safari: safe viewport height (responsive.md §11) ─── */
+    .hero { min-height: 80svh; }
+    @media (max-width: 767px) {
+      .hero { min-height: 90svh; }
+    }
+
+/* ═══════════════════════════════════════════
+       Hero アニメーション（旧UI 復元 + 強化 2026-05-31）
+       2 枚スライダー（女性キャディ ⇄ ゴルフカート）＋ Ken Burns ＋ テキスト fade-up ＋ scroll-cue bob
+    ═══════════════════════════════════════════ */
+    .hero__bg--1 {
+      background-image: url('/assets/hero-main.png');
+      animation: heroSlide1 18s ease-in-out infinite, kenburns 22s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+    .hero__bg--2 {
+      background-image: url('/assets/hero-cart.jpg');
+      animation: heroSlide2 18s ease-in-out infinite, kenburns 22s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+      z-index: 0;
+    }
+    @keyframes heroSlide1 {
+      0%, 42%   { opacity: 1; }
+      50%, 92%  { opacity: 0; }
+      100%      { opacity: 1; }
+    }
+    @keyframes heroSlide2 {
+      0%, 42%   { opacity: 0; }
+      50%, 92%  { opacity: 1; }
+      100%      { opacity: 0; }
+    }
+    @keyframes kenburns {
+      0%   { transform: scale(1.00) translate(0, 0); }
+      100% { transform: scale(1.10) translate(-1.5%, -1%); }
+    }
+
+    /* 旧UI 流: 黒系グラデで写真をしっかり見せ、白文字のコントラストを確保 */
+    .hero__overlay {
+      background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.10) 0%,
+        rgba(0, 0, 0, 0.28) 50%,
+        rgba(0, 0, 0, 0.50) 100%
+      ) !important;
+    }
+
+    /* ヘッダー: ヒーロー上は透過 + 白文字、スクロール後 cream に切替
+       ロゴは元の色のまま（filter で塗りつぶさない）*/
+    .header__nav a {
+      color: rgba(255, 255, 255, 0.96);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.42);
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+    .header__nav a.btn--primary {
+      color: var(--color-surface);
+      text-shadow: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    }
+    .header.is-scrolled {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: saturate(180%) blur(10px);
+      -webkit-backdrop-filter: saturate(180%) blur(10px);
+      border-bottom-color: var(--color-border);
+    }
+    /* スクロール後もロゴは素のまま */
+    .header.is-scrolled .header__nav a {
+      color: var(--color-ink);
+      text-shadow: none;
+    }
+    .header.is-scrolled .header__nav a.btn--primary {
+      color: var(--color-surface);
+      box-shadow: none;
+    }
+    .header.is-scrolled .header__menu-btn { color: var(--color-ink); }
+
+    /* Hero テキストを白文字 + 影に（旧UI の読みやすさを踏襲） */
+    .hero-headline {
+      color: var(--color-surface) !important;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55),
+                   0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+    .hero-sub {
+      color: var(--color-surface) !important;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ヒーローコンテンツは画像中央に配置。2 つのテキストブロックを grid で重ねる */
+    .hero__inner {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      margin-inline: auto;
+      max-width: 880px;
       width: 100%;
       text-align: center;
-      padding: 48px 32px;
     }
-    .symbol {
-      width: 56px;
-      height: 56px;
-      margin: 0 auto 28px;
-      opacity: 0.95;
+    .hero-text {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
     }
-    .brand {
-      font-family: "Cormorant Garamond", "Noto Serif JP", serif;
-      font-size: 2.2rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      margin-bottom: 6px;
+    .hero-text--1 {
+      opacity: 0;
+      animation: heroTextFade1 18s ease-in-out infinite;
     }
-    .brand-ja {
-      font-size: 0.85rem;
+    .hero-text--2 {
+      opacity: 0;
+      animation: heroTextFade2 18s ease-in-out infinite;
+    }
+    @keyframes heroTextFade1 {
+      0%       { opacity: 0; }
+      6%, 42%  { opacity: 1; }
+      50%, 92% { opacity: 0; }
+      100%     { opacity: 0; }
+    }
+    @keyframes heroTextFade2 {
+      0%, 42%  { opacity: 0; }
+      50%, 92% { opacity: 1; }
+      100%     { opacity: 0; }
+    }
+
+    /* ヘッダー: ロゴとナビの間に余白 */
+    .header__nav { margin-left: var(--space-8); }
+
+    /* hero-text 内の見出し/サブ自体には個別アニメをかけない（親の opacity 切替に従属させる） */
+    .hero-text .hero-headline,
+    .hero-text .hero-sub {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+
+    /* スクロール促し（旧UI の「↓ スクロールして詳細を見る」を踏襲） */
+    .hero-scroll-cue {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      font-size: var(--fs-small);
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+      display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none;
+      opacity: 0;
+      animation: scrollCueIn 0.6s ease-out 1.4s forwards, scrollCueBob 2.2s ease-in-out 2s infinite;
+    }
+    .hero-scroll-cue:hover { color: var(--color-surface); }
+
+    /* セクションアイラベル（2026-06-01: 英字 uppercase、文字間 0.2em で品格）*/
+    .section-eyebrow {
+      display: block;
+      font-size: var(--fs-micro);
+      font-weight: 700;
       letter-spacing: 0.2em;
-      color: #5C5C5C;
-      margin-bottom: 40px;
+      text-transform: uppercase;
+      margin-bottom: var(--space-4);
     }
-    .message {
-      font-size: 1.05rem;
-      line-height: 1.85;
-      color: #1A1A1A;
-      margin-bottom: 32px;
+    .section-eyebrow--golf  { color: var(--color-primary); }
+    .section-eyebrow--caddy { color: var(--color-ink-sub); }
+    @keyframes scrollCueIn  { to { opacity: 0.85; } }
+    @keyframes scrollCueBob {
+      0%, 100% { transform: translate(-50%, 0); }
+      50%      { transform: translate(-50%, 6px); }
     }
-    .meta {
-      font-size: 0.82rem;
-      color: #888;
-      line-height: 1.7;
-      padding-top: 28px;
-      border-top: 1px solid #E8E2D5;
-      margin-top: 32px;
+
+    /* アクセシビリティ: 動きを減らす設定を尊重 */
+    @media (prefers-reduced-motion: reduce) {
+      .hero__bg { animation: none; }
+      .hero__bg--2 { opacity: 0; } /* スライダー停止: 1枚目だけ表示 */
+      .hero-text--1 { opacity: 1; animation: none; }
+      .hero-text--2 { opacity: 0; animation: none; }
+      .hero-headline, .hero-sub, .hero-cta {
+        opacity: 1; transform: none; animation: none;
+      }
+      .hero-scroll-cue { animation: none; opacity: 0.85; }
     }
-    .meta strong {
-      color: #5C5C5C;
+
+    /* ─── Alert Bar モバイル divider 非表示 ─── */
+    @media (max-width: 767px) {
+      .alert-bar__divider { display: none; }
+    }
+
+    /* ─── Section G: Fee Badges —— 2026-06-01 pro 仕上げ ─── */
+    .fee-badges {
+      display: flex;
+      gap: var(--space-3);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: var(--space-8);
+    }
+    .fee-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-body);
+      font-weight: 600;
+      color: var(--color-primary-deep);
+      background: transparent;
+      letter-spacing: var(--ls-ja);
+    }
+    .fee-badge i { width: 18px; height: 18px; stroke-width: 2; color: var(--color-primary); }
+
+    /* ─── Section G: Founders Card —— 2026-06-01 余白増 + tabular-nums ─── */
+    .founders-card-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--space-6);
+    }
+    .founders-card {
+      max-width: 560px;
+      width: 100%;
+      padding: var(--space-7) var(--space-6) !important;
+    }
+    .founders-card .pricing-card__title {
+      text-align: center;
+      letter-spacing: var(--ls-ja);
+      margin-bottom: var(--space-4);
+    }
+    .founders-card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--fs-body);
+      gap: var(--space-4);
+    }
+    .founders-card-row:last-of-type { border-bottom: 0; }
+    .founders-card-label {
+      color: var(--color-ink-sub);
+      flex-shrink: 0;
+      font-size: var(--fs-small);
+      letter-spacing: var(--ls-ja);
+    }
+    .founders-card-value {
+      font-weight: 700;
+      color: var(--color-ink);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .founders-card-value--accent {
+      color: var(--color-primary);
+      font-size: var(--fs-lead);
+    }
+    .founders-card-note {
+      margin-top: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--fs-small);
+      color: var(--color-ink-sub);
+      line-height: var(--lh-normal);
+    }
+    .founders-card-cta {
+      margin-top: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    /* ─── Section H: Trust Items ─── */
+    .trust-list {
+      max-width: 720px;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+    .trust-item {
+      display: flex;
+      gap: var(--space-5);
+      align-items: flex-start;
+    }
+    .trust-item__icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      color: var(--color-primary);
+      margin-top: 4px;
+    }
+    .trust-item__body { flex: 1; }
+    .trust-item__title {
+      font-size: var(--fs-h3);
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+      line-height: var(--lh-snug);
+    }
+    .trust-item__text {
+      font-size: var(--fs-body);
+      color: var(--color-ink-sub);
+      line-height: var(--lh-normal);
+    }
+    @media (max-width: 767px) {
+      .trust-item { flex-direction: column; gap: var(--space-3); }
+    }
+
+    /* ─── Compare table (D section) —— 2026-06-01 zebra廃止 + 余白増 ─── */
+    .compare-table {
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-subtle);
+    }
+    .compare-table th {
+      background: transparent;
+      color: var(--color-ink-sub);
+      font-weight: 600;
+      font-size: var(--fs-small);
+      letter-spacing: var(--ls-ja-wide);
+      text-transform: uppercase;
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 2px solid var(--color-primary);
+    }
+    .compare-table th:last-child {
+      color: var(--color-primary);
+    }
+    .compare-table td {
+      padding: var(--space-5) var(--space-6);
+      line-height: 1.65;
+      vertical-align: top;
+    }
+    .compare-table td:last-child {
+      color: var(--color-ink);
       font-weight: 500;
     }
-    @media (max-width: 480px) {
-      .brand { font-size: 1.8rem; }
-      .message { font-size: 0.98rem; }
+    .compare-table td:first-child {
+      color: var(--color-ink-mute);
     }
+    @media (max-width: 767px) {
+      .compare-table th, .compare-table td { padding: var(--space-4); }
+    }
+
+    /* ─── Section E: Portrait photo —— 2026-06-01 コーナーR 控えめ + 細枠 ─── */
+    .portrait-img {
+      width: 100%;
+      max-width: 1040px;
+      margin-inline: auto;
+      border-radius: var(--radius-md); /* 6px → 控えめ */
+      border: 1px solid var(--color-border);
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      margin-bottom: var(--space-6);
+      display: block;
+    }
+
+    /* ─── Hamburger menu (mobile) ─── */
+    .header__menu-btn {
+      display: none;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      padding: var(--space-2);
+      color: var(--color-ink);
+    }
+    @media (max-width: 767px) {
+      .header__menu-btn { display: flex; align-items: center; }
+      .header__nav { display: none; }
+      .header__nav.is-open {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        inset: 0;
+        background: var(--color-bg);
+        z-index: calc(var(--z-header) + 1);
+        justify-content: center;
+        align-items: center;
+        gap: var(--space-6);
+        padding: var(--space-7);
+      }
+      .header__nav.is-open a { font-size: var(--fs-lead); }
+      .header__close-btn {
+        position: absolute;
+        top: var(--space-5);
+        right: var(--space-5);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        color: var(--color-ink);
+        padding: var(--space-2);
+      }
+    }
+
+    /* ─── 機会損失強調枠（C セクション）—— 2026-06-01
+       ベージュ canvas を活かす：白塗りせず、苔緑の罫線で囲うだけ ─── */
+    .loss-card {
+      background: transparent;
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8) var(--space-7);
+      text-align: center;
+      margin-top: var(--space-7);
+    }
+    .loss-card__text {
+      color: var(--color-ink-sub);
+      font-size: var(--fs-body);
+      line-height: var(--lh-normal);
+      margin-bottom: var(--space-5);
+    }
+    .loss-card__stat {
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.025em;
+      color: var(--color-primary);
+      display: block;
+      margin-bottom: var(--space-4);
+      font-variant-numeric: tabular-nums;
+    }
+    .loss-card__sub {
+      color: var(--color-ink-mute);
+      font-size: var(--fs-small);
+      line-height: var(--lh-normal);
+    }
+
+    /* ─── Checklist (C セクション)—— 2026-06-01
+       ベージュ canvas を活かす：箱化せず、苔緑の hairline で行を区切るだけ ─── */
+    .checklist {
+      max-width: 720px;
+      gap: 0;
+    }
+    .checklist__item {
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--color-border);
+      border-radius: 0;
+      padding: var(--space-4) var(--space-2);
+      align-items: center;
+      color: var(--color-ink);
+      font-size: var(--fs-body);
+      line-height: 1.5;
+      transition: color var(--t-base);
+    }
+    .checklist__item:last-child { border-bottom: 0; }
+    .checklist__item:hover { color: var(--color-primary-deep); }
+    .checklist__box {
+      width: 22px; height: 22px;
+      border: 1.5px solid var(--color-primary);
+      border-radius: var(--radius-sm);
+      background: var(--color-primary-soft);
+      margin-top: 0;
+      position: relative;
+    }
+    .checklist__box::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 7px;
+      width: 5px; height: 10px;
+      border: solid var(--color-primary);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* ─── 残枠バッジ（2026-06-01: 苔緑 soft でアクセント）─── */
+    .quota-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-primary-soft);
+      color: var(--color-primary-deep);
+      border: 1px solid var(--lp-frame-border);
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-small);
+      font-weight: 600;
+      letter-spacing: var(--ls-ja);
+      margin-bottom: var(--space-5);
+    }
+
+    /* ─── Section J CTA 縦並び ─── */
+    .cta-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      align-items: center;
+      max-width: 480px; /* layouts.md §J 定義値 */
+      margin: var(--space-6) auto 0;
+    }
+    .cta-stack .btn { width: 100%; }
+
+    /* ─── Contact form section ─── */
+    .contact-form-inner {
+      max-width: var(--container-prose); /* 720px = tokens.md §6 */
+      margin-inline: auto;
+    }
+
+    /* ─── Founders card: badge absolute 補正 ─── */
+    .pricing-card--featured {
+      margin-top: var(--space-3); /* badge がはみ出す分の余白 */
+    }
+
+    /* ─── Footer: LINE リンク ─── */
+    .footer__line-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--fs-small);
+      color: var(--color-surface);
+      opacity: 0.85;
+    }
+    .footer__line-link:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+
+    /* ─── icon size utilities ─── */
+    .icon-sm { width: 18px; height: 18px; stroke-width: 1.75; }
+    .icon-md { width: 24px; height: 24px; stroke-width: 1.75; }
+    .icon-lg { width: 32px; height: 32px; stroke-width: 1.5; }
   </style>
 </head>
 <body>
-  <main class="card">
-    <svg class="symbol" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <line x1="10" y1="14" x2="54" y2="14" stroke="#2C4A3B" stroke-width="3" stroke-linecap="round"/>
-      <line x1="14" y1="14" x2="14" y2="54" stroke="#2C4A3B" stroke-width="3" stroke-linecap="round"/>
-      <line x1="50" y1="14" x2="50" y2="54" stroke="#2C4A3B" stroke-width="3" stroke-linecap="round"/>
-      <line x1="14" y1="22" x2="50" y2="22" stroke="#2C4A3B" stroke-width="2"/>
-      <polyline points="32,30 40,36 32,42" stroke="#2C4A3B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    <h1 class="brand">Caddygate</h1>
-    <p class="brand-ja">キャディゲート</p>
-    <p class="message">
-      サイトリニューアル準備中です。<br />
-      ローンチ情報は追ってご案内いたします。
-    </p>
-    <div class="meta">
-      <p><strong>運営</strong>　株式会社KAIROS</p>
-      <p>&copy; 2026 KAIROS Inc.</p>
+
+  <!-- ═══════════════════════════════════════════
+       HEADER — Sticky Navigation
+       components.md §2
+  ═══════════════════════════════════════════ -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="/" class="header__logo">
+        <img src="/assets/logo-wordmark.png?v=3" alt="Caddygate（キャディゲート）">
+      </a>
+      <nav class="header__nav" id="mainNav" aria-label="メインナビ">
+        <a href="#solution">概要</a>
+        <a href="/login/?role=golf">ゴルフ場ログイン</a>
+        <a href="/login/?role=caddy">キャディログイン</a>
+        <a href="#contact" class="btn btn--primary btn--sm">資料請求</a>
+      </nav>
+      <button class="header__menu-btn" id="menuBtn" aria-label="メニューを開く" aria-expanded="false" aria-controls="mainNav">
+        <i data-lucide="menu" style="width:24px;height:24px;"></i>
+      </button>
     </div>
-  </main>
+  </header>
+
+
+  <!-- ═══════════════════════════════════════════
+       A. HERO
+       layouts.md §A / components.md §1
+       背景 hero-main.png + 古紙ベール
+  ═══════════════════════════════════════════ -->
+  <section class="hero" id="hero" aria-labelledby="hero-h1">
+    <div class="hero__bg hero__bg--1" role="img" aria-label="若手キャディの写真"></div>
+    <div class="hero__bg hero__bg--2" aria-hidden="true"></div>
+    <div class="hero__overlay"></div>
+    <div class="container hero__inner">
+      <div class="hero-text hero-text--1">
+        <h1 class="hero-headline" id="hero-h1">
+          キャディとしての、<br>新しい働き方を。
+        </h1>
+        <p class="hero-sub">
+          柔軟なシフト、スキルアップ。<br>
+          自分らしい働き方を、サポートします。
+        </p>
+      </div>
+      <div class="hero-text hero-text--2" aria-hidden="true">
+        <p class="hero-headline">
+          ゴルフ場に、<br>いつでもキャディを。
+        </p>
+        <p class="hero-sub">
+          経験豊富な大学生キャディとゴルフ場をつなぎ、<br>
+          より良いゴルフ体験を、いつでも。
+        </p>
+      </div>
+    </div>
+    <a href="#problem" class="hero-scroll-cue" aria-label="次のセクションへスクロール">
+      ↓ スクロールして詳細を見る
+    </a>
+  </section>
+
+
+  <!-- B. ALERT BAR は user 指示で一旦撤去（2026-05-31）。
+       「ファウンダーズプラン」「先着 100 社」「永久無料」全部削除。 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       C. 課題提起（Before）
+       layouts.md §C / components.md §6
+       背景: 古紙オフホワイト（地のまま）
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="problem" aria-labelledby="problem-h2">
+    <div class="container container--narrow">
+      <h2 class="h1 mb-5" id="problem-h2">土曜の朝、断った予約は、ありませんでしたか。</h2>
+      <p class="lead mb-7">
+        キャディ ひとりの欠員が、1 組ぶんの売上を、その日のうちに削っていきます。
+      </p>
+
+      <ul class="checklist mb-7" aria-label="課題チェックリスト">
+        <li class="checklist__item">
+          <span class="checklist__box" aria-hidden="true"></span>
+          ハイシーズンの土日、キャディが足りずに組数を絞ったことがある
+        </li>
+        <li class="checklist__item">
+          <span class="checklist__box" aria-hidden="true"></span>
+          ベテランキャディの引退が近く、後継の見通しが立っていない
+        </li>
+      </ul>
+
+      <!-- 機会損失強調枠（苔緑塗り）-->
+      <div class="loss-card" role="region" aria-label="機会損失の試算">
+        <p class="loss-card__text">
+          1 組 4 人 × ラウンドフィー 1 万円 = 4 万円 ／ 組。<br>
+          土日のうち月 5 日、1 日 2 組のお断りで、ひと月
+        </p>
+        <span class="loss-card__stat">40 万円</span>
+        <p class="loss-card__sub">
+          コンペがひと枠流れれば、それだけで 30 〜 40 万円。<br>
+          失った 1 日は、戻ってきません。
+        </p>
+      </div>
+
+      <p class="micro mt-4">
+        ※ ラウンドフィー単価は地域・コースにより異なります。キャディ不足率 正社員 84.4% ／ パート 90.5%（NGK 雇用状況実態調査）。
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       D. 解決 Before/After 対比
+       layouts.md §D / components.md §7
+       背景: section--surface（純白）
+  ═══════════════════════════════════════════ -->
+  <section class="section section--surface" id="solution" aria-labelledby="solution-h2">
+    <div class="container">
+      <h2 class="h1 mb-5" id="solution-h2">
+        予約が決まった時だけ、お手数料。<br>
+        それ以外の固定費は、いただきません。
+      </h2>
+      <p class="lead mb-7">
+        キャディゲートは、貴クラブの求人を九州の登録キャディに届け、<br>
+        応募が来て予約が成立した時だけ、所定の予約システム手数料を月末にまとめて精算します。<br>
+        基本料も、掲載料も、契約期間の縛りも、ありません。
+      </p>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th scope="col">これまで</th>
+            <th scope="col">キャディゲートで</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>急な欠員で、組数を絞っていた</td>
+            <td>求人を出せば、登録キャディから応募が届きます</td>
+          </tr>
+          <tr>
+            <td>派遣単価が高く、人件費を圧迫していた</td>
+            <td>予約成立時のお手数料のみ。固定費はゼロ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       D-2. ゴルフ場にもたらす3つの変化
+       旧 LP のイラスト3枚（人材不足の解決・売上向上・サービス品質向上）を引き継ぎ
+       2026-05-31 追加（user 指示）
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="benefits-club" aria-labelledby="benefits-club-h2" style="background: var(--color-surface-alt);">
+    <div class="container">
+      <div class="text-center mb-7">
+        <span class="section-eyebrow section-eyebrow--golf">GOLF</span>
+        <h2 class="h1" id="benefits-club-h2">ゴルフ場向けサービス</h2>
+        <p class="lead mt-3 muted" style="max-width: var(--container-prose); margin-inline: auto;">
+          経験豊富な大学生キャディを確保し、お客様に最高のゴルフ体験を提供。
+        </p>
+      </div>
+
+      <div class="grid grid--3">
+        <article class="card text-center">
+          <img src="/assets/benefit-staffing.png" alt="人材不足の解決" width="180" height="180" loading="lazy" style="max-width: 180px; width: 100%; height: auto; margin: 0 auto var(--space-5);">
+          <h3 class="card__title">人材不足の解決</h3>
+          <p class="card__body">
+            登録キャディが応募する仕組みで、慢性的な人手不足を解消。ベテランの引退に備える、もうひとつの担い手です。
+          </p>
+        </article>
+        <article class="card text-center">
+          <img src="/assets/benefit-revenue.png" alt="売上向上" width="180" height="180" loading="lazy" style="max-width: 180px; width: 100%; height: auto; margin: 0 auto var(--space-5);">
+          <h3 class="card__title">売り上げ向上</h3>
+          <p class="card__body">
+            土曜の朝、キャディが足りずに組数を絞ることがなくなります。機会損失を減らし、収益を取りこぼしません。
+          </p>
+        </article>
+        <article class="card text-center">
+          <img src="/assets/benefit-quality.png" alt="サービス品質向上" width="180" height="180" loading="lazy" style="max-width: 180px; width: 100%; height: auto; margin: 0 auto var(--space-5);">
+          <h3 class="card__title">サービス品質向上</h3>
+          <p class="card__body">
+            研修を受けた若手キャディが現場に入り、お客様満足度の向上とリピート率の向上に貢献します。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 2026-06-01 user 指示で E セクション（キャディは九州の大学生です + 写真）を全削除 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       E-2. キャディにもたらす3つの価値
+       旧 LP のイラスト3枚（柔軟な働き方・収入向上・キャリア&スキルアップ）を引き継ぎ
+       2026-05-31 追加（user 指示）
+       ※ 支配人にとって「キャディ側にも価値があるから定着する」訴求 = 中抜き防止の補強
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="benefits-caddie" aria-labelledby="benefits-caddie-h2" style="background: var(--color-surface-alt);">
+    <div class="container">
+      <div class="text-center mb-7">
+        <span class="section-eyebrow section-eyebrow--caddy">CADDY</span>
+        <h2 class="h1" id="benefits-caddie-h2">キャディ向けサービス</h2>
+        <p class="lead mt-3 muted" style="max-width: var(--container-prose); margin-inline: auto;">
+          自分のスケジュールに合わせて働き、スキル向上の機会を提供。
+        </p>
+      </div>
+
+      <div class="grid grid--3">
+        <article class="card text-center">
+          <img src="/assets/benefit-flexible.png" alt="柔軟な働き方" width="180" height="180" loading="lazy">
+          <h3 class="card__title">柔軟な働き方</h3>
+          <p class="card__body">
+            自分の都合に合わせてシフトを選択でき、ワークライフバランスを保ちながら働けます。
+          </p>
+        </article>
+        <article class="card text-center">
+          <img src="/assets/benefit-income.png" alt="収入向上" width="180" height="180" loading="lazy">
+          <h3 class="card__title">収入向上</h3>
+          <p class="card__body">
+            複数のゴルフ場で働くことで収入を増やし、スキルに応じた適正な報酬を得ることができます。
+          </p>
+        </article>
+        <article class="card text-center">
+          <img src="/assets/benefit-career.png" alt="キャリア＆スキルアップ" width="180" height="180" loading="lazy">
+          <h3 class="card__title">キャリア&amp;スキルアップ</h3>
+          <p class="card__body">
+            多様なゴルフ場での経験と専門研修プログラムを通じて、プロフェッショナルなキャディとしてのキャリア形成とスキル向上を実現します。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       F. 仕組み（4 ステップ）
+       layouts.md §F / components.md §8
+       背景: section--surface（純白）
+  ═══════════════════════════════════════════ -->
+  <section class="section section--surface" id="flow" aria-labelledby="flow-h2">
+    <div class="container">
+      <h2 class="h1 text-center mb-7" id="flow-h2">4 ステップで、始められます。</h2>
+
+      <div class="steps">
+        <div class="step">
+          <span class="step__num" aria-label="ステップ 1">1</span>
+          <h3 class="step__title">求人を掲載する</h3>
+          <p class="step__body">
+            日付・コース・必要人数を入力。最短 5 分で公開できます。
+          </p>
+        </div>
+        <div class="step">
+          <span class="step__num" aria-label="ステップ 2">2</span>
+          <h3 class="step__title">応募が届く</h3>
+          <p class="step__body">
+            九州の登録キャディが、貴クラブの求人を見て応募します。
+            貴クラブは、応募者のプロフィールを見て選びます。
+          </p>
+        </div>
+        <div class="step">
+          <span class="step__num" aria-label="ステップ 3">3</span>
+          <h3 class="step__title">予約が確定する</h3>
+          <p class="step__body">
+            キャディと貴クラブの両方が承諾した時点で予約成立。
+            当日のラウンドに進みます。
+          </p>
+        </div>
+        <div class="step">
+          <span class="step__num" aria-label="ステップ 4">4</span>
+          <h3 class="step__title">月末にまとめて精算</h3>
+          <p class="step__body">
+            先月の予約件数に応じて、月末締めで請求書をお送りします。
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       G. 料金 & 資料請求（クローズド料金型）
+       layouts.md §G（2026-05-31 改訂版）
+       LP 上で具体的金額は一切表示しない
+       背景: 古紙オフホワイト（地のまま）
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="pricing" aria-labelledby="pricing-h2">
+    <div class="container">
+      <div class="text-center mb-7">
+        <h2 class="h1" id="pricing-h2">料金は、シンプルに。</h2>
+        <p class="lead mt-3 muted">詳細は資料請求にて。</p>
+      </div>
+
+      <!-- 3 項目バッジ（layouts.md §G）-->
+      <div class="fee-badges" role="list" aria-label="料金の特徴">
+        <div class="fee-badge" role="listitem">
+          <i data-lucide="circle-check" class="icon-sm" aria-hidden="true"></i>
+          初期費用 ゼロ
+        </div>
+        <div class="fee-badge" role="listitem">
+          <i data-lucide="circle-check" class="icon-sm" aria-hidden="true"></i>
+          月額固定費 ゼロ
+        </div>
+        <div class="fee-badge" role="listitem">
+          <i data-lucide="circle-check" class="icon-sm" aria-hidden="true"></i>
+          ご利用時のみ、お手数料
+        </div>
+      </div>
+
+      <!-- 料金カード（中央・founders-card レイアウト流用） -->
+      <div class="founders-card-wrap">
+        <article class="pricing-card pricing-card--featured founders-card" aria-label="ご利用料金">
+          <h3 class="pricing-card__title">ご利用料金</h3>
+
+          <div class="founders-card-row">
+            <span class="founders-card-label">基本料金</span>
+            <span class="founders-card-value founders-card-value--accent">¥0</span>
+          </div>
+          <div class="founders-card-row">
+            <span class="founders-card-label">求人掲載料</span>
+            <span class="founders-card-value founders-card-value--accent">¥0</span>
+          </div>
+          <div class="founders-card-row">
+            <span class="founders-card-label">予約システム手数料</span>
+            <span class="founders-card-value">詳細は資料請求にて</span>
+          </div>
+          <div class="founders-card-row" style="border-bottom: 0;">
+            <span class="founders-card-label">最低契約期間</span>
+            <span class="founders-card-value">なし</span>
+          </div>
+
+          <div class="founders-card-cta">
+            <a href="#contact" class="btn btn--primary btn--lg" style="width:100%;">
+              無料で詳細資料を受け取る
+              <i data-lucide="arrow-right" class="icon-sm"></i>
+            </a>
+            <a href="tel:TBD" class="btn btn--ghost" style="width:100%; text-align:center;">
+              お電話でのご相談はこちら
+            </a>
+            <p class="micro text-center muted" style="padding-top: var(--space-2);">
+              ※ 1 分のフォーム入力で、料金詳細・契約条件・FAQ をまとめた PDF を即時送付。<br>
+              営業のご連絡は、貴クラブのペースでお受けします。
+            </p>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- H. 安心の仕組み セクションは user 指示で一旦撤去（2026-05-31）。
+       「法人取引で必要な備え」「運営」「法務監修」「キャディ保険」「中抜き防止」「契約書ドラフト」全削除。 -->
+
+
+  <!-- ═══════════════════════════════════════════
+       I. FAQ（8 件アコーディオン）
+       layouts.md §I / components.md §10
+       P-13: <details><summary> ネイティブ
+       背景: 古紙オフホワイト（地のまま）
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="faq" aria-labelledby="faq-h2">
+    <div class="container">
+      <h2 class="h1 text-center mb-7" id="faq-h2">よくあるご質問</h2>
+
+      <div class="faq-list" role="list">
+
+        <details class="faq-item" role="listitem">
+          <summary class="faq-q">他のスポット型サービスとの違いは、何ですか。</summary>
+          <div class="faq-a">
+            キャディゲートは、貴クラブと同じキャディが継続して入る前提で設計されています。
+            単発派遣ではなく、研修を経た若手キャディとの長期的な関係を、
+            月末まとめての請求で運営できる仕組みです。
+          </div>
+        </details>
+
+        <details class="faq-item" role="listitem">
+          <summary class="faq-q">キャディの質に、ばらつきはありませんか。</summary>
+          <div class="faq-a">
+            福岡大学ゴルフ部・長崎国際大学ゴルフ部（強化指定部）の現役学生を中核に、
+            ゴルフ部経験者・ハンディキャップ保持者からスタートしています。
+            研修・ランク制度の詳細は、資料にてご案内します。
+          </div>
+        </details>
+
+        <details class="faq-item" role="listitem">
+          <summary class="faq-q">解約は、いつでもできますか。</summary>
+          <div class="faq-a">
+            はい。最低契約期間はありません。
+            解約のお申し出からその月末で停止、未払いの予約手数料のみ精算いただきます。
+          </div>
+        </details>
+
+      </div>
+
+      <p class="small text-center mt-7 muted">
+        その他のご質問（料金・キャンセル・保険・支払い等）は、<br>
+        資料請求 or 個別のお打ち合わせで詳しくご案内いたします。
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       J. 最終 CTA
+       layouts.md §J
+       背景: section--primary（苔緑ベタ）
+  ═══════════════════════════════════════════ -->
+  <section class="section section--primary" id="cta" aria-labelledby="cta-h2">
+    <div class="container text-center">
+      <h2 class="h1 mb-5" id="cta-h2">
+        キャディが、開く。<br>
+        その朝を、ご一緒しませんか。
+      </h2>
+      <p class="lead mb-5" style="max-width: var(--container-prose); margin-inline: auto;">
+        ファウンダーズプランは、先着 100 社限定。<br>
+        基本料金・掲載料は、ある限りずっと無料です。
+      </p>
+
+      <!-- TODO: Supabase founders_status からリアルタイム取得 -->
+      <div class="quota-badge">
+        <i data-lucide="award" style="width:14px;height:14px;" aria-hidden="true"></i>
+        現在 残り <strong>準備中</strong> 枠
+      </div>
+
+      <div class="cta-stack">
+        <a href="#contact" class="btn btn--primary btn--lg">
+          無料で資料を受け取る
+          <i data-lucide="arrow-right" class="icon-sm"></i>
+        </a>
+        <a href="#contact" class="btn btn--secondary">事業内容資料（PDF）をダウンロード</a>
+        <a href="tel:TBD" class="btn btn--ghost">お電話でのご相談はこちら</a>
+      </div>
+
+      <p class="small mt-6">
+        お問い合わせから、初回ご返信まで、2 営業日以内に。
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       CONTACT — 資料請求フォーム
+       components.md §11
+       背景: section--surface（純白）
+       ※ Phase 1 後半でフォーム本実装予定
+  ═══════════════════════════════════════════ -->
+  <section class="section section--surface" id="contact" aria-labelledby="contact-h2">
+    <div class="container">
+      <div class="text-center mb-7">
+        <h2 class="h1" id="contact-h2">無料で詳細資料を受け取る</h2>
+        <p class="lead mt-3 muted">
+          料金詳細・契約条件・FAQ をまとめた PDF を、2 営業日以内にお送りします。
+        </p>
+      </div>
+
+      <div class="contact-form-inner">
+        <form id="contact-form" novalidate action="mailto:contact@caddygate.jp" method="post" enctype="text/plain">
+          <div class="field">
+            <label class="label" for="company">
+              ゴルフ場名 <span style="color:var(--color-error);" aria-label="必須">*</span>
+            </label>
+            <input class="input" type="text" id="company" name="company" placeholder="○○カントリークラブ" required autocomplete="organization">
+          </div>
+          <div class="field">
+            <label class="label" for="name">
+              ご担当者さまのお名前 <span style="color:var(--color-error);" aria-label="必須">*</span>
+            </label>
+            <input class="input" type="text" id="name" name="name" placeholder="山田 太郎" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label class="label" for="email">
+              メールアドレス <span style="color:var(--color-error);" aria-label="必須">*</span>
+            </label>
+            <input class="input" type="email" id="email" name="email" placeholder="info@example.jp" required autocomplete="email">
+            <span class="help-text">2 営業日以内にご返信します。</span>
+          </div>
+          <div class="field">
+            <label class="label" for="phone">お電話番号（任意）</label>
+            <input class="input" type="tel" id="phone" name="phone" placeholder="092-000-0000" autocomplete="tel">
+          </div>
+          <div class="field">
+            <label class="label" for="message">お問い合わせ内容（任意）</label>
+            <textarea class="textarea" id="message" name="message" placeholder="導入検討の背景や、具体的なご要望があればお聞かせください。"></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary btn--lg" style="width:100%;">
+            送信する（資料を受け取る）
+            <i data-lucide="arrow-right" class="icon-sm"></i>
+          </button>
+          <p class="micro mt-4 text-center muted">
+            送信後、自動返信メールにて受付確認をお知らせします。<br>
+            担当者より 2 営業日以内にご連絡いたします。
+          </p>
+        </form>
+
+        <div class="mt-7 text-center" style="padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
+          <p class="small muted mb-4">メール・フォーム以外でのご連絡はこちら</p>
+          <a href="mailto:contact@caddygate.jp" class="btn btn--secondary">
+            <i data-lucide="mail" class="icon-sm"></i>
+            contact@caddygate.jp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       K. FOOTER — 4 列・法人取引仕様
+       layouts.md §K / components.md §12
+       P-14: 株式会社KAIROS / 住所TBD / 独自ドメインメール必須
+  ═══════════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- 列 1: ブランド -->
+        <div class="footer__col">
+          <div class="footer__brand">Caddygate</div>
+          <div class="footer__tagline">キャディが、開く。</div>
+          <div style="margin-top: var(--space-5);">
+            <!-- TODO: 新LINE公式作成後にQRコード or URL に差し替え -->
+            <a href="#" class="footer__line-link" aria-label="LINE公式アカウント @caddygate（準備中）">
+              <i data-lucide="message-square" style="width:16px;height:16px;" aria-hidden="true"></i>
+              LINE @caddygate（準備中）
+            </a>
+          </div>
+        </div>
+
+        <!-- 列 2: サービス -->
+        <div class="footer__col">
+          <h4>サービス</h4>
+          <ul>
+            <li><a href="#solution">サービス紹介</a></li>
+            <li><a href="#pricing">料金</a></li>
+            <li><a href="#flow">導入の流れ</a></li>
+            <li><a href="#faq">よくあるご質問</a></li>
+            <li><a href="#contact">資料請求</a></li>
+          </ul>
+        </div>
+
+        <!-- 列 3: 運営会社（P-14 法人取引仕様）-->
+        <div class="footer__col">
+          <h4>運営会社</h4>
+          <ul>
+            <li>株式会社KAIROS</li>
+            <li>〒[TBD] [TBD 住所]</li>
+            <li>TEL: [TBD]</li>
+            <li>
+              <a href="mailto:contact@caddygate.jp">contact@caddygate.jp</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 列 4: 法務情報（P-14）-->
+        <div class="footer__col">
+          <h4>法務情報</h4>
+          <ul>
+            <li><a href="/legal/tokushoho">特定商取引法に基づく表記</a></li>
+            <li><a href="/legal/privacy">プライバシーポリシー</a></li>
+            <li><a href="/legal/terms">利用規約</a></li>
+            <li>
+              <span class="micro" style="color:var(--color-bg); opacity:0.6;">
+                募集情報等提供事業 届出 [TBD 番号]
+              </span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__copyright">
+        &copy; 2026 KAIROS Inc. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       Lucide Icons（P-10: Lucide 一本・ページ末尾）
+       responsive.md §9: パフォーマンス指針 3
+  ═══════════════════════════════════════════ -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+
+    /* ─── Mobile hamburger menu ─── */
+    (function() {
+      var btn = document.getElementById('menuBtn');
+      var nav = document.getElementById('mainNav');
+      if (!btn || !nav) return;
+
+      btn.addEventListener('click', function() {
+        var isOpen = nav.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        btn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+
+        /* close ボタンを動的追加 */
+        if (isOpen && !nav.querySelector('.header__close-btn')) {
+          var closeBtn = document.createElement('button');
+          closeBtn.className = 'header__close-btn';
+          closeBtn.setAttribute('aria-label', 'メニューを閉じる');
+          closeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+          closeBtn.addEventListener('click', function() {
+            nav.classList.remove('is-open');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-label', 'メニューを開く');
+          });
+          nav.prepend(closeBtn);
+        }
+      });
+
+      /* nav リンクをタップでメニューを閉じる */
+      nav.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          nav.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-label', 'メニューを開く');
+        });
+      });
+    })();
+
+    /* ─── Header: ヒーロー上は透過、スクロール後 cream に切替 ─── */
+    (function() {
+      var header = document.querySelector('.header');
+      var hero   = document.querySelector('.hero');
+      if (!header || !hero) return;
+      var threshold = function() { return hero.offsetHeight - 120; };
+      var ticking = false;
+      function update() {
+        header.classList.toggle('is-scrolled', window.scrollY > threshold());
+        ticking = false;
+      }
+      window.addEventListener('scroll', function() {
+        if (!ticking) { requestAnimationFrame(update); ticking = true; }
+      }, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+      update();
+    })();
+  </script>
+
 </body>
 </html>

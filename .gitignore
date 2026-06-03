@@ -15,3 +15,7 @@ assets/
 
 # Dependencies (将来用)
 node_modules/
+
+# Cloudflare Pages local env
+.dev.vars
+.wrangler/

@@ -103,9 +103,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      "https://vqjxajzaasuqfgvhvxci.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    const sb = window.supabase.createClient(
+      "https://dfvxzwrqkxklfutlzqiq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmdnh6d3Jxa3hrbGZ1dGx6cWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTI4NzUsImV4cCI6MjA5NTgyODg3NX0.rRPwIqVfsdjGRkghv2X269oP75fOLm_w4Js16yWeh-Q"
     );
 
     // テーブル存在確認
@@ -115,7 +115,7 @@
       resultDiv.className = 'result';
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
           .from(tableName)
           .select('*')
           .limit(1);
@@ -140,7 +140,7 @@
       resultDiv.className = 'result';
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
           .from('golf_courses')
           .select('*')
           .limit(10);
@@ -170,7 +170,7 @@
       resultDiv.className = 'result';
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
           .from('caddies')
           .select('*')
           .limit(10);
@@ -200,7 +200,7 @@
       resultDiv.className = 'result';
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
           .from('users')
           .select('*')
           .limit(10);
@@ -231,7 +231,7 @@
 
       try {
         // スキーマ情報を取得するために、実際のデータから推測
-        const { data, error } = await supabase
+        const { data, error } = await sb
           .from(tableName)
           .select('*')
           .limit(1);
@@ -278,7 +278,7 @@
         const results = [];
         for (const tableName of commonTables) {
           try {
-            const { data, error } = await supabase
+            const { data, error } = await sb
               .from(tableName)
               .select('*')
               .limit(1);

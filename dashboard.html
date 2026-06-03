@@ -3,66 +3,168 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>My Page</title>
+  <title>マイページ | Caddygate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- LP framework を先に、dashboard を後に -->
+  <link rel="stylesheet" href="/design-system/framework.css?v=2">
+  <link rel="stylesheet" href="/design-system/dashboard-framework.css?v=2">
+
   <style>
-    body{font-family:Helvetica,Arial,sans-serif;text-align:center;padding-top:40px}
-    .card{display:inline-block;padding:24px 32px;border:1px solid #ccc;border-radius:8px;min-width:260px}
-    button{margin-top:20px;padding:10px 24px;border:none;border-radius:6px;background:#c74444;color:#fff;cursor:pointer}
+    /* ロード中ハブ用レイアウト */
+    .hub-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: var(--space-5);
+      background: var(--color-bg);
+    }
+    .hub-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8) var(--space-7);   /* 縦 64 / 横 48 */
+      text-align: center;
+      min-width: 320px;
+    }
+    .hub-card__brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      margin-bottom: var(--space-4);
+    }
+    .hub-card__brand img {
+      height: 32px;
+      width: auto;
+      display: inline-block;
+    }
+    .hub-card__status {
+      font-size: var(--fs-small);
+      color: var(--color-ink-sub);
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+      margin-bottom: var(--space-6);
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 id="welcome">Loading...</h2>
-    <button id="logout">Logout</button>
+  <div class="hub-wrap">
+    <div class="hub-card">
+      <div class="hub-card__brand"><img src="/assets/logo-wordmark.png?v=3" alt="Caddygate" /></div>
+      <div class="hub-card__status" id="welcome">読み込み中…</div>
+      <button id="logout" class="btn--ghost">ログアウト</button>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      "https://vqjxajzaasuqfgvhvxci.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54"
+    const sb = window.supabase.createClient(
+      "https://dfvxzwrqkxklfutlzqiq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmdnh6d3Jxa3hrbGZ1dGx6cWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTI4NzUsImV4cCI6MjA5NTgyODg3NX0.rRPwIqVfsdjGRkghv2X269oP75fOLm_w4Js16yWeh-Q"
     );
 
-    // ログイン後の振り分け処理
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    // OAuth callback / メール認証 callback の場合、Supabase JS は
+    // 自動で URL hash からセッションを復元する。
+    // 復元が間に合わないケースに備えて onAuthStateChange でも捕捉する。
 
-      if (user) {
-        const role = user.user_metadata?.role;
-        if (!role || role === 'guest') {
-          // 役割がない場合はホームページに戻す
-          window.location.href = "/";
-          return;
+    let routed = false;
+
+    async function routeUser(user) {
+      if (routed) return;
+      if (!user) return;
+
+      // URL クエリの role が user_metadata より優先される（OAuth callback で渡してくるケース）
+      const urlRole = new URLSearchParams(location.search).get("role");
+      let role = user.user_metadata?.role;
+
+      // user_metadata に role が無い OAuth ユーザー → URL から拾って Supabase に書く
+      if (!role && (urlRole === "golf" || urlRole === "caddy")) {
+        try {
+          await sb.auth.updateUser({ data: { role: urlRole } });
+          role = urlRole;
+        } catch (e) {
+          console.error("[dashboard] updateUser failed:", e);
         }
+      }
 
-        const table = role === "golf" ? "golf_courses" : "caddies";
-        const { data: profile, error } = await supabase
-          .from(table)
-          .select('email')
-          .eq('email', user.email)
-          .maybeSingle();
+      if (role !== "golf" && role !== "caddy") {
+        console.warn("[dashboard] no role → /");
+        window.location.href = "/";
+        return;
+      }
 
-        if (error) {
-          console.error("Error fetching profile:", error);
-          window.location.href = "/"; // エラー時も安全にホームへ
-          return;
-        }
+      // テーブル row が存在するかチェック（OAuth 初回ログインなら無いはず）
+      const table = role === "golf" ? "golf_courses" : "caddies";
+      const { data: profile, error: profileError } = await sb
+        .from(table)
+        .select("email")
+        .eq("email", user.email)
+        .maybeSingle();
 
-        // プロフィールの有無に関係なく、各ダッシュボードへ直接アクセス
+      if (profileError) {
+        console.error("[dashboard] profile check error:", profileError);
+        document.getElementById("welcome").textContent = "エラー: " + profileError.message;
+        return;
+      }
+
+      routed = true;
+      if (!profile) {
+        // 初回ログイン → プロフィール初期化へ
+        window.location.href = `/profile.html?role=${role}`;
+      } else {
+        // 既存ユーザー → 各 dashboard へ
         if (role === "golf") {
           window.location.href = "/golf_dashboard.html";
         } else {
           window.location.href = "/caddy_dashboard.html";
         }
-      } else {
-        // 未ログイン: ホームページへ
-        window.location.href = "/";
+      }
+    }
+
+    // OAuth / メール認証 callback も SIGNED_IN を発火するので拾う
+    sb.auth.onAuthStateChange(async (event, session) => {
+      console.log("[dashboard] authState:", event);
+      if (event === "SIGNED_IN" && session?.user) {
+        await routeUser(session.user);
+      }
+    });
+
+    // 初期チェック（既にセッションがある場合）
+    (async () => {
+      try {
+        const { data: { user }, error: authErr } = await sb.auth.getUser();
+        console.log("[dashboard] initial user:", user, "authErr:", authErr);
+
+        if (!user) {
+          // OAuth callback 直後だと getUser が空で返るケースがある。少し待って onAuthStateChange に任せる
+          setTimeout(async () => {
+            if (routed) return;
+            const { data: { user: u2 } } = await sb.auth.getUser();
+            if (!u2) {
+              console.warn("[dashboard] no user → /");
+              window.location.href = "/";
+            } else {
+              await routeUser(u2);
+            }
+          }, 1500);
+          return;
+        }
+        await routeUser(user);
+      } catch (e) {
+        console.error("[dashboard] fatal:", e);
+        document.getElementById("welcome").textContent = "エラー: " + e.message;
       }
     })();
 
     // ログアウト処理
     document.getElementById("logout").onclick = async () => {
-      await supabase.auth.signOut();
+      await sb.auth.signOut();
       window.location.href = "/";
     };
   </script>

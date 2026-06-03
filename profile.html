@@ -3,231 +3,283 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>プロフィール登録</title>
+  <title>プロフィール登録 | Caddygate</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <!-- LP framework を先に、dashboard を後に -->
+  <link rel="stylesheet" href="/design-system/framework.css?v=2">
+  <link rel="stylesheet" href="/design-system/dashboard-framework.css?v=2">
+
   <style>
-    body{
-      font-family:Helvetica,Arial,sans-serif;
-      padding:30px;
-      background:#f7fafc;
-      margin:0;
+    /* ── profile ページ固有レイアウト ── */
+    .prof-wrap {
+      background: var(--color-bg);
+      min-height: 100vh;
+      padding: var(--space-6) var(--space-5);
     }
-    .container{
-      max-width:800px;
-      margin:0 auto;
-      background:white;
-      border-radius:12px;
-      box-shadow:0 4px 6px rgba(0,0,0,0.1);
-      overflow:hidden;
+    .prof-container {
+      max-width: 800px;
+      margin: 0 auto;
     }
-    .header{
-      background:linear-gradient(135deg, #2e7d32, #388e3c);
-      color:white;
-      padding:2rem;
-      text-align:center;
+
+    /* ── ページヘッダー（gradient 排除、フラット化） ── */
+    .prof-header {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
     }
-    .header h1{
-      margin:0;
-      font-size:2rem;
-      font-weight:600;
+    .prof-header__brand {
+      font-size: 1.125rem;          /* 18px */
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      flex-shrink: 0;
     }
-    .header p{
-      margin:0.5rem 0 0 0;
-      opacity:0.9;
+    .prof-header__brand img {
+      height: 28px;
+      width: auto;
+      display: block;
     }
-    .content{
-      padding:2rem;
+    .prof-header__divider {
+      width: 1px;
+      height: 32px;
+      background: var(--color-border);
+      flex-shrink: 0;
     }
-    .profile-section{
-      margin-bottom:2rem;
-      padding:1.5rem;
-      border:1px solid #e2e8f0;
-      border-radius:8px;
-      background:#f8f9fa;
+    .prof-header__title-wrap {}
+    .prof-header__title {
+      margin: 0;
+      font-size: var(--fs-xlarge);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      line-height: 1.3;
+      color: var(--color-ink);
     }
-    .profile-section h2{
-      margin:0 0 1rem 0;
-      color:#2e7d32;
-      font-size:1.5rem;
-      border-bottom:2px solid #e2e8f0;
-      padding-bottom:0.5rem;
+    .prof-header__subtitle {
+      margin: 4px 0 0;              /* Proximity: title 直下 */
+      font-size: var(--fs-small);
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+      color: var(--color-ink-sub);
     }
-    .stats-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-      gap:1rem;
-      margin-bottom:1.5rem;
+
+    /* ── section カード ── */
+    .prof-section {
+      margin-bottom: var(--space-5);
     }
-    .stat-card{
-      background:white;
-      padding:1rem;
-      border-radius:6px;
-      border:1px solid #e2e8f0;
-      text-align:center;
+    .prof-section__title {
+      font-size: var(--fs-nano);             /* 11px uppercase ラベル化 */
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.4;
+      color: var(--color-ink-sub);
+      margin: 0 0 var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
     }
-    .stat-number{
-      font-size:2rem;
-      font-weight:bold;
-      color:#2e7d32;
-      margin-bottom:0.5rem;
+
+    /* ── stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
     }
-    .stat-label{
-      color:#666;
-      font-size:0.9rem;
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      text-align: center;
     }
-    .golf-courses-list{
-      background:white;
-      border-radius:6px;
-      border:1px solid #e2e8f0;
-      overflow:hidden;
+    .stat-number {
+      font-size: var(--fs-xlarge);
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: var(--space-1);
     }
-    .golf-course-item{
-      padding:1rem;
-      border-bottom:1px solid #e2e8f0;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+    .stat-label {
+      font-size: var(--fs-small);
+      color: var(--color-ink-sub);
     }
-    .golf-course-item:last-child{
-      border-bottom:none;
+
+    /* ── golf courses list ── */
+    .golf-courses-list {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
     }
-    .golf-course-name{
-      font-weight:600;
-      color:#2e7d32;
+    .golf-course-item {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .golf-course-status{
-      background:#e8f5e8;
-      color:#2e7d32;
-      padding:0.25rem 0.75rem;
-      border-radius:20px;
-      font-size:0.8rem;
+    .golf-course-item:last-child {
+      border-bottom: none;
     }
-    form{
-      max-width:400px;
-      margin:auto;
+    .golf-course-name {
+      font-weight: 600;
+      color: var(--color-ink);
     }
-    label{
-      display:block;
-      margin:12px 0 4px;
-      font-weight:600;
-      color:#333;
+    .golf-course-status {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-micro);
+      font-weight: 600;
+      background: var(--color-primary-soft-bg);
+      color: var(--color-primary-deep);
     }
-    input{
-      width:100%;
-      padding:12px;
-      border:2px solid #e2e8f0;
-      border-radius:6px;
-      font-size:1rem;
-      box-sizing:border-box;
+
+    /* ── form 内セクション見出し ── */
+    .form-section-title {
+      font-size: var(--fs-small);
+      font-weight: 700;
+      color: var(--color-ink-sub);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-wide);
+      margin: var(--space-5) 0 var(--space-2);
+      padding-bottom: var(--space-1);
+      border-bottom: 1px solid var(--color-border);
     }
-    input:focus{
-      outline:none;
-      border-color:#2e7d32;
+
+    /* ── back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-size: var(--fs-small);
+      color: var(--color-ink-sub);
+      text-decoration: none;
+      margin-bottom: var(--space-4);
     }
-    button{
-      margin-top:20px;
-      padding:12px 24px;
-      border:none;
-      border-radius:6px;
-      background:#2e7d32;
-      color:#fff;
-      cursor:pointer;
-      font-size:1rem;
-      font-weight:600;
-      width:100%;
+    .back-link:hover {
+      color: var(--color-primary);
     }
-    button:hover{
-      background:#1b5e20;
+
+    /* ── submit button width override ── */
+    #profForm button[type="submit"] {
+      width: 100%;
+      margin-top: var(--space-5);
     }
-    .back-link{
-      display:inline-block;
-      margin-bottom:1rem;
-      color:#2e7d32;
-      text-decoration:none;
-      font-weight:500;
-    }
-    .back-link:hover{
-      text-decoration:underline;
-    }
-    @media (max-width: 768px) {
-      .container{
-        margin:1rem;
-        border-radius:8px;
-      }
-      .header{
-        padding:1.5rem;
-      }
-      .content{
-        padding:1.5rem;
-      }
-      .stats-grid{
-        grid-template-columns:1fr;
-      }
+
+    @media (max-width: 767px) {
+      .prof-wrap { padding: var(--space-4) var(--space-3); }
+      .prof-header { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+      .prof-header__divider { display: none; }
+      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1 id="title">プロフィール登録</h1>
-      <p>あなたの情報を登録して、サービスをご利用ください</p>
-    </div>
-    
-    <div class="content">
+  <div class="prof-wrap">
+    <div class="prof-container">
+
+      <!-- ページヘッダー -->
+      <header class="prof-header">
+        <div class="prof-header__brand"><img src="/assets/logo-wordmark.png?v=3" alt="Caddygate" /></div>
+        <div class="prof-header__divider"></div>
+        <div class="prof-header__title-wrap">
+          <h1 class="prof-header__title" id="title">プロフィール登録</h1>
+          <p class="prof-header__subtitle">あなたの情報を登録して、サービスをご利用ください</p>
+        </div>
+      </header>
+
       <a href="/" class="back-link">← ホームに戻る</a>
-      
+
       <!-- プロフィール登録フォーム -->
-      <div class="profile-section">
-        <h2>基本情報</h2>
+      <div class="card prof-section">
+        <h2 class="card__title prof-section__title">基本情報</h2>
         <form id="profForm"></form>
       </div>
-      
-      <!-- 統計情報（ログイン済みユーザーのみ表示） -->
-      <div id="statsSection" class="profile-section" style="display: none;">
-        <h2>統計情報</h2>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-number" id="roundsCount">0</div>
-            <div class="stat-label">ラウンド回数</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="totalEarnings">¥0</div>
-            <div class="stat-label">稼いだ合計金額</div>
+
+      <!-- 統計情報（ログイン済みキャディのみ表示） -->
+      <div id="statsSection" class="prof-section" style="display:none;">
+        <div class="card">
+          <h2 class="card__title prof-section__title">統計情報</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number" id="roundsCount">0</div>
+              <div class="stat-label">ラウンド回数</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="totalEarnings">¥0</div>
+              <div class="stat-label">稼いだ合計金額</div>
+            </div>
           </div>
         </div>
       </div>
-      
+
       <!-- 登録済みゴルフ場リスト（ゴルフ場ユーザーのみ表示） -->
-      <div id="golfCoursesSection" class="profile-section" style="display: none;">
-        <h2>登録済みゴルフ場</h2>
-        <div id="golfCoursesList" class="golf-courses-list">
-          <!-- ゴルフ場リストがここに表示されます -->
+      <div id="golfCoursesSection" class="prof-section" style="display:none;">
+        <div class="card">
+          <h2 class="card__title prof-section__title">登録済みゴルフ場</h2>
+          <div id="golfCoursesList" class="golf-courses-list">
+            <!-- ゴルフ場リストがここに表示されます -->
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
   <script>
+  (async () => {
+  try {
+    if (!window.supabase || typeof window.supabase.createClient !== "function") {
+      alert("Supabase ライブラリの読み込みに失敗しました");
+      throw new Error("supabase library not loaded");
+    }
     /* ==== Supabase 初期化 ==== */
-    const SUPABASE_URL  = "https://vqjxajzaasuqfgvhvxci.supabase.co";
-    const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxanhhanphYXN1cWZndmh2eGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2MjIxMzgsImV4cCI6MjA2OTE5ODEzOH0.NmKwgZA1_-TTvMTQt07QRXtIlR-DPOPATVPuQ3QuO54";
+    const SUPABASE_URL  = "https://dfvxzwrqkxklfutlzqiq.supabase.co";
+    const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmdnh6d3Jxa3hrbGZ1dGx6cWlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNTI4NzUsImV4cCI6MjA5NTgyODg3NX0.rRPwIqVfsdjGRkghv2X269oP75fOLm_w4Js16yWeh-Q";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    /* ==== 役割判定（?role=golf or caddy） ==== */
-    const role  = new URLSearchParams(location.search).get("role") || "caddy";
+    /* ==== 役割判定（?role=golf or caddy）==== */
+    /*   guest や不正値は caddy にフォールバック。
+         URL から ?role=golf を期待するが、login 画面で role 未指定だった場合の保険。
+         OAuth/LINE Login 直後は user_metadata.role を参照（URL に無いケース対応） */
+    let role = new URLSearchParams(location.search).get("role");
+    if (!role || (role !== "golf" && role !== "caddy")) {
+      // URL 未指定 → user_metadata から拾う
+      const { data: { user: u0 } } = await supabase.auth.getUser();
+      if (u0 && u0.user_metadata && (u0.user_metadata.role === "golf" || u0.user_metadata.role === "caddy")) {
+        role = u0.user_metadata.role;
+      } else {
+        console.warn("[profile] invalid role '" + role + "' → fallback to caddy");
+        role = "caddy";
+      }
+    }
 
     const form  = document.getElementById("profForm");
     const title = document.getElementById("title");
     const statsSection = document.getElementById("statsSection");
     const golfCoursesSection = document.getElementById("golfCoursesSection");
 
-    /* ==== 項目定義 ==== */
+    /* ==== 項目定義 ====
+       section プロパティで「基本情報」「キャディ条件」など見出しを分割 */
     const FIELDS = {
       golf: [
-        {id:"name",         label:"ゴルフ場名"},
-        {id:"contact_name", label:"担当者名"},
-        {id:"phone",        label:"電話番号"},
-        {id:"perks",        label:"キャディ特典（例：打ちっぱなし無料）"}
+        {id:"name",                 label:"ゴルフ場名",                                     section:"基本情報"},
+        {id:"contact_name",         label:"担当者名",                                       section:"基本情報"},
+        {id:"phone",                label:"電話番号",                                       section:"基本情報"},
+        {id:"caddy_wage_per_round", label:"キャディ謝礼金（1ラウンドあたり・円）", type:"number", section:"キャディ条件"},
+        {id:"caddy_duration_hours", label:"拘束時間（時間）",                       type:"number", section:"キャディ条件"},
+        {id:"perks",                label:"キャディ特典（例：打ちっぱなし無料）",            section:"キャディ条件"}
       ],
       caddy:[
         {id:"name",        label:"氏名"},
@@ -238,27 +290,36 @@
       ]
     };
 
-    /* ==== 初期化 ==== */
+    /* ==== 初期化 ====
+       2026-06-01: 統計情報・登録済みゴルフ場リストはモックデータだったので削除。
+       実データができたら caddy_dashboard.html 側で表示する。
+       profile.html は登録/編集フォームに専念。 */
     async function initialize() {
-      // ユーザーの認証状態を確認
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // ログイン済みの場合、統計情報を表示
-        await loadUserStats();
-        if (role === 'golf') {
-          await loadGolfCourses();
-        }
-      }
+      // 統計・ゴルフ場リストの読み込みは停止（モックデータ排除）
     }
 
     /* ==== 1. フォーム描画 ==== */
     title.textContent = role === "golf" ? "ゴルフ場プロフィール登録" : "キャディプロフィール登録";
+    let currentSection = null;
     FIELDS[role].forEach(f => {
+      if (f.section && f.section !== currentSection) {
+        form.insertAdjacentHTML("beforeend",
+          `<h3 class="form-section-title">${f.section}</h3>`);
+        if (f.section === "キャディ条件") {
+          form.insertAdjacentHTML("beforeend",
+            `<p style="margin:0 0 var(--space-3);font-size:var(--fs-small);color:var(--color-ink-mute);">※ キャディ条件は後で編集可能です。</p>`);
+        }
+        currentSection = f.section;
+      }
+      const required = (f.section === "キャディ条件") ? "" : "required";
       form.insertAdjacentHTML("beforeend",
-        `<label for="${f.id}">${f.label}</label>
-         <input id="${f.id}" type="${f.type||'text'}" required />`);
+        `<div class="form-field">
+           <label class="form-label" for="${f.id}">${f.label}</label>
+           <input class="form-input" id="${f.id}" type="${f.type||'text'}" ${required} />
+         </div>`);
     });
-    form.insertAdjacentHTML("beforeend", `<button type="submit">登録</button>`);
+    form.insertAdjacentHTML("beforeend",
+      `<button type="submit" class="btn btn--primary">登録</button>`);
 
     /* ==== 2. 送信処理 ==== */
     form.onsubmit = async e => {
@@ -282,6 +343,19 @@
       const { error } = await supabase.from(table).upsert(data, { onConflict: role === 'golf' ? 'gid' : 'cid' });
       if (error) { alert(error.message); return; }
 
+      /* LINE Login 経由の caddy なら line_integrations の暫定 cid (auth_*) を正規 cid に書き換える */
+      if (role === "caddy" && user.user_metadata && user.user_metadata.provider === "line" && user.user_metadata.line_user_id) {
+        try {
+          const tempCid = "auth_" + user.id.slice(0, 8);
+          await supabase
+            .from("line_integrations")
+            .update({ cid: data.cid })
+            .eq("cid", tempCid);
+        } catch (e) {
+          console.warn("[profile] line_integrations cid migration failed:", e);
+        }
+      }
+
       alert("登録完了！");
       // 絶対パスでダッシュボードハブへ
       location.href = "/dashboard.html";
@@ -295,12 +369,12 @@
           roundsCount: 15,
           totalEarnings: 45000
         };
-        
+
         document.getElementById('roundsCount').textContent = mockStats.roundsCount;
         document.getElementById('totalEarnings').textContent = `¥${mockStats.totalEarnings.toLocaleString()}`;
-        
+
         statsSection.style.display = 'block';
-        
+
       } catch (error) {
         console.error('Error loading user stats:', error);
       }
@@ -324,10 +398,10 @@
             registeredDate: '2025-03-20'
           }
         ];
-        
+
         renderGolfCoursesList(mockGolfCourses);
         golfCoursesSection.style.display = 'block';
-        
+
       } catch (error) {
         console.error('Error loading golf courses:', error);
       }
@@ -336,30 +410,37 @@
     /* ==== 5. ゴルフ場リストの表示 ==== */
     function renderGolfCoursesList(golfCourses) {
       const golfCoursesList = document.getElementById('golfCoursesList');
-      
+
       if (!golfCourses || golfCourses.length === 0) {
-        golfCoursesList.innerHTML = '<div style="padding:1rem; text-align:center; color:#666;">登録済みのゴルフ場はありません。</div>';
+        golfCoursesList.innerHTML = `<div class="empty"><div class="empty__title">登録済みのゴルフ場はありません</div></div>`;
         return;
       }
-      
+
       let html = '';
       golfCourses.forEach(course => {
         html += `
           <div class="golf-course-item">
             <div>
               <div class="golf-course-name">${course.name}</div>
-              <small style="color:#666;">登録日: ${course.registeredDate}</small>
+              <small style="color:var(--color-ink-mute);font-size:var(--fs-micro);">登録日: ${course.registeredDate}</small>
             </div>
             <span class="golf-course-status">${course.status}</span>
           </div>
         `;
       });
-      
+
       golfCoursesList.innerHTML = html;
     }
 
     // 初期化を実行
     initialize();
+    document.title = "プロフィール ✓";
+    console.log("[profile] initialized. role=", role);
+  } catch (initError) {
+    alert("プロフィール画面の初期化に失敗:\n" + (initError && initError.message ? initError.message : initError));
+    console.error("[profile] init error:", initError);
+  }
+  })();
   </script>
 </body>
 </html>
