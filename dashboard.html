@@ -74,10 +74,24 @@
     // 復元が間に合わないケースに備えて onAuthStateChange でも捕捉する。
 
     let routed = false;
+    const welcomeEl = document.getElementById("welcome");
+    function setStatus(msg) {
+      welcomeEl.textContent = msg;
+      console.log("[dashboard]", msg);
+    }
+
+    // Promise を timeout 付きで await するヘルパー
+    function withTimeout(promise, ms, label) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(label + " が " + ms + "ms 以内に返ってきませんでした")), ms))
+      ]);
+    }
 
     async function routeUser(user) {
       if (routed) return;
       if (!user) return;
+      setStatus("ステップ2: ユーザー判定中 (email=" + (user.email || "?") + ")");
 
       // URL クエリの role が user_metadata より優先される（OAuth callback で渡してくるケース）
       // OAuth プロバイダ側で query が落とされるケースに備え、sessionStorage を fallback として使う
@@ -86,47 +100,58 @@
       try { stashedRole = sessionStorage.getItem("oauth_role"); } catch (_) {}
       const incomingRole = urlRole || stashedRole;
       let role = user.user_metadata?.role;
+      setStatus("ステップ3: role=" + (role || "なし") + " incoming=" + (incomingRole || "なし"));
 
       // user_metadata に role が無い OAuth ユーザー → URL/stash から拾って Supabase に書く
       if (!role && (incomingRole === "golf" || incomingRole === "caddy")) {
+        setStatus("ステップ4: updateUser で role 書込み中…");
         try {
-          await sb.auth.updateUser({ data: { role: incomingRole } });
+          await withTimeout(sb.auth.updateUser({ data: { role: incomingRole } }), 10000, "updateUser");
           role = incomingRole;
         } catch (e) {
           console.error("[dashboard] updateUser failed:", e);
-          role = incomingRole; // updateUser に失敗してもこのセッション中はメモリ上で扱う
+          setStatus("ステップ4 警告: " + e.message + " → メモリ上で続行");
+          role = incomingRole;
         }
       }
 
-      // 役割が確定した時点で stash は消す
       try { sessionStorage.removeItem("oauth_role"); } catch (_) {}
 
       if (role !== "golf" && role !== "caddy") {
-        console.warn("[dashboard] no role → /");
-        window.location.href = "/";
+        setStatus("エラー: role が確定できません → / に戻ります");
+        setTimeout(() => { window.location.href = "/"; }, 2000);
         return;
       }
 
       // テーブル row が存在するかチェック（OAuth 初回ログインなら無いはず）
       const table = role === "golf" ? "golf_courses" : "caddies";
-      const { data: profile, error: profileError } = await sb
-        .from(table)
-        .select("email")
-        .eq("email", user.email)
-        .maybeSingle();
+      setStatus("ステップ5: " + table + " テーブル検索中… (email=" + user.email + ")");
+      let profile = null;
+      let profileError = null;
+      try {
+        const res = await withTimeout(
+          sb.from(table).select("email").eq("email", user.email).maybeSingle(),
+          10000,
+          table + " query"
+        );
+        profile = res.data;
+        profileError = res.error;
+      } catch (e) {
+        setStatus("エラー (テーブル検索 timeout/失敗): " + e.message);
+        return;
+      }
 
       if (profileError) {
-        console.error("[dashboard] profile check error:", profileError);
-        document.getElementById("welcome").textContent = "エラー: " + profileError.message;
+        setStatus("エラー (profileError): " + profileError.message);
         return;
       }
 
       routed = true;
       if (!profile) {
-        // 初回ログイン → プロフィール初期化へ
+        setStatus("ステップ6: " + table + " に登録無し → /profile.html?role=" + role + " へ");
         window.location.href = `/profile.html?role=${role}`;
       } else {
-        // 既存ユーザー → 各 dashboard へ
+        setStatus("ステップ6: 登録あり → " + (role === "golf" ? "/golf_dashboard.html" : "/caddy_dashboard.html") + " へ");
         if (role === "golf") {
           window.location.href = "/golf_dashboard.html";
         } else {
@@ -139,26 +164,35 @@
     sb.auth.onAuthStateChange(async (event, session) => {
       console.log("[dashboard] authState:", event);
       if (event === "SIGNED_IN" && session?.user) {
+        setStatus("認証イベント SIGNED_IN を受信、ルーティング開始");
         await routeUser(session.user);
       }
     });
 
     // 初期チェック（既にセッションがある場合）
     (async () => {
+      setStatus("ステップ1: getUser 実行中…");
       try {
-        const { data: { user }, error: authErr } = await sb.auth.getUser();
+        const userRes = await withTimeout(sb.auth.getUser(), 8000, "getUser");
+        const user = userRes.data?.user;
+        const authErr = userRes.error;
         console.log("[dashboard] initial user:", user, "authErr:", authErr);
 
         if (!user) {
-          // OAuth callback 直後だと getUser が空で返るケースがある。少し待って onAuthStateChange に任せる
+          setStatus("ステップ1: セッション無し、1.5秒待って onAuthStateChange に委譲");
           setTimeout(async () => {
             if (routed) return;
-            const { data: { user: u2 } } = await sb.auth.getUser();
-            if (!u2) {
-              console.warn("[dashboard] no user → /");
-              window.location.href = "/";
-            } else {
-              await routeUser(u2);
+            try {
+              const r2 = await withTimeout(sb.auth.getUser(), 8000, "getUser(retry)");
+              const u2 = r2.data?.user;
+              if (!u2) {
+                setStatus("セッションが見つかりません → / に戻ります");
+                setTimeout(() => { window.location.href = "/"; }, 2000);
+              } else {
+                await routeUser(u2);
+              }
+            } catch (e) {
+              setStatus("エラー (retry getUser): " + e.message);
             }
           }, 1500);
           return;
@@ -166,7 +200,7 @@
         await routeUser(user);
       } catch (e) {
         console.error("[dashboard] fatal:", e);
-        document.getElementById("welcome").textContent = "エラー: " + e.message;
+        setStatus("致命的エラー: " + e.message);
       }
     })();
 
