@@ -1901,32 +1901,107 @@
 
     function renderProfileForm(row={}){
       const formHost = document.getElementById('subProfBasic') || document.getElementById('mainProfile');
+      const isNew = !row.cid;
       formHost.innerHTML=`
-        <div style='display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap'>
-          <form id='profForm' style='max-width:520px;flex:1 1 320px'>
-          <label>氏名<input type='text' id='pName' value='${row.name??""}' required></label><br>
-          <label>生年月日<input type='date' id='pBirth' value='${row.birth_date??""}'></label><br>
-          <label>電話<input type='text' id='pPhone' value='${row.phone??""}'></label><br>
-          <label>所属大学<input type='text' id='pUni' value='${row.university??""}'></label><br>
-          <label>ゴルフ歴(年)<input type='number' id='pGolf' value='${row.golf_years??0}'></label><br>
-          <label>キャディ歴(年)<input type='number' id='pCaddy' value='${row.caddy_years??0}'></label><br>
-          <label>プロフィール画像<input type='file' id='pAvatar' accept='image/*'></label><br>
-            <label>アピール<textarea id='pAppeal' rows='5'>${row.appeal??""}</textarea></label><br>
-          <button type='submit' id='saveProfileBtn'>保存</button>
-          </form>
-          <div id='profPreview' class='card' style='flex:1 1 260px;min-width:260px;'>
-            <div id='ppAvatar' style='width:120px;height:120px;border-radius:50%;background:#ddd;overflow:hidden;display:flex;align-items:center;justify-content:center;'>
-              ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : `<div style='color:#999;font-size:28px;font-weight:bold;'>📷</div>`}
-            </div>
-            <h3 id='ppName' style='margin:12px 0 8px;'>${row.name||''}</h3>
-            <div class='pp-line'>電話: <span id='ppPhone'>${row.phone||''}</span></div>
-            <div class='pp-line'>所属大学: <span id='ppUni'>${row.university||''}</span></div>
-            <div class='pp-line'>ゴルフ歴: <span id='ppGolf'>${row.golf_years??0}</span> 年</div>
-            <div class='pp-line'>キャディ歴: <span id='ppCaddy'>${row.caddy_years??0}</span> 年</div>
-            <div style='margin-top:8px;font-weight:700;'>アピール</div>
-            <div id='ppAppeal' style='white-space:pre-wrap;background:#f8f9fa;border:1px solid #eee;border-radius:6px;padding:10px;'>${row.appeal||''}</div>
+        <div class="card" style="margin-bottom:var(--space-4);padding:var(--space-4) var(--space-5);background:var(--color-primary-soft-bg,#E8F2E8);border:1px solid var(--color-border);">
+          <div style="font-size:var(--fs-small);font-weight:700;color:var(--color-primary-deep);letter-spacing:0.02em;">${isNew ? "プロフィール初回登録" : "プロフィール編集"}</div>
+          <div style="font-size:var(--fs-micro);color:var(--color-ink-sub);line-height:1.6;margin-top:4px;">
+            ${isNew ? "Caddygate のご利用にはプロフィール登録が必要です。<br>下記の情報を入力して「保存」を押してください。" : "プロフィール情報を更新できます。"}
           </div>
-        </div>`;
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:var(--space-6);align-items:flex-start;">
+          <!-- 左: 入力フォーム -->
+          <form id="profForm" class="card" style="padding:var(--space-5) var(--space-5) var(--space-4);">
+            <div class="form-field">
+              <label class="form-field__label" for="pName">氏名 <span style="color:var(--color-accent);">*</span></label>
+              <input class="form-input" type="text" id="pName" value="${row.name??""}" required placeholder="例: 山田 太郎" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="pBirth">生年月日</label>
+              <input class="form-input" type="date" id="pBirth" value="${row.birth_date??""}" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="pPhone">電話番号</label>
+              <input class="form-input" type="tel" id="pPhone" value="${row.phone??""}" placeholder="090-1234-5678" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="pUni">所属大学</label>
+              <input class="form-input" type="text" id="pUni" value="${row.university??""}" placeholder="例: 〇〇大学" />
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);">
+              <div class="form-field">
+                <label class="form-field__label" for="pGolf">ゴルフ歴 (年)</label>
+                <input class="form-input" type="number" id="pGolf" value="${row.golf_years??0}" min="0" />
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="pCaddy">キャディ歴 (年)</label>
+                <input class="form-input" type="number" id="pCaddy" value="${row.caddy_years??0}" min="0" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="pAvatar">プロフィール画像</label>
+              <input class="form-input" type="file" id="pAvatar" accept="image/*" style="padding:6px var(--space-3);" />
+              <div class="form-field__hint">推奨: 正方形・3MB 以内</div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="pAppeal">アピール</label>
+              <textarea class="form-textarea" id="pAppeal" rows="5" placeholder="ゴルフ場側に伝えたい強み・実績・志望動機など">${row.appeal??""}</textarea>
+            </div>
+
+            <button type="submit" id="saveProfileBtn" class="btn btn--primary" style="width:100%;margin-top:var(--space-2);">${isNew ? "登録する" : "保存する"}</button>
+          </form>
+
+          <!-- 右: プレビュー -->
+          <div id="profPreview" class="card" style="padding:var(--space-5);position:sticky;top:var(--space-4);">
+            <div style="font-size:var(--fs-micro);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-ink-mute);margin-bottom:var(--space-3);">プレビュー</div>
+            <div style="display:flex;justify-content:center;margin-bottom:var(--space-4);">
+              <div id="ppAvatar" style="width:128px;height:128px;border-radius:50%;background:var(--color-surface-alt);border:1px solid var(--color-border);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                ${row.avatar_url ? (()=>{const u = row.avatar_url + (row.avatar_url.includes('?')?'&':'?')+`v=${Date.now()}`; return `<img src='${u}' style='width:100%;height:100%;object-fit:cover;'>`;})() : `<div style='color:var(--color-ink-mute);font-size:32px;'>👤</div>`}
+              </div>
+            </div>
+            <h3 id="ppName" style="margin:0 0 var(--space-3);text-align:center;font-size:var(--fs-large);font-weight:700;color:var(--color-ink);">${row.name||'(氏名)'}</h3>
+
+            <div style="display:flex;flex-direction:column;gap:var(--space-2);padding:var(--space-3) 0;border-top:1px solid var(--color-border);">
+              <div style="display:flex;justify-content:space-between;font-size:var(--fs-small);">
+                <span style="color:var(--color-ink-mute);">電話</span>
+                <span id="ppPhone" style="color:var(--color-ink);">${row.phone||'—'}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:var(--fs-small);">
+                <span style="color:var(--color-ink-mute);">所属大学</span>
+                <span id="ppUni" style="color:var(--color-ink);">${row.university||'—'}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:var(--fs-small);">
+                <span style="color:var(--color-ink-mute);">ゴルフ歴</span>
+                <span style="color:var(--color-ink);"><span id="ppGolf">${row.golf_years??0}</span> 年</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:var(--fs-small);">
+                <span style="color:var(--color-ink-mute);">キャディ歴</span>
+                <span style="color:var(--color-ink);"><span id="ppCaddy">${row.caddy_years??0}</span> 年</span>
+              </div>
+            </div>
+
+            <div style="padding-top:var(--space-3);border-top:1px solid var(--color-border);">
+              <div style="font-size:var(--fs-micro);font-weight:700;letter-spacing:0.02em;color:var(--color-ink-sub);margin-bottom:var(--space-2);">アピール</div>
+              <div id="ppAppeal" style="white-space:pre-wrap;font-size:var(--fs-small);color:var(--color-ink-sub);line-height:1.6;min-height:48px;">${row.appeal||'未入力'}</div>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          @media (max-width: 880px) {
+            #profForm + #profPreview, #profForm ~ #profPreview { position: static !important; }
+            #subProfBasic > div[style*='grid-template-columns'],
+            #mainProfile > div[style*='grid-template-columns'] { grid-template-columns: 1fr !important; }
+          }
+        </style>
+      `;
       const form = document.getElementById('profForm');
       if (form) form.onsubmit=saveProfile.bind(null,row);
       // 入力即時プレビュー
