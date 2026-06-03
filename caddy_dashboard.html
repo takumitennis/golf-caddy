@@ -130,7 +130,32 @@
           <i data-lucide="graduation-cap" class="dash-nav-item__icon"></i>
           研修
         </button>
+        <button class="dash-nav-item" id="sideNavLineNotify" onclick="switchMain('line')">
+          <i data-lucide="bell" class="dash-nav-item__icon"></i>
+          <span>LINE通知</span>
+          <span id="lineNotifyBadge" class="line-notify-badge" style="display:none;" aria-label="未設定"></span>
+        </button>
       </div>
+
+      <style>
+        /* 未連携バッジ: 緑のドット (推奨アクション) */
+        .line-notify-badge {
+          display: inline-block;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #16A34A;
+          margin-left: 6px;
+          vertical-align: middle;
+          box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+          animation: lineBadgePulse 2s infinite;
+        }
+        @keyframes lineBadgePulse {
+          0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
+          70%  { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        }
+      </style>
 
       <div class="dash-sidebar__footer">
         <div class="dash-header__user" id="welcome"></div>
@@ -1555,7 +1580,8 @@
       prof: 'プロフィール',
       search: '仕事を探す',
       shift: 'シフト',
-      training: '研修'
+      training: '研修',
+      line: 'LINE通知'
     };
 
     // ── sidebar nav active state helper ──
@@ -1566,7 +1592,8 @@
         prof: 'sideNavProf',
         search: 'sideNavSearch',
         shift: 'sideNavShift',
-        training: 'sideNavTraining'
+        training: 'sideNavTraining',
+        line: 'sideNavLineNotify'
       };
       const mobileIdMap = {
         prof: 'mNavProf',
@@ -1679,22 +1706,24 @@
       if (k === 'schedule') k = 'shift';
       if (k === 'assign') k = 'shift';
       if (k === 'msg' || k === 'messages') {
-        // メッセージはシフト経由で展開されるので shift に寄せる
         k = 'shift';
       }
-      if (k === 'notice' || k === 'line') {
-        // お知らせ・LINE設定は新IAでは sidebar から外したが、互換のため training に寄せる
+      if (k === 'notice') {
+        // お知らせは training に寄せる
         k = 'training';
       }
-      if (!['prof','search','shift','training'].includes(k)) k = 'prof';
+      // 'line' は LINE通知設定として一級メニュー化 (旧 training への寄せを撤回)
+      if (!['prof','search','shift','training','line'].includes(k)) k = 'prof';
 
       const mainProfileDiv  = document.getElementById('mainProfile');
       const mainSearchDiv   = document.getElementById('mainSearch');
       const mainShiftDiv    = document.getElementById('mainShift');
       const mainTrainingDiv = document.getElementById('mainTraining');
+      const mainLineDiv     = document.getElementById('mainLineSettings');
 
-      // 旧セクションも確実に非表示
-      const legacyIds = ['mainSchedule','mainAssigned','mainMessages','mainLineSettings','mainNotice','assignedListContainer'];
+      // 旧セクションも確実に非表示 ('line' 表示時は mainLineSettings は除外)
+      const legacyIds = ['mainSchedule','mainAssigned','mainMessages','mainNotice','assignedListContainer'];
+      if (k !== 'line') legacyIds.push('mainLineSettings');
       legacyIds.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
       // hide all primary sections
@@ -1717,6 +1746,11 @@
         if (mainTrainingDiv) mainTrainingDiv.classList.remove('hidden');
         setSideNavActive('training');
         switchSubTab('training', 'open');
+      } else if (k === 'line') {
+        if (mainLineDiv) mainLineDiv.style.display = 'block';
+        setSideNavActive('line');
+        const titleEl = document.getElementById('mainHeaderTitle');
+        if (titleEl) titleEl.textContent = 'LINE通知';
       }
     }
     window.switchMain = switchMain;
@@ -2203,6 +2237,34 @@
     const LINE_BOT_ID = '@775xibyg'; // キャディプラス公式LINE
     
     async function checkLineConnectionStatus() {
+      // LINE Login 経由のユーザーは user_metadata.provider === 'line' で line_user_id 自動保持
+      // → line_integrations row 検索の前にメタデータから即時判定して fast path で connected 扱い
+      let metaLineLinked = false;
+      try {
+        const { data: { user: _u } } = await sb.auth.getUser();
+        const prov = _u?.user_metadata?.provider || _u?.app_metadata?.provider;
+        if (prov === 'line' && _u?.user_metadata?.line_user_id) metaLineLinked = true;
+      } catch (_) {}
+
+      const setBadge = (connected) => {
+        const badge = document.getElementById('lineNotifyBadge');
+        if (!badge) return;
+        // 未連携 → 緑の点滅ドット (推奨アクション)
+        badge.style.display = connected ? 'none' : 'inline-block';
+      };
+      const setConnectedView = (connected) => {
+        const nc = document.getElementById('lineNotConnected');
+        const cc = document.getElementById('lineConnected');
+        if (nc) nc.style.display = connected ? 'none' : 'block';
+        if (cc) cc.style.display = connected ? 'block' : 'none';
+      };
+
+      if (metaLineLinked) {
+        setConnectedView(true);
+        setBadge(true);
+        return;
+      }
+
       try {
         const { data: lineIntegration } = await sb
           .from('line_integrations')
@@ -2210,18 +2272,14 @@
           .eq('cid', cid)
           .eq('is_active', true)
           .single();
-        
-        if (lineIntegration) {
-          document.getElementById('lineNotConnected').style.display = 'none';
-          document.getElementById('lineConnected').style.display = 'block';
-        } else {
-          document.getElementById('lineNotConnected').style.display = 'block';
-          document.getElementById('lineConnected').style.display = 'none';
-        }
+
+        const isConnected = !!lineIntegration;
+        setConnectedView(isConnected);
+        setBadge(isConnected);
       } catch (error) {
         console.log('LINE integration not found:', error);
-        document.getElementById('lineNotConnected').style.display = 'block';
-        document.getElementById('lineConnected').style.display = 'none';
+        setConnectedView(false);
+        setBadge(false);
       }
     }
     

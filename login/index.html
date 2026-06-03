@@ -323,7 +323,9 @@
       if (role === "golf") {
         googleBtn.style.display = "inline-flex";
       } else if (role === "caddy") {
+        // キャディは LINE（おすすめ）と Google の両方を提供
         lineBtn.style.display = "inline-flex";
+        googleBtn.style.display = "inline-flex";
       } else {
         // guest（ロール未指定）の場合は OAuth ブロック自体を非表示
         oauthGroup.style.display = "none";
@@ -396,16 +398,17 @@
         updateMode();
       };
 
-      // ── 1. Google OAuth（ゴルフ場側） ──
+      // ── 1. Google OAuth（ゴルフ場 / キャディ 両対応） ──
       googleBtn.onclick = async () => {
         try {
           googleBtn.disabled = true;
-          // OAuth 戻りで URL から role が落ちても拾えるよう sessionStorage に保存
-          try { sessionStorage.setItem("oauth_role", "golf"); } catch (_) {}
+          // role が "golf" でも "caddy" でも、現在の URL の role をそのまま引き継ぐ
+          const targetRole = (role === "golf" || role === "caddy") ? role : "caddy";
+          try { sessionStorage.setItem("oauth_role", targetRole); } catch (_) {}
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-              redirectTo: `${location.origin}/dashboard.html?role=golf`,
+              redirectTo: `${location.origin}/dashboard.html?role=${targetRole}`,
               queryParams: { prompt: "select_account" }
             }
           });

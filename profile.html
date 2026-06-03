@@ -299,14 +299,14 @@
     const golfCoursesSection = document.getElementById("golfCoursesSection");
 
     /* ==== ログインプロバイダの先読み ==== */
-    /*   line_id フィールドの出し分けに使うので、FIELDS 定義より前で取得 */
     const { data: { user: _provUser } } = await supabase.auth.getUser();
     const _provider = _provUser?.user_metadata?.provider || _provUser?.app_metadata?.provider || "";
     const isLineLoginUser = (_provider === "line");
 
     /* ==== 項目定義 ====
-       section プロパティで「基本情報」「キャディ条件」など見出しを分割
-       LINE Login ユーザーは line_user_id を既に保持してるので line_id 欄は出さない */
+       LINE ID 欄は登録段階では一切聞かない（離脱抑止）。
+       LINE 通知の有効化は dashboard サイドバーの「LINE通知」メニューから後追いで行う。
+       既存 caddies.line_id カラムは触らず空のまま残置（後追いで更新可能）。 */
     const FIELDS = {
       golf: [
         {id:"name",                 label:"ゴルフ場名",                                     section:"基本情報"},
@@ -319,8 +319,6 @@
       caddy: [
         {id:"name",        label:"氏名"},
         {id:"phone",       label:"電話番号"},
-        // LINE Login 経由なら line_user_id を既に持っているので LINE ID 入力欄は省略
-        ...(!isLineLoginUser ? [{id:"line_id", label:"LINE ID"}] : []),
         {id:"golf_years",  label:"ゴルフ歴(年)",  type:"number"},
         {id:"caddy_years", label:"キャディ歴(年)", type:"number"}
       ]
