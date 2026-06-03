@@ -601,11 +601,20 @@
       data.user = user;
 
       // get golf_courses row to fetch gid & name
-      const { data: rows } = await sb
+      // 新カラム (address/homepage_url/gallery_urls) は MIGRATE 適用前は無いので二段階クエリ
+      let { data: rows } = await sb
         .from("golf_courses")
-        .select("gid,name,contact_name,phone,perks,image_url,description")
+        .select("gid,name,contact_name,phone,perks,image_url,description,prefecture,city,address,homepage_url,gallery_urls,partner_display")
         .eq("email", data.user.email)
         .single();
+      if (!rows) {
+        const fb = await sb
+          .from("golf_courses")
+          .select("gid,name,contact_name,phone,perks,image_url,description,prefecture,city,partner_display")
+          .eq("email", data.user.email)
+          .single();
+        rows = fb.data;
+      }
 
       if (!rows) {
         // 未登録: プロフィール作成フォームを表示し、他セクションは非表示にする
@@ -662,7 +671,8 @@
                 <tr><td style="font-weight:600;width:120px;">ゴルフ場名</td><td>${rows.name}</td></tr>
                 <tr><td style="font-weight:600;">担当者名</td><td>${rows.contact_name||'未設定'}</td></tr>
                 <tr><td style="font-weight:600;">電話番号</td><td>${rows.phone||'未設定'}</td></tr>
-                <tr><td style="font-weight:600;">住所</td><td>${rows.prefecture || '未設定'}${rows.city ? ' ' + rows.city : ''}</td></tr>
+                <tr><td style="font-weight:600;">住所</td><td>${(rows.prefecture||'') + (rows.city ? ' ' + rows.city : '') + (rows.address ? ' ' + rows.address : '') || '未設定'}</td></tr>
+                <tr><td style="font-weight:600;">公式 HP</td><td>${rows.homepage_url ? `<a href="${rows.homepage_url}" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:underline;">${rows.homepage_url}</a>` : '未設定'}</td></tr>
                 <tr><td style="font-weight:600;">特典</td><td>${rows.perks||'未設定'}</td></tr>
                 <tr><td style="font-weight:600;">提携表示</td><td>
                   <span style="color:${rows.partner_display ? 'var(--color-primary)' : 'var(--color-ink-mute)'};font-weight:${rows.partner_display ? '600' : '400'};">
@@ -672,6 +682,31 @@
               </tbody>
             </table>
             <button id="editProfileBtn" class="btn btn--primary" style="margin-top:var(--space-4);">プロフィールを編集</button>
+          </div>
+
+          <!-- ゴルフ場の写真ギャラリー (gallery_urls) -->
+          <div class="card" style="margin-top:var(--space-4);">
+            <h4 class="card__title" style="font-size:var(--fs-body);margin-bottom:var(--space-3);">ゴルフ場の写真</h4>
+            <p style="margin:0 0 var(--space-3);color:var(--color-ink-sub);font-size:var(--fs-small);line-height:1.6;">
+              コース・クラブハウス・練習場などの写真を最大 8 枚まで登録できます。<br>
+              キャディがゴルフ場詳細を見るときに表示されます。
+            </p>
+            <div id="galleryList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--space-2);margin-bottom:var(--space-3);">
+              ${(rows.gallery_urls || []).map((u, i) => `
+                <div style="position:relative;aspect-ratio:1/1;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--color-border);background:var(--color-surface-alt);">
+                  <img src="${u}" alt="写真${i+1}" style="width:100%;height:100%;object-fit:cover;" />
+                  <button class="galleryDeleteBtn" data-url="${u}" style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+                </div>
+              `).join('')}
+              ${(rows.gallery_urls || []).length < 8 ? `
+                <label style="aspect-ratio:1/1;border-radius:var(--radius-sm);border:2px dashed var(--color-border);background:var(--color-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--color-ink-sub);font-size:var(--fs-small);transition:border-color var(--t-fast);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                  <div style="font-size:24px;line-height:1;margin-bottom:4px;">+</div>
+                  <div>写真を追加</div>
+                  <input type="file" id="galleryUpload" accept="image/*" multiple style="display:none;" />
+                </label>
+              ` : '<div style="grid-column:1/-1;text-align:center;color:var(--color-ink-mute);font-size:var(--fs-small);">最大 8 枚に到達しました</div>'}
+            </div>
+            <div id="galleryStatus" style="font-size:var(--fs-micro);color:var(--color-ink-mute);"></div>
           </div>
 
           <!-- 提携表示設定 -->
@@ -718,6 +753,27 @@
                 <label class="form-field__label" for="editPhone">電話番号</label>
                 <input type="tel" id="editPhone" class="form-input" value="${rows.phone||''}">
               </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);">
+                <div class="form-field">
+                  <label class="form-field__label" for="editPrefecture">都道府県</label>
+                  <select id="editPrefecture" class="form-select">
+                    <option value="">未設定</option>
+                    ${['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'].map(p => `<option value="${p}" ${rows.prefecture === p ? 'selected' : ''}>${p}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-field__label" for="editCity">市区町村</label>
+                  <input type="text" id="editCity" class="form-input" value="${rows.city||''}" placeholder="渋谷区・横浜市など">
+                </div>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="editAddress">住所詳細</label>
+                <input type="text" id="editAddress" class="form-input" value="${rows.address||''}" placeholder="〇〇町1-2-3 など">
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="editHomepage">公式 HP URL</label>
+                <input type="url" id="editHomepage" class="form-input" value="${rows.homepage_url||''}" placeholder="https://example-golf.com">
+              </div>
               <div class="form-field">
                 <label class="form-field__label" for="editPerks">キャディ特典</label>
                 <textarea id="editPerks" class="form-textarea" placeholder="打ちっぱなし無料、食事提供など...">${rows.perks||''}</textarea>
@@ -736,6 +792,9 @@
       } else {
         document.getElementById('mainProfile').innerHTML = profHtml;
       }
+
+      // gallery_urls 編集 wire-up
+      setupGalleryHandlers(rows.gallery_urls || []);
 
       // 旧UIの残骸に依存しないようガード
       try {
@@ -864,6 +923,16 @@
               <input type="text" id="gcCity" class="form-input" placeholder="例: 渋谷区、横浜市、川崎市など" />
             </div>
             <div class="form-field">
+              <label class="form-field__label" for="gcAddress">住所詳細</label>
+              <input type="text" id="gcAddress" class="form-input" placeholder="例: 〇〇町1-2-3" />
+              <div class="form-field__hint">番地・建物名など、市区町村より下の住所</div>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="gcHomepage">公式 HP URL</label>
+              <input type="url" id="gcHomepage" class="form-input" placeholder="https://example-golf.com" />
+              <div class="form-field__hint">空欄でも構いません（後から追加可能）</div>
+            </div>
+            <div class="form-field">
               <label class="form-field__label" for="gcPerks">特典</label>
               <input type="text" id="gcPerks" class="form-input" placeholder="例: 打ちっぱなし無料 など" />
             </div>
@@ -881,6 +950,8 @@
           const phone = document.getElementById('gcPhone').value.trim();
           const prefecture = document.getElementById('gcPrefecture').value;
           const city = document.getElementById('gcCity').value.trim();
+          const address = document.getElementById('gcAddress')?.value.trim() || '';
+          const homepage = document.getElementById('gcHomepage')?.value.trim() || '';
           const perks = document.getElementById('gcPerks').value.trim();
           if (!name){ alert('ゴルフ場名を入力してください'); return; }
           if (!prefecture){ alert('都道府県を選択してください'); return; }
@@ -888,7 +959,7 @@
             // gid を生成（簡易）
             const { data: u } = await sb.auth.getUser();
             const generatedGid = 'g' + (u.user?.id||Date.now().toString()).slice(0,6);
-            const { error } = await sb.from('golf_courses').insert({
+            const insertPayload = {
               gid: generatedGid,
               email,
               name,
@@ -897,7 +968,11 @@
               prefecture,
               city,
               perks
-            });
+            };
+            // 新カラムは MIGRATE_2026_06_03.sql 適用後のみ存在するので、値がある時だけ含める
+            if (address) insertPayload.address = address;
+            if (homepage) insertPayload.homepage_url = homepage;
+            const { error } = await sb.from('golf_courses').insert(insertPayload);
             if (error) throw error;
             gid = generatedGid; hasProfile = true;
             const welcomeEl = document.getElementById('welcome');
@@ -2257,6 +2332,112 @@
       }
     }
 
+    // ── 複数画像ギャラリー (gallery_urls) のアップロード / 削除 ──
+    let _galleryCurrent = []; // メモリ上の最新 URL リスト
+
+    function setupGalleryHandlers(initial) {
+      _galleryCurrent = Array.isArray(initial) ? [...initial] : [];
+
+      const fileInput = document.getElementById('galleryUpload');
+      if (fileInput) fileInput.onchange = handleGalleryAdd;
+
+      document.querySelectorAll('.galleryDeleteBtn').forEach(btn => {
+        btn.onclick = (e) => {
+          const url = e.currentTarget.getAttribute('data-url');
+          handleGalleryDelete(url);
+        };
+      });
+    }
+
+    async function handleGalleryAdd(event) {
+      const files = Array.from(event.target.files || []);
+      if (files.length === 0) return;
+      const status = document.getElementById('galleryStatus');
+      const remaining = 8 - _galleryCurrent.length;
+      const toUpload = files.slice(0, remaining);
+      if (files.length > remaining) {
+        alert(`合計 8 枚までです。先頭の ${remaining} 枚のみアップロードします。`);
+      }
+      let added = 0;
+      for (let i = 0; i < toUpload.length; i++) {
+        const file = toUpload[i];
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`${file.name} は 5MB を超えるためスキップしました`);
+          continue;
+        }
+        try {
+          if (status) status.textContent = `アップロード中… ${i+1}/${toUpload.length}`;
+          const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+          const fileName = `${gid}_gallery_${Date.now()}_${i}.${ext}`;
+          const { error: upErr } = await sb.storage
+            .from('golf-course-images')
+            .upload(fileName, file);
+          if (upErr) throw upErr;
+          const { data: urlData } = sb.storage
+            .from('golf-course-images')
+            .getPublicUrl(fileName);
+          _galleryCurrent.push(urlData.publicUrl);
+          added++;
+        } catch (err) {
+          console.error('[gallery] upload error:', err);
+          alert(`${file.name} のアップロードに失敗: ${err.message || err}`);
+        }
+      }
+      if (added > 0) {
+        await persistGallery();
+        if (status) status.textContent = `${added} 枚アップロードしました`;
+        // UI を再描画するため galleryList を rebuild
+        rebuildGalleryListUi();
+      } else if (status) {
+        status.textContent = '';
+      }
+    }
+
+    async function handleGalleryDelete(url) {
+      if (!confirm('この写真を削除しますか？')) return;
+      _galleryCurrent = _galleryCurrent.filter(u => u !== url);
+      await persistGallery();
+      rebuildGalleryListUi();
+      // 任意: Supabase Storage からも物理削除する場合は、URL からファイル名を抜いて delete を呼ぶ
+      try {
+        const fileName = decodeURIComponent((url.split('/').pop() || '').split('?')[0]);
+        if (fileName) {
+          await sb.storage.from('golf-course-images').remove([fileName]);
+        }
+      } catch (_) {}
+    }
+
+    async function persistGallery() {
+      const { error } = await sb
+        .from('golf_courses')
+        .update({ gallery_urls: _galleryCurrent })
+        .eq('gid', gid);
+      if (error) {
+        console.error('[gallery] persist error:', error);
+        alert('写真リストの保存に失敗しました: ' + error.message);
+      }
+    }
+
+    function rebuildGalleryListUi() {
+      const list = document.getElementById('galleryList');
+      if (!list) return;
+      const html = _galleryCurrent.map((u, i) => `
+        <div style="position:relative;aspect-ratio:1/1;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--color-border);background:var(--color-surface-alt);">
+          <img src="${u}" alt="写真${i+1}" style="width:100%;height:100%;object-fit:cover;" />
+          <button class="galleryDeleteBtn" data-url="${u}" style="position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+      `).join('') + (_galleryCurrent.length < 8 ? `
+        <label style="aspect-ratio:1/1;border-radius:var(--radius-sm);border:2px dashed var(--color-border);background:var(--color-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--color-ink-sub);font-size:var(--fs-small);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+          <div style="font-size:24px;line-height:1;margin-bottom:4px;">+</div>
+          <div>写真を追加</div>
+          <input type="file" id="galleryUpload" accept="image/*" multiple style="display:none;" />
+        </label>
+      ` : '<div style="grid-column:1/-1;text-align:center;color:var(--color-ink-mute);font-size:var(--fs-small);">最大 8 枚に到達しました</div>');
+      list.innerHTML = html;
+      // 再 bind
+      setupGalleryHandlers(_galleryCurrent);
+    }
+
     // Profile image upload handler
     async function handleImageUpload(event) {
       const file = event.target.files[0];
@@ -2334,31 +2515,33 @@
       const contactName = document.getElementById('editContactName').value.trim();
       const phone = document.getElementById('editPhone').value.trim();
       const perks = document.getElementById('editPerks').value.trim();
+      const prefecture = document.getElementById('editPrefecture')?.value || '';
+      const city = document.getElementById('editCity')?.value.trim() || '';
+      const address = document.getElementById('editAddress')?.value.trim() || '';
+      const homepage = document.getElementById('editHomepage')?.value.trim() || '';
 
       try {
+        const payload = {
+          contact_name: contactName,
+          phone: phone,
+          perks: perks
+        };
+        if (prefecture !== undefined) payload.prefecture = prefecture || null;
+        if (city !== undefined) payload.city = city || null;
+        if (address !== undefined) payload.address = address || null;
+        if (homepage !== undefined) payload.homepage_url = homepage || null;
+
         const { error } = await sb
           .from('golf_courses')
-          .update({
-            contact_name: contactName,
-            phone: phone,
-            perks: perks
-          })
+          .update(payload)
           .eq('gid', gid);
 
         if (error) throw error;
 
-        // Update UI
-        const profileTable = document.querySelector('#mainProfile table');
-        if (profileTable) {
-          const rows = profileTable.querySelectorAll('tr');
-          if (rows[1]) rows[1].cells[1].textContent = contactName || '未設定';
-          if (rows[2]) rows[2].cells[1].textContent = phone || '未設定';
-          if (rows[3]) rows[3].cells[1].textContent = perks || '未設定';
-        }
-
         document.getElementById('profileEditModal').style.display = 'none';
-
-        alert('プロフィールを更新しました');
+        alert('プロフィールを更新しました。最新表示に反映するためリロードします。');
+        // テーブル表示が複数行に増えたので、安全のためフルリロード
+        location.reload();
       } catch (error) {
         console.error('Profile edit error:', error);
         alert('プロフィールの更新に失敗しました: ' + error.message);

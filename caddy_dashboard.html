@@ -2911,11 +2911,24 @@
             <div style="flex:1;min-width:0;">
               <h2 class="modal__title" style="margin-bottom:4px;">${course.name || '名前未設定'}</h2>
               <div style="font-size:var(--fs-small);color:var(--color-ink-sub);line-height:1.5;">
-                ${course.address || '所在地未登録'}<br>
+                ${(course.prefecture||'') + (course.city ? ' ' + course.city : '') + (course.address ? ' ' + course.address : '') || '所在地未登録'}<br>
                 ${wageText} ／ ${hoursText}
               </div>
+              ${course.homepage_url ? `
+                <a href="${course.homepage_url}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:var(--fs-micro);color:var(--color-primary);text-decoration:none;">
+                  <i data-lucide="external-link" style="width:12px;height:12px;"></i>公式 HP を見る
+                </a>` : ''}
             </div>
           </div>
+          ${Array.isArray(course.gallery_urls) && course.gallery_urls.length > 0 ? `
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:var(--space-2);margin-bottom:var(--space-4);">
+              ${course.gallery_urls.map((u, i) => `
+                <a href="${u}" target="_blank" rel="noopener noreferrer" style="display:block;aspect-ratio:1/1;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--color-border);background:var(--color-surface-alt);">
+                  <img src="${u}" alt="写真${i+1}" style="width:100%;height:100%;object-fit:cover;" />
+                </a>
+              `).join('')}
+            </div>
+          ` : ''}
           ${course.description ? `
             <div style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-3);margin-bottom:var(--space-3);font-size:var(--fs-small);color:var(--color-ink-sub);line-height:var(--lh-snug);white-space:pre-wrap;">${course.description}</div>
           ` : ''}
@@ -2949,6 +2962,7 @@
           </div>
         </div>`;
       document.body.appendChild(modal);
+      if (window.lucide) lucide.createIcons();
       gcDetailState.course = course;
       gcDetailState.month = new Date().getMonth();
       gcDetailState.year = new Date().getFullYear();
