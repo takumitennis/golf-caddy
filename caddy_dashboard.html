@@ -251,10 +251,10 @@
             <table class="calendar cal-grid" id="caddyJobCal" style="border-collapse:separate;border-spacing:0;width:100%"></table>
             <div class="cal-legend">
               <span class="cal-legend__item">
-                <span class="cal-legend__swatch" style="background:var(--color-surface)"></span> ○ 応募可（クリックで応募）
+                <span class="cal-legend__swatch" style="background:var(--color-surface)"></span> ○ 募集中（クリックでゴルフ場一覧）
               </span>
               <span class="cal-legend__item">
-                <span class="cal-legend__swatch" style="background:var(--color-primary-soft-bg)"></span> ✓ 応募済み
+                <span class="cal-legend__swatch" style="background:var(--color-primary-soft-bg)"></span> ✓ 応募済み（追加応募も可）
               </span>
               <span class="cal-legend__item">
                 <span class="cal-legend__swatch" style="background:var(--color-gray-soft)"></span> × 募集なし
@@ -271,6 +271,24 @@
               <button id="golfCourseListReload" class="btn--ghost">再読み込み</button>
             </div>
           </div>
+
+          <!-- 検索・フィルター -->
+          <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-4);flex-wrap:wrap;align-items:center;">
+            <div style="flex:0 0 auto;display:flex;align-items:center;gap:var(--space-2);">
+              <label for="gcPrefectureFilter" style="font-size:var(--fs-small);color:var(--color-ink-sub);font-weight:600;">エリア</label>
+              <select id="gcPrefectureFilter" class="form-select" style="min-width:160px;">
+                <option value="">すべての都道府県</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:var(--space-2);">
+              <label for="gcSearchInput" style="font-size:var(--fs-small);color:var(--color-ink-sub);font-weight:600;">名称検索</label>
+              <input id="gcSearchInput" class="form-input" placeholder="ゴルフ場名で絞り込み…" style="flex:1;" />
+            </div>
+            <div style="flex:0 0 auto;">
+              <span id="gcFilterCount" style="font-size:var(--fs-micro);color:var(--color-ink-mute);font-variant-numeric:tabular-nums;"></span>
+            </div>
+          </div>
+
           <div id="golfCourseGrid" class="dash-grid-2"></div>
         </div>
       </div>
@@ -2617,10 +2635,10 @@
       const firstStr = first.toISOString().slice(0,10);
       const lastStr  = last.toISOString().slice(0,10);
 
-      // 1) 今月の bookings（status='pending' で枠が空いている可能性のあるもの）
+      // 1) 今月の bookings（gid と golf_courses 情報も同時取得して click 時のリスト表示に流用）
       const { data: bks } = await sb
         .from('bookings')
-        .select('booking_id, date, slots, status, booking_caddies(cid)')
+        .select('booking_id, gid, date, slots, status, start_time, booking_caddies(cid), golf_courses(gid,name,image_url,prefecture,city,address,caddy_wage_per_round,caddy_duration_hours,perks,homepage_url)')
         .gte('date', firstStr)
         .lte('date', lastStr);
 
@@ -2633,15 +2651,37 @@
         .lte('date', lastStr);
       const mySet = new Set((myAvail||[]).map(r=>r.date));
 
-      // map: date -> {open, applied}
+      // 自分が応募済みの booking_id（このリスト経由なら適応応募の重複防止）
+      let appliedBookingIds = new Set();
+      if (cid) {
+        const bookingIds = (bks||[]).map(b => b.booking_id);
+        if (bookingIds.length > 0) {
+          const { data: myApps } = await sb
+            .from('booking_caddies')
+            .select('booking_id, status')
+            .eq('cid', cid)
+            .in('booking_id', bookingIds);
+          (myApps||[]).forEach(a => {
+            if (a.status !== 'cancelled' && a.status !== 'rejected') appliedBookingIds.add(a.booking_id);
+          });
+        }
+      }
+
+      // map: date -> { open: bool, openBookings: [...] }
       const dateMap = new Map();
       (bks||[]).forEach(b => {
         const filled = (b.booking_caddies||[]).length;
         const isOpen = (b.slots||1) > filled && b.status !== 'completed' && b.status !== 'cancelled';
-        const cur = dateMap.get(b.date) || { open: false, full: false };
-        if (isOpen) cur.open = true; else cur.full = true;
+        const cur = dateMap.get(b.date) || { open: false, openBookings: [] };
+        if (isOpen) {
+          cur.open = true;
+          cur.openBookings.push(b);
+        }
         dateMap.set(b.date, cur);
       });
+
+      // 後段で openJobDateDetail から参照するためにキャッシュ
+      _jobDateCache = { dateMap, appliedBookingIds, mySet };
 
       table.innerHTML='';
       const headerRow = document.createElement('tr');
@@ -2663,15 +2703,18 @@
         td.innerHTML = `<span class="cal-date">${day}</span><span class="cal-mark"></span>`;
         if (applied) {
           td.className = 'cal-confirmed';
-          td.style.cursor = 'default';
-          td.title = '応募済み';
+          td.style.cursor = 'pointer';
+          td.title = '応募済み（クリックで募集中のゴルフ場を確認）';
+          td.onclick = () => openJobDateDetail(dateStr);
         } else if (info && info.open) {
           td.className = 'cal-available';
           td.style.cursor = 'pointer';
-          td.onclick = () => applyToJobDate(dateStr);
+          td.title = 'クリックで募集中のゴルフ場を確認';
+          td.onclick = () => openJobDateDetail(dateStr);
         } else {
           td.className = 'cal-disabled';
           td.style.cursor = 'not-allowed';
+          td.title = 'この日は募集がありません';
         }
         row.appendChild(td);
         if ((startWD+day)%7===0) { table.appendChild(row); row = document.createElement('tr'); }
@@ -2751,6 +2794,132 @@
       }
     }
 
+    // ── 募集中の日付カレンダー: ○ クリック時に当日募集中のゴルフ場一覧モーダルを開く ──
+    let _jobDateCache = { dateMap: new Map(), appliedBookingIds: new Set(), mySet: new Set() };
+
+    function openJobDateDetail(dateStr) {
+      const info = _jobDateCache.dateMap.get(dateStr);
+      const bookings = (info?.openBookings || []);
+      const appliedIds = _jobDateCache.appliedBookingIds;
+
+      const existing = document.getElementById('jobDateModal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'jobDateModal';
+      modal.className = 'modal-backdrop';
+      modal.dataset.open = 'true';
+      modal.style.alignItems = 'flex-start';
+      modal.style.overflowY = 'auto';
+
+      const list = bookings.length === 0
+        ? `<div class="empty" style="padding:var(--space-5);">
+             <i data-lucide="calendar-x" class="empty__icon"></i>
+             <div class="empty__title">この日は募集中のゴルフ場がありません</div>
+             <div class="empty__desc">他の日付や「ゴルフ場一覧から」もご覧ください。</div>
+           </div>`
+        : bookings.map(b => {
+            const c = b.golf_courses || {};
+            const isApplied = appliedIds.has(b.booking_id);
+            const initial = (c.name || '?').slice(0, 1);
+            const addr = [(c.prefecture||''), (c.city||''), (c.address||'')].filter(Boolean).join(' ');
+            const wage = c.caddy_wage_per_round != null ? `¥${Number(c.caddy_wage_per_round).toLocaleString()}/ラウンド` : '謝礼未設定';
+            const hours = c.caddy_duration_hours != null ? `拘束 ${c.caddy_duration_hours}h` : '';
+            const meta = [wage, hours].filter(Boolean).join(' / ');
+            const startTime = b.start_time ? `開始 ${b.start_time.slice(0,5)}` : '';
+            return `
+              <article class="person-card" style="margin-bottom:var(--space-2);">
+                <div class="person-card__avatar">
+                  ${c.image_url ? `<img src="${c.image_url}" alt="">` : initial}
+                </div>
+                <div class="person-card__info">
+                  <div class="person-card__name">${c.name || '名前未設定'}</div>
+                  <div class="person-card__meta">${addr || '所在地未登録'}</div>
+                  <div class="person-card__meta" style="margin-top:4px;">${meta}${startTime ? ' / ' + startTime : ''}</div>
+                  ${c.perks ? `<div class="person-card__meta" style="margin-top:4px;color:var(--color-primary-deep);">特典: ${c.perks}</div>` : ''}
+                </div>
+                <div class="person-card__actions" style="display:flex;flex-direction:column;gap:var(--space-2);">
+                  ${isApplied
+                    ? `<span class="badge badge--pending" style="text-align:center;">応募済み</span>`
+                    : `<button class="btn btn--primary btn--sm jobApplyBtn" data-booking-id="${b.booking_id}" data-gid="${b.gid}">応募する</button>`}
+                </div>
+              </article>`;
+          }).join('');
+
+      modal.innerHTML = `
+        <div class="modal" role="dialog" style="width:min(720px,100%);max-height:90vh;overflow-y:auto;margin:var(--space-5) 0;">
+          <h2 class="modal__title" style="margin-bottom:var(--space-2);">${dateStr} の募集中ゴルフ場</h2>
+          <p style="font-size:var(--fs-small);color:var(--color-ink-sub);margin-bottom:var(--space-4);line-height:1.6;">
+            気になるゴルフ場の <strong>「応募する」</strong> を押すと、該当ゴルフ場へ応募が送られます。<br>
+            複数のゴルフ場に応募することも可能です。
+          </p>
+          <div>${list}</div>
+          <div class="modal__actions" style="margin-top:var(--space-5);">
+            <button id="jobDateCloseBtn" class="btn--ghost">閉じる</button>
+          </div>
+        </div>`;
+
+      document.body.appendChild(modal);
+      if (window.lucide) lucide.createIcons();
+      document.getElementById('jobDateCloseBtn').onclick = () => modal.remove();
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+      // 個別応募ボタン
+      modal.querySelectorAll('.jobApplyBtn').forEach(btn => {
+        btn.onclick = async () => {
+          const bookingId = btn.getAttribute('data-booking-id');
+          const targetGid = btn.getAttribute('data-gid');
+          if (!cid) { alert('プロフィール登録後に応募できます'); return; }
+          btn.disabled = true;
+          btn.textContent = '送信中…';
+          try {
+            // caddy_availability にも入れておく（既存のシフト系UIで使われる）
+            try {
+              await sb.from('caddy_availability').insert({ cid, date: dateStr });
+            } catch (_) { /* 重複は無視 */ }
+
+            // 既存 booking_caddies が無ければ insert、あれば status を pending に戻す
+            const { data: exist } = await sb
+              .from('booking_caddies')
+              .select('booking_id, cid, status')
+              .eq('booking_id', bookingId)
+              .eq('cid', cid)
+              .maybeSingle();
+            if (exist) {
+              if (exist.status !== 'confirmed') {
+                await sb.from('booking_caddies').update({ status: 'pending' })
+                  .eq('booking_id', bookingId).eq('cid', cid);
+              }
+            } else {
+              await sb.from('booking_caddies').insert({ booking_id: bookingId, cid, status: 'pending' });
+            }
+
+            // LINE 通知（該当 gid のゴルフ場のみ）
+            try {
+              const name = currentCaddyName || 'キャディ';
+              await notifyGolfByGid(targetGid, `【Caddygate】${name} さんが ${dateStr} に応募しました`);
+            } catch (e) { console.warn('LINE notify (single apply) error:', e); }
+
+            // UI 更新: このボタンを 応募済み バッジに置き換え
+            const parent = btn.parentElement;
+            if (parent) parent.innerHTML = `<span class="badge badge--pending" style="text-align:center;">応募済み</span>`;
+            // キャッシュも更新
+            _jobDateCache.appliedBookingIds.add(bookingId);
+
+            // 背景のカレンダー / KPI を更新
+            await renderCaddyJobCal();
+            await loadCaddyKpiStats();
+            if (typeof renderPendingSchedule === 'function') { try { await renderPendingSchedule(); } catch (_) {} }
+          } catch (err) {
+            console.error('[jobApply] error:', err);
+            alert('応募に失敗しました: ' + (err.message || err));
+            btn.disabled = false;
+            btn.textContent = '応募する';
+          }
+        };
+      });
+    }
+
     async function applyToJobDate(dateStr) {
       if (!cid) { alert('プロフィール登録後に応募できます'); return; }
       if (!confirm(`${dateStr} に応募しますか？`)) return;
@@ -2818,13 +2987,14 @@
     }
 
     // ── 仕事を探す > ゴルフ場一覧から ──
+    // フィルター状態保持（renderGolfCourseGrid 呼び出し時の rebuild 用）
+    let _gcAllCourses = [];
+
     async function renderGolfCourseGrid() {
       const grid = document.getElementById('golfCourseGrid');
       if (!grid) return;
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-ink-mute);padding:var(--space-5);">読み込み中...</div>';
-      // address / prefecture / homepage_url / gallery_urls は MIGRATE_2026_06_03.sql 適用前は存在しないため、
-      // まず full set で試して失敗したら最小カラムでフォールバックする二段階クエリ
-      const FULL_COLS = 'gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description,address,prefecture,homepage_url,gallery_urls';
+      const FULL_COLS = 'gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description,address,prefecture,city,homepage_url,gallery_urls';
       const SAFE_COLS = 'gid,name,contact_name,phone,image_url,perks,caddy_wage_per_round,caddy_duration_hours,description';
       let { data: courses, error } = await sb
         .from('golf_courses')
@@ -2843,13 +3013,51 @@
         grid.innerHTML = `<div style="grid-column:1/-1;color:var(--color-accent);">エラー: ${error.message}</div>`;
         return;
       }
+
+      _gcAllCourses = courses || [];
+      // 都道府県 select を populate（重複除去、五十音順）
+      const prefectures = Array.from(new Set(_gcAllCourses.map(c => c.prefecture).filter(Boolean))).sort();
+      const sel = document.getElementById('gcPrefectureFilter');
+      if (sel && sel.options.length <= 1) {
+        prefectures.forEach(p => {
+          const o = document.createElement('option');
+          o.value = p; o.textContent = p;
+          sel.appendChild(o);
+        });
+      }
+      applyGcFilters();
+      return;
+    }
+
+    // フィルター適用 (renderGolfCourseGrid の表示部分を分離)
+    function applyGcFilters() {
+      const grid = document.getElementById('golfCourseGrid');
+      if (!grid) return;
+      const prefSel = document.getElementById('gcPrefectureFilter');
+      const searchInp = document.getElementById('gcSearchInput');
+      const countEl = document.getElementById('gcFilterCount');
+      const prefVal = prefSel ? prefSel.value : '';
+      const searchVal = (searchInp ? searchInp.value : '').trim().toLowerCase();
+
+      const courses = _gcAllCourses.filter(c => {
+        if (prefVal && c.prefecture !== prefVal) return false;
+        if (searchVal) {
+          const hay = ((c.name||'') + ' ' + (c.prefecture||'') + ' ' + (c.city||'') + ' ' + (c.address||'')).toLowerCase();
+          if (!hay.includes(searchVal)) return false;
+        }
+        return true;
+      });
+
+      if (countEl) countEl.textContent = `${courses.length} 件 / 全 ${_gcAllCourses.length} 件`;
       if (!courses || courses.length === 0) {
+        const isFiltering = !!(prefVal || searchVal);
+        const isEmptyDB = _gcAllCourses.length === 0;
         grid.innerHTML = `
           <div style="grid-column:1/-1;">
             <div class="empty">
-              <i data-lucide="map-pin" class="empty__icon"></i>
-              <div class="empty__title">登録ゴルフ場はまだありません</div>
-              <div class="empty__desc">ゴルフ場が登録されるとここに表示されます。</div>
+              <i data-lucide="${isEmptyDB ? 'map-pin' : 'search-x'}" class="empty__icon"></i>
+              <div class="empty__title">${isEmptyDB ? '登録ゴルフ場はまだありません' : '該当するゴルフ場が見つかりませんでした'}</div>
+              <div class="empty__desc">${isEmptyDB ? 'ゴルフ場が登録されるとここに表示されます。' : (isFiltering ? '都道府県や検索条件を変えて再度お試しください。' : '')}</div>
             </div>
           </div>`;
         if (window.lucide) lucide.createIcons();
@@ -3848,6 +4056,18 @@
 
       const gcReload = document.getElementById('golfCourseListReload');
       if (gcReload) gcReload.onclick = () => renderGolfCourseGrid();
+
+      // 都道府県 select / 名称検索のフィルター変更 → 再フィルタリング (sb 再クエリ不要)
+      const gcPref = document.getElementById('gcPrefectureFilter');
+      if (gcPref) gcPref.onchange = () => applyGcFilters();
+      const gcSearch = document.getElementById('gcSearchInput');
+      if (gcSearch) {
+        let debounceTimer = null;
+        gcSearch.oninput = () => {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => applyGcFilters(), 150);
+        };
+      }
     })();
 
     // cid 確定後に KPI を一度ロード（既存のプロフィール初期化が走った後に呼ぶ）
